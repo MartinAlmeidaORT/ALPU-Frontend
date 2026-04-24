@@ -4,6 +4,8 @@
     import * as Field from "$lib/components/ui/field/index.js";
     import { Input } from "$lib/components/ui/input/index.js";
     import * as Select from "$lib/components/ui/select/index.js";
+    import * as Alert from "$lib/components/ui/alert/index.js";
+    import AlertCircleIcon from "@lucide/svelte/icons/alert-circle";
     import type { ComponentProps } from "svelte";
     import { onMount } from "svelte";
     import { goto } from "$app/navigation";
@@ -192,6 +194,18 @@
                             placeholder="Martin"
                             bind:value={userFormData.firstName}
                             required
+                            minlength={3}
+                            maxlength={50}
+                            pattern="[A-Za-z]+"
+                            oninvalid={(e) => {
+                                const input = e.target as HTMLInputElement;
+                                if (input.validity.patternMismatch) {
+                                    input.setCustomValidity("Solo se permiten letras");
+                                }
+                            }}
+                            oninput={(e) => {
+                                (e.target as HTMLInputElement).setCustomValidity("");
+                            }}
                         />
                     </Field.Field>
                     <Field.Field>
@@ -202,6 +216,18 @@
                             placeholder="Almeida"
                             bind:value={userFormData.lastName}
                             required
+                            minlength={3}
+                            maxlength={50}
+                            pattern="[A-Za-z]+"
+                            oninvalid={(e) => {
+                                const input = e.target as HTMLInputElement;
+                                if (input.validity.patternMismatch) {
+                                    input.setCustomValidity("Solo se permiten letras");
+                                }
+                            }}
+                            oninput={(e) => {
+                                (e.target as HTMLInputElement).setCustomValidity("");
+                            }}
                         />
                     </Field.Field>
                     <Field.Field>
@@ -211,6 +237,8 @@
                             type="text"
                             bind:value={userFormData.rut}
                             required
+                            minlength={12}
+                            maxlength={12}
                         />
                     </Field.Field>
                     {#if selectedOption === "Agencia"}
@@ -234,6 +262,18 @@
                             type="text"
                             bind:value={userFormData.city}
                             required
+                            minlength={4}
+                            maxlength={100}
+                            pattern="[A-Za-z]+"
+                            oninvalid={(e) => {
+                                const input = e.target as HTMLInputElement;
+                                if (input.validity.patternMismatch) {
+                                    input.setCustomValidity("Solo se permiten letras");
+                                }
+                            }}
+                            oninput={(e) => {
+                                (e.target as HTMLInputElement).setCustomValidity("");
+                            }}
                         />
                     </Field.Field>
                     <Field.Field>
@@ -273,6 +313,18 @@
                             type="text"
                             bind:value={userFormData.state}
                             required
+                            minlength={4}
+                            maxlength={100}
+                            pattern="[A-Za-z]+"
+                            oninvalid={(e) => {
+                                const input = e.target as HTMLInputElement;
+                                if (input.validity.patternMismatch) {
+                                    input.setCustomValidity("Solo se permiten letras");
+                                }
+                            }}
+                            oninput={(e) => {
+                                (e.target as HTMLInputElement).setCustomValidity("");
+                            }}
                         />
                     </Field.Field>
                 </Field.Group>
@@ -294,3 +346,15 @@
         </Card.Content>
     {/if}
 </Card.Root>
+
+{#if message}
+    <div class="grid w-full max-w-xl items-start gap-4">
+    <Alert.Root variant="destructive">
+        <AlertCircleIcon />
+        <Alert.Title>Error en el registro</Alert.Title>
+        <Alert.Description>
+        <p>{message}</p>
+        </Alert.Description>
+    </Alert.Root>
+    </div>
+{/if}

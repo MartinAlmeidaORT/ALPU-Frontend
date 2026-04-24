@@ -91,6 +91,42 @@ export async function googleAuth(code: string) {
   return data;
 }
 
+interface LoginInput {
+  email: string;
+  password: string;
+}
+
+interface LoginResponse {
+  token: string;
+  user: {
+    userId: string;
+    email: string;
+    firstName: string;
+    lastName: string;
+    userType: string;
+  };
+}
+
+export const LOGIN_MUTATION = `
+  mutation login($input: UserLoginInput!) {
+    login(input: $input) {
+      token
+      user {
+        userId
+        email
+        firstName
+        lastName
+        __typename
+      }
+    }
+  }
+`;
+
+export async function login(email: string, password: string) {
+  const { data } = await client.mutation(LOGIN_MUTATION, { input: { email, password } });
+  return data.login;
+}
+
 export const COMPLETE_GOOGLE_SIGNUP_BROADCASTER_MUTATION = `
     mutation completeGoogleSignUpBroadcaster($input: CompleteGoogleSignUpBroadcasterInput!) {
         completeGoogleSignUpBroadcaster(input: $input) {
@@ -157,3 +193,4 @@ export async function CompleteGoogleSignUpClient() {
   );
   return data.completeGoogleSignUpClient;
 }
+

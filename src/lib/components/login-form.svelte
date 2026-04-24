@@ -2,14 +2,64 @@
     import { Button } from "$lib/components/ui/button/index.js";
     import * as Card from "$lib/components/ui/card/index.js";
     import { Input } from "$lib/components/ui/input/index.js";
+    import { client } from "$lib/graphql/client";
+    import { setUser } from "$lib/stores/store";
     import {
         FieldGroup,
         Field,
         FieldLabel,
     } from "$lib/components/ui/field/index.js";
     import { redirectToGoogle } from "$lib/auth/google";
+  import { setToken } from "$lib/auth/token";
+  import { goto } from "$app/navigation";
+  import { LOGIN_MUTATION } from "$lib/graphql/mutations/auth";
 
     const id = Math.random().toString(36).substr(2, 9);
+    let message = $state("");
+    let formData = $state({
+        email: "",
+        password: "",
+    });
+    async function handleSubmit(event: Event) {
+        event.preventDefault();
+        message = "";
+        
+        try {
+            const baseInput = {
+                email: formData.email,
+                password: formData.password,
+            };
+
+            const result = await client.mutation(LOGIN_MUTATION, {
+                input: baseInput,
+            })
+            .toPromise();
+
+            if (result.error) {
+                message =
+                    result.error.graphQLErrors[0]?.extensions?.message ??
+                    result.error.message;
+                return;
+            }
+
+            const payload = result.data.login;
+
+            setUser({
+                userId: payload.user.userId,
+                email: payload.user.email,
+                firstName: payload.user.firstName,
+                lastName: payload.user.lastName,
+                userType: payload.user.__typename,
+            })
+
+            setToken(payload.token);
+            goto("/");
+        } catch (error) {
+            message = "Error inesperado, intente nuevamente.";
+            console.error(error);
+        }
+
+    }
 </script>
 
 <Card.Root class=" w-full max-w-sm">
@@ -21,7 +71,7 @@
         >
     </Card.Header>
     <Card.Content>
-        <form>
+        <form onsubmit={handleSubmit}>
             <FieldGroup>
                 <Field>
                     <FieldLabel for="email-{id}">Email</FieldLabel>
@@ -30,6 +80,7 @@
                         type="email"
                         placeholder="m@example.com"
                         required
+                        bind:value={formData.email}
                     />
                 </Field>
                 <Field>
@@ -42,7 +93,7 @@
                             ¿Olvidaste tu contraseña?
                         </a>
                     </div>
-                    <Input id="password-{id}" type="password" required />
+                    <Input id="password-{id}" type="password" required bind:value={formData.password} />
                 </Field>
                 <Field>
                     <Button type="submit" class="w-full">Iniciar Sesión</Button>

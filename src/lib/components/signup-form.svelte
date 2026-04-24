@@ -4,6 +4,8 @@
     import * as Field from "$lib/components/ui/field/index.js";
     import { Input } from "$lib/components/ui/input/index.js";
     import * as Select from "$lib/components/ui/select/index.js";
+    import * as Alert from "$lib/components/ui/alert/index.js";
+    import AlertCircleIcon from "@lucide/svelte/icons/alert-circle";
     import type { ComponentProps } from "svelte";
     import { onMount } from "svelte";
     import { goto } from "$app/navigation";
@@ -65,9 +67,11 @@
         fetchPaises();
     });
 
+
     async function handleSubmit(e: Event) {
         e.preventDefault();
         message = "";
+
 
         try {
             const baseInput = {
@@ -179,6 +183,18 @@
                             placeholder="Martin"
                             bind:value={formData.firstName}
                             required
+                            minlength={3}
+                            maxlength={50}
+                            pattern="[A-Za-z]+"
+                            oninvalid={(e) => {
+                                const input = e.target as HTMLInputElement;
+                                if (input.validity.patternMismatch) {
+                                    input.setCustomValidity("Solo se permiten letras");
+                                }
+                            }}
+                            oninput={(e) => {
+                                (e.target as HTMLInputElement).setCustomValidity("");
+                            }}
                         />
                     </Field.Field>
                     <Field.Field>
@@ -189,6 +205,18 @@
                             placeholder="Almeida"
                             bind:value={formData.lastName}
                             required
+                            minlength={3}
+                            maxlength={50}
+                            pattern="[A-Za-z]+"
+                            oninvalid={(e) => {
+                                const input = e.target as HTMLInputElement;
+                                if (input.validity.patternMismatch) {
+                                    input.setCustomValidity("Solo se permiten letras");
+                                }
+                            }}
+                            oninput={(e) => {
+                                (e.target as HTMLInputElement).setCustomValidity("");
+                            }}
                         />
                     </Field.Field>
                     <Field.Field>
@@ -199,6 +227,8 @@
                             placeholder="m@example.com"
                             bind:value={formData.email}
                             required
+                            minlength={10}
+                            maxlength={100}
                         />
                     </Field.Field>
                     <Field.Field>
@@ -208,6 +238,8 @@
                             type="password"
                             bind:value={formData.password}
                             required
+                            minlength={10}
+                            maxlength={60}
                         />
                         <Field.Description></Field.Description>
                     </Field.Field>
@@ -218,6 +250,8 @@
                             type="text"
                             bind:value={formData.rut}
                             required
+                            minlength={12}
+                            maxlength={12}
                         />
                     </Field.Field>
                     {#if selectedOption === "Cliente"}
@@ -230,6 +264,8 @@
                                 type="text"
                                 bind:value={formData.agencyName}
                                 required
+                                minlength={3}
+                                maxlength={100}
                             />
                         </Field.Field>
                     {/if}
@@ -240,6 +276,18 @@
                             type="text"
                             bind:value={formData.city}
                             required
+                            minlength={4}
+                            maxlength={100}
+                            pattern="[A-Za-z]+"
+                            oninvalid={(e) => {
+                                const input = e.target as HTMLInputElement;
+                                if (input.validity.patternMismatch) {
+                                    input.setCustomValidity("Solo se permiten letras");
+                                }
+                            }}
+                            oninput={(e) => {
+                                (e.target as HTMLInputElement).setCustomValidity("");
+                            }}
                         />
                     </Field.Field>
                     <Field.Field>
@@ -249,6 +297,18 @@
                             type="text"
                             bind:value={formData.state}
                             required
+                            minlength={4}
+                            maxlength={100}
+                            pattern="[A-Za-z]+"
+                            oninvalid={(e) => {
+                                const input = e.target as HTMLInputElement;
+                                if (input.validity.patternMismatch) {
+                                    input.setCustomValidity("Solo se permiten letras");
+                                }
+                            }}
+                            oninput={(e) => {
+                                (e.target as HTMLInputElement).setCustomValidity("");
+                            }}
                         />
                     </Field.Field>
                     <Field.Field>
@@ -258,6 +318,8 @@
                             type="text"
                             bind:value={formData.street}
                             required
+                            minlength={4}
+                            maxlength={100}
                         />
                     </Field.Field>
                     <Field.Field>
@@ -265,6 +327,7 @@
                         <Select.Root
                             type="single"
                             bind:value={formData.countryCode}
+                            required
                         >
                             <Select.Trigger id="pais">
                                 <span>
@@ -291,6 +354,7 @@
                             onclick={() => {
                                 accountType = "select";
                                 selectedOption = null;
+                                message = "";
                             }}>Volver</Button
                         >
                     </Field.Field>
@@ -299,3 +363,16 @@
         </Card.Content>
     {/if}
 </Card.Root>
+
+{#if message}
+    <div class="grid w-full max-w-xl items-start gap-4">
+    <Alert.Root variant="destructive">
+        <AlertCircleIcon />
+        <Alert.Title>Error en el inicio de sesión</Alert.Title>
+        <Alert.Description>
+        <p>Por favor verifique los siguientes datos.</p>
+        <p>{message}</p>
+        </Alert.Description>
+    </Alert.Root>
+    </div>
+{/if}

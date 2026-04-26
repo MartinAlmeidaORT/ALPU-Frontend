@@ -16,6 +16,11 @@
         REGISTER_BROADCASTER_MUTATION,
     } from "$lib/graphql/mutations/auth";
     import { setUser } from "$lib/stores/store";
+    import {
+        fetchCountries,
+        type CountryData,
+    } from "$lib/graphql/queries/country";
+    import type { OperationResult } from "@urql/core";
 
     let { ...restProps }: ComponentProps<typeof Card.Root> = $props();
     let message = $state("");
@@ -35,43 +40,19 @@
     let accountType = $state<"select" | "form">("select");
     let selectedOption = $state<string | null>(null);
 
-    let paises: any[] = $state([]);
+    let fetchCountriesResult = $state<OperationResult<CountryData> | null>(
+        null,
+    );
 
-    async function fetchPaises() {
-        try {
-            const response = await fetch("http://localhost:5116/graphql", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    query: `
-						query {
-							countries {
-								countryCode
-								name
-							}
-						}
-					`,
-                }),
-            });
-            const { data } = await response.json();
-            paises = data.countries;
-            console.log("✅ Países cargados:", paises);
-        } catch (error) {
-            console.error("Error fetching countries:", error);
-        }
-    }
-
-    onMount(() => {
-        fetchPaises();
+    onMount(async () => {
+        fetchCountriesResult = await fetchCountries();
     });
 
+    let countries = $derived(fetchCountriesResult?.data?.countries ?? []);
 
     async function handleSubmit(e: Event) {
         e.preventDefault();
         message = "";
-
 
         try {
             const baseInput = {
@@ -189,11 +170,15 @@
                             oninvalid={(e) => {
                                 const input = e.target as HTMLInputElement;
                                 if (input.validity.patternMismatch) {
-                                    input.setCustomValidity("Solo se permiten letras");
+                                    input.setCustomValidity(
+                                        "Solo se permiten letras",
+                                    );
                                 }
                             }}
                             oninput={(e) => {
-                                (e.target as HTMLInputElement).setCustomValidity("");
+                                (
+                                    e.target as HTMLInputElement
+                                ).setCustomValidity("");
                             }}
                         />
                     </Field.Field>
@@ -211,11 +196,15 @@
                             oninvalid={(e) => {
                                 const input = e.target as HTMLInputElement;
                                 if (input.validity.patternMismatch) {
-                                    input.setCustomValidity("Solo se permiten letras");
+                                    input.setCustomValidity(
+                                        "Solo se permiten letras",
+                                    );
                                 }
                             }}
                             oninput={(e) => {
-                                (e.target as HTMLInputElement).setCustomValidity("");
+                                (
+                                    e.target as HTMLInputElement
+                                ).setCustomValidity("");
                             }}
                         />
                     </Field.Field>
@@ -282,11 +271,15 @@
                             oninvalid={(e) => {
                                 const input = e.target as HTMLInputElement;
                                 if (input.validity.patternMismatch) {
-                                    input.setCustomValidity("Solo se permiten letras");
+                                    input.setCustomValidity(
+                                        "Solo se permiten letras",
+                                    );
                                 }
                             }}
                             oninput={(e) => {
-                                (e.target as HTMLInputElement).setCustomValidity("");
+                                (
+                                    e.target as HTMLInputElement
+                                ).setCustomValidity("");
                             }}
                         />
                     </Field.Field>
@@ -303,11 +296,15 @@
                             oninvalid={(e) => {
                                 const input = e.target as HTMLInputElement;
                                 if (input.validity.patternMismatch) {
-                                    input.setCustomValidity("Solo se permiten letras");
+                                    input.setCustomValidity(
+                                        "Solo se permiten letras",
+                                    );
                                 }
                             }}
                             oninput={(e) => {
-                                (e.target as HTMLInputElement).setCustomValidity("");
+                                (
+                                    e.target as HTMLInputElement
+                                ).setCustomValidity("");
                             }}
                         />
                     </Field.Field>
@@ -335,7 +332,7 @@
                                 </span>
                             </Select.Trigger>
                             <Select.Content>
-                                {#each paises as country (country.countryCode)}
+                                {#each countries as country (country.countryCode)}
                                     <Select.Item value={country.countryCode}>
                                         {country.name}
                                     </Select.Item>
@@ -366,13 +363,13 @@
 
 {#if message}
     <div class="grid w-full max-w-xl items-start gap-4">
-    <Alert.Root variant="destructive">
-        <AlertCircleIcon />
-        <Alert.Title>Error en el inicio de sesión</Alert.Title>
-        <Alert.Description>
-        <p>Por favor verifique los siguientes datos.</p>
-        <p>{message}</p>
-        </Alert.Description>
-    </Alert.Root>
+        <Alert.Root variant="destructive">
+            <AlertCircleIcon />
+            <Alert.Title>Error en el inicio de sesión</Alert.Title>
+            <Alert.Description>
+                <p>Por favor verifique los siguientes datos.</p>
+                <p>{message}</p>
+            </Alert.Description>
+        </Alert.Root>
     </div>
 {/if}

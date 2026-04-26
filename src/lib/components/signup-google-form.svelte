@@ -21,6 +21,11 @@
         clearGooglePrefill,
         getGooglePrefill,
     } from "$lib/stores/google-store";
+    import {
+        fetchCountries,
+        type CountryData,
+    } from "$lib/graphql/queries/country";
+    import type { OperationResult } from "@urql/core";
 
     let { ...restProps }: ComponentProps<typeof Card.Root> = $props();
 
@@ -46,35 +51,13 @@
 
     let selectedOption = $state<string | null>(null);
 
-    let paises: any[] = $state([]);
+    let fetchCountriesResult = $state<OperationResult<CountryData> | null>(
+        null,
+    );
 
-    async function fetchPaises() {
-        try {
-            const response = await fetch("http://localhost:5116/graphql", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    query: `
-						query {
-							countries {
-								countryCode
-								name
-							}
-						}
-					`,
-                }),
-            });
-            const { data } = await response.json();
-            paises = data.countries;
-            console.log("✅ Países cargados:", paises);
-        } catch (error) {
-            console.error("Error fetching countries:", error);
-        }
-    }
+    let countries = $derived(fetchCountriesResult?.data?.countries ?? []);
 
-    onMount(() => {
+    onMount(async () => {
         const prefill = getGooglePrefill();
         if (!prefill) {
             goto("/signup"); // no debería estar acá sin pasar por Google
@@ -85,7 +68,7 @@
         userFormData.firstName = prefill.firstName ?? "";
         userFormData.lastName = prefill.lastName ?? "";
         clearGooglePrefill();
-        fetchPaises();
+        fetchCountriesResult = await fetchCountries();
     });
 
     async function handleSubmit(e: Event) {
@@ -200,11 +183,15 @@
                             oninvalid={(e) => {
                                 const input = e.target as HTMLInputElement;
                                 if (input.validity.patternMismatch) {
-                                    input.setCustomValidity("Solo se permiten letras");
+                                    input.setCustomValidity(
+                                        "Solo se permiten letras",
+                                    );
                                 }
                             }}
                             oninput={(e) => {
-                                (e.target as HTMLInputElement).setCustomValidity("");
+                                (
+                                    e.target as HTMLInputElement
+                                ).setCustomValidity("");
                             }}
                         />
                     </Field.Field>
@@ -222,11 +209,15 @@
                             oninvalid={(e) => {
                                 const input = e.target as HTMLInputElement;
                                 if (input.validity.patternMismatch) {
-                                    input.setCustomValidity("Solo se permiten letras");
+                                    input.setCustomValidity(
+                                        "Solo se permiten letras",
+                                    );
                                 }
                             }}
                             oninput={(e) => {
-                                (e.target as HTMLInputElement).setCustomValidity("");
+                                (
+                                    e.target as HTMLInputElement
+                                ).setCustomValidity("");
                             }}
                         />
                     </Field.Field>
@@ -268,11 +259,15 @@
                             oninvalid={(e) => {
                                 const input = e.target as HTMLInputElement;
                                 if (input.validity.patternMismatch) {
-                                    input.setCustomValidity("Solo se permiten letras");
+                                    input.setCustomValidity(
+                                        "Solo se permiten letras",
+                                    );
                                 }
                             }}
                             oninput={(e) => {
-                                (e.target as HTMLInputElement).setCustomValidity("");
+                                (
+                                    e.target as HTMLInputElement
+                                ).setCustomValidity("");
                             }}
                         />
                     </Field.Field>
@@ -298,7 +293,7 @@
                                 </span>
                             </Select.Trigger>
                             <Select.Content>
-                                {#each paises as country (country.countryCode)}
+                                {#each countries as country (country.countryCode)}
                                     <Select.Item value={country.countryCode}>
                                         {country.name}
                                     </Select.Item>
@@ -319,11 +314,15 @@
                             oninvalid={(e) => {
                                 const input = e.target as HTMLInputElement;
                                 if (input.validity.patternMismatch) {
-                                    input.setCustomValidity("Solo se permiten letras");
+                                    input.setCustomValidity(
+                                        "Solo se permiten letras",
+                                    );
                                 }
                             }}
                             oninput={(e) => {
-                                (e.target as HTMLInputElement).setCustomValidity("");
+                                (
+                                    e.target as HTMLInputElement
+                                ).setCustomValidity("");
                             }}
                         />
                     </Field.Field>
@@ -349,12 +348,12 @@
 
 {#if message}
     <div class="grid w-full max-w-xl items-start gap-4">
-    <Alert.Root variant="destructive">
-        <AlertCircleIcon />
-        <Alert.Title>Error en el registro</Alert.Title>
-        <Alert.Description>
-        <p>{message}</p>
-        </Alert.Description>
-    </Alert.Root>
+        <Alert.Root variant="destructive">
+            <AlertCircleIcon />
+            <Alert.Title>Error en el registro</Alert.Title>
+            <Alert.Description>
+                <p>{message}</p>
+            </Alert.Description>
+        </Alert.Root>
     </div>
 {/if}

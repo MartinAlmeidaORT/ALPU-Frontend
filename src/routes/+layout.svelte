@@ -1,56 +1,43 @@
 <script lang="ts">
-	import Header from './Header.svelte';
-	import './layout.css';
+    import "./layout.css";
+    let { children, data } = $props();
+    import * as NavigationMenu from "$lib/components/ui/navigation-menu/index.js";
+    import { navigationMenuTriggerStyle } from "$lib/components/ui/navigation-menu/navigation-menu-trigger.svelte";
+    import { IsMobile } from "$lib/components/hooks/is-mobile.svelte.js";
 
-	let { children } = $props();
+    let user: any = $state(null);
+    let token: any = $state("");
+    const isMobile = new IsMobile();
+    // let authReady = $state(false);
 </script>
 
-<div class="app">
-	<Header />
-	<main>{@render children()}</main>
-
-	<footer>
-		<p>
-			visit 
-			<a href="https://svelte.dev/docs/kit">svelte.dev/docs/kit</a>
-			to learn about SvelteKit
-		</p>
-	</footer>
+<div class="w-full flex justify-center py-4">
+    <!-- {#if authReady} -->
+    <NavigationMenu.Root viewport={isMobile.current}>
+        <NavigationMenu.List class="flex-wrap align-items-center">
+            <NavigationMenu.Item>
+                <NavigationMenu.Link>
+                    {#snippet child()}
+                        <a href="/" class={navigationMenuTriggerStyle()}>Home</a
+                        >
+                    {/snippet}
+                </NavigationMenu.Link>
+            </NavigationMenu.Item>
+            <NavigationMenu.Item>
+                <NavigationMenu.Link>
+                    {#snippet child()}
+                        <a
+                            href="login-signup"
+                            class={navigationMenuTriggerStyle()}>Sesion</a
+                        >
+                    {/snippet}
+                </NavigationMenu.Link>
+            </NavigationMenu.Item>
+        </NavigationMenu.List>
+    </NavigationMenu.Root>
+    <!-- {/if} -->
 </div>
 
-<style>
-	.app {
-		display: flex;
-		flex-direction: column;
-		min-height: 100vh;
-	}
-
-	main {
-		flex: 1;
-		display: flex;
-		flex-direction: column;
-		padding: 1rem;
-		width: 100%;
-		max-width: 64rem;
-		margin: 0 auto;
-		box-sizing: border-box;
-	}
-
-	footer {
-		display: flex;
-		flex-direction: column;
-		justify-content: center;
-		align-items: center;
-		padding: 12px;
-	}
-
-	footer a {
-		font-weight: bold;
-	}
-
-	@media (min-width: 480px) {
-		footer {
-			padding: 12px 0;
-		}
-	}
-</style>
+<!-- {#if authReady} -->
+{@render children()}
+<!-- {/if} -->

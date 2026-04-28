@@ -122,9 +122,9 @@ export const LOGIN_MUTATION = `
   }
 `;
 
-export async function login(email: string, password: string) {
-  const { data } = await client.mutation(LOGIN_MUTATION, { input: { email, password } });
-  return data.login;
+export async function login({ email, password }: LoginInput): Promise<LoginResponse> {
+  const { data } = await client.mutation(LOGIN_MUTATION, { input: { email, password } }).toPromise();
+  return data;
 }
 
 export const COMPLETE_GOOGLE_SIGNUP_BROADCASTER_MUTATION = `
@@ -193,4 +193,3 @@ export async function CompleteGoogleSignUpClient() {
   );
   return data.completeGoogleSignUpClient;
 }
-

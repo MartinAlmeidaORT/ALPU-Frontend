@@ -26,9 +26,8 @@
             <NavigationMenu.Item>
                 <NavigationMenu.Link>
                     {#snippet child()}
-                        <a
-                            href="login-signup"
-                            class={navigationMenuTriggerStyle()}>Sesion</a
+                        <a href="login" class={navigationMenuTriggerStyle()}
+                            >Sesion</a
                         >
                     {/snippet}
                 </NavigationMenu.Link>

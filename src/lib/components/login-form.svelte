@@ -1,64 +1,29 @@
 <script lang="ts">
+    import type { ActionData } from "../../routes/auth/login/$types";
+    import * as Card from "$lib/components/ui/card";
+    import * as Field from "$lib/components/ui/field";
     import { Button } from "$lib/components/ui/button/index.js";
-    import * as Card from "$lib/components/ui/card/index.js";
     import { Input } from "$lib/components/ui/input/index.js";
-    import { client } from "$lib/graphql/client";
-    import { setUser } from "$lib/stores/store";
-    import {
-        FieldGroup,
-        Field,
-        FieldLabel,
-    } from "$lib/components/ui/field/index.js";
+    import { enhance } from "$app/forms";
     import { redirectToGoogle } from "$lib/auth/google";
-  import { setToken } from "$lib/auth/token";
-  import { goto } from "$app/navigation";
-  import { LOGIN_MUTATION } from "$lib/graphql/mutations/auth";
 
-    const id = Math.random().toString(36).substr(2, 9);
-    let message = $state("");
-    let formData = $state({
-        email: "",
-        password: "",
+    let { form }: { form: ActionData } = $props();
+    let errorMessage: string | null = $state(null);
+
+    $effect(() => {
+        if (form?.message) errorMessage = form.message;
     });
-    async function handleSubmit(event: Event) {
-        event.preventDefault();
-        message = "";
-        
-        try {
-            const baseInput = {
-                email: formData.email,
-                password: formData.password,
-            };
 
-            const result = await client.mutation(LOGIN_MUTATION, {
-                input: baseInput,
-            })
-            .toPromise();
+    function handleSubmit() {
+        return async ({ result, update }: any) => {
+            errorMessage = null;
 
-            if (result.error) {
-                message =
-                    result.error.graphQLErrors[0]?.extensions?.message ??
-                    result.error.message;
-                return;
+            if (result.type === "failure") {
+                errorMessage =
+                    result.data?.message || "An unexpected error occurred";
             }
-
-            const payload = result.data.login;
-
-            setUser({
-                userId: payload.user.userId,
-                email: payload.user.email,
-                firstName: payload.user.firstName,
-                lastName: payload.user.lastName,
-                userType: payload.user.__typename,
-            })
-
-            setToken(payload.token);
-            goto("/");
-        } catch (error) {
-            message = "Error inesperado, intente nuevamente.";
-            console.error(error);
-        }
-
+            await update();
+        };
     }
 </script>
 
@@ -71,21 +36,21 @@
         >
     </Card.Header>
     <Card.Content>
-        <form onsubmit={handleSubmit}>
-            <FieldGroup>
-                <Field>
-                    <FieldLabel for="email-{id}">Email</FieldLabel>
+        <form method="POST" action="/auth/login" use:enhance={handleSubmit}>
+            <Field.Group>
+                <Field.Field>
+                    <Field.Label for="email">Email</Field.Label>
                     <Input
-                        id="email-{id}"
+                        id="email"
+                        name="email"
                         type="email"
                         placeholder="m@example.com"
                         required
-                        bind:value={formData.email}
                     />
-                </Field>
-                <Field>
+                </Field.Field>
+                <Field.Field>
                     <div class="flex items-center">
-                        <FieldLabel for="password-{id}">Contraseña</FieldLabel>
+                        <Field.Label for="password">Contraseña</Field.Label>
                         <a
                             href="##"
                             class="ms-auto inline-block text-sm underline"
@@ -93,9 +58,14 @@
                             ¿Olvidaste tu contraseña?
                         </a>
                     </div>
-                    <Input id="password-{id}" type="password" required bind:value={formData.password} />
-                </Field>
-                <Field>
+                    <Input
+                        id="password"
+                        name="password"
+                        type="password"
+                        required
+                    />
+                </Field.Field>
+                <Field.Field>
                     <Button type="submit" class="w-full">Iniciar Sesión</Button>
                     <Button
                         variant="outline"
@@ -113,8 +83,13 @@
                         </svg>
                         Iniciar sesión con Google
                     </Button>
-                </Field>
-            </FieldGroup>
+                </Field.Field>
+            </Field.Group>
+            {#if errorMessage}
+                <p class="text-sm font-medium text-destructive">
+                    {errorMessage}
+                </p>
+            {/if}
         </form>
     </Card.Content>
 </Card.Root>

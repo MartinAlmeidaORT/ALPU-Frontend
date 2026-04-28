@@ -1,0 +1,35 @@
+<!-- <script lang="ts">
+    import LoginForm from "$lib/components/login-form.svelte";
+    import SignupForm from "$lib/components/signup-form.svelte";
+</script>
+
+<div class="flex h-screen w-full items-center justify-center px-4">
+    <div class="flex flex-row justify-center w-full gap-8">
+        <LoginForm />
+        <div class="w-full max-w-sm">
+            <SignupForm />
+        </div>
+    </div>
+</div> -->
+<script lang="ts">
+    import LoginForm from "$lib/components/login-form.svelte";
+    import SignupForm from "$lib/components/signup-form.svelte";
+
+    export let form;
+    let isLogin = true;
+</script>
+
+<div class="auth-container">
+    {#if isLogin}
+        <LoginForm {form} />
+        <button on:click={() => (isLogin = false)}
+            >Need an account? Sign up</button
+        >
+    {:else}
+        <h1>Already have an account? Login</h1>
+        <!-- <SignupForm {form} />
+        <button on:click={() => (isLogin = true)}
+            >Already have an account? Login</button
+        > -->
+    {/if}
+</div>

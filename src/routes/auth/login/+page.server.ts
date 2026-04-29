@@ -1,5 +1,6 @@
 import { fail, redirect } from "@sveltejs/kit";
 import { LOGIN_MUTATION } from "$lib/graphql/mutations/auth";
+import { createUrqlClient } from "$lib/graphql/client.js";
 
 export const actions = {
   default: async ({ request, cookies, locals }) => {
@@ -8,18 +9,20 @@ export const actions = {
       const formData = await request.formData();
       const data = Object.fromEntries(formData);
 
-      const result = await locals.urql.mutation(LOGIN_MUTATION, {
+      const result = await createUrqlClient().mutation(LOGIN_MUTATION, {
         input: data,
       }).toPromise();
+
+      const resultData = result.data?.login;
 
       // Handle GraphQL-specific errors
       if (result.error) {
         return fail(400, {
-          message: result.error?.message || "Invalid email or password"
+          message: resultData.error?.message || "Invalid email or password"
         });
       }
 
-      const token = result.data?.token;
+      const token = resultData.token;
 
       if (!token) {
         return fail(500, { message: "No token received" });

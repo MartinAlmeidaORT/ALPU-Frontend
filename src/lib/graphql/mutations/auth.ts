@@ -1,4 +1,4 @@
-import { client } from "$lib/graphql/client";
+import { createUrqlClient } from "$lib/graphql/client";
 
 export const REGISTER_BROADCASTER_MUTATION = `
     mutation registerBroadcaster($input: RegisterBroadcasterInput!) {
@@ -24,7 +24,7 @@ export const REGISTER_BROADCASTER_MUTATION = `
 `;
 
 export async function RegisterBroadcaster() {
-  const { data } = await client.mutation(REGISTER_BROADCASTER_MUTATION, {});
+  const { data } = await createUrqlClient().mutation(REGISTER_BROADCASTER_MUTATION, {});
   return data.completeGoogleBroadcasterRegistration;
 }
 
@@ -57,7 +57,7 @@ export const REGISTER_CLIENT_MUTATION = `
 `;
 
 export async function RegisterClient() {
-  const { data } = await client.mutation(REGISTER_CLIENT_MUTATION, {});
+  const { data } = await createUrqlClient().mutation(REGISTER_CLIENT_MUTATION, {});
   return data.completeGoogleBroadcasterRegistration;
 }
 
@@ -87,7 +87,7 @@ export const GOOGLE_AUTH_MUTATION = `
 `;
 
 export async function googleAuth(code: string) {
-  const { data } = await client.mutation(GOOGLE_AUTH_MUTATION, { code });
+  const { data } = await createUrqlClient().mutation(GOOGLE_AUTH_MUTATION, { code });
   return data;
 }
 
@@ -123,7 +123,7 @@ export const LOGIN_MUTATION = `
 `;
 
 export async function login({ email, password }: LoginInput): Promise<LoginResponse> {
-  const { data } = await client.mutation(LOGIN_MUTATION, { input: { email, password } }).toPromise();
+  const { data } = await createUrqlClient().mutation(LOGIN_MUTATION, { input: { email, password } }).toPromise();
   return data;
 }
 
@@ -151,7 +151,7 @@ export const COMPLETE_GOOGLE_SIGNUP_BROADCASTER_MUTATION = `
 `;
 
 export async function CompleteGoogleSignUpBroadcaster() {
-  const { data } = await client.mutation(
+  const { data } = await createUrqlClient().mutation(
     COMPLETE_GOOGLE_SIGNUP_BROADCASTER_MUTATION,
     {},
   );
@@ -187,7 +187,7 @@ export const COMPLETE_GOOGLE_SIGNUP_CLIENT_MUTATION = `
 `;
 
 export async function CompleteGoogleSignUpClient() {
-  const { data } = await client.mutation(
+  const { data } = await createUrqlClient().mutation(
     COMPLETE_GOOGLE_SIGNUP_CLIENT_MUTATION,
     {},
   );

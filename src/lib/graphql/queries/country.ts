@@ -1,4 +1,4 @@
-import { client } from "$lib/graphql/client";
+import { createUrqlClient } from "$lib/graphql/client";
 import type { OperationResult } from "@urql/core";
 
 export interface Country {
@@ -20,5 +20,5 @@ const COUNTRY_QUERY = `
 `;
 
 export async function fetchCountries(): Promise<OperationResult<CountryData>> {
-  return await client.query(COUNTRY_QUERY, {}).toPromise();
+  return await createUrqlClient().query(COUNTRY_QUERY, {}).toPromise();
 }

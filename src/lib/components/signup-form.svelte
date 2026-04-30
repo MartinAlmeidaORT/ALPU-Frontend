@@ -1,4 +1,6 @@
 <script lang="ts">
+    import type { ActionData } from "../../routes/auth/signup/$types";
+    import { enhance } from "$app/forms";
     import { Button } from "$lib/components/ui/button/index.js";
     import * as Card from "$lib/components/ui/card/index.js";
     import * as Field from "$lib/components/ui/field/index.js";
@@ -8,37 +10,22 @@
     import AlertCircleIcon from "@lucide/svelte/icons/alert-circle";
     import type { ComponentProps } from "svelte";
     import { onMount } from "svelte";
-    import { goto } from "$app/navigation";
-    import { setToken } from "$lib/auth/token";
-    import { client } from "$lib/graphql/client";
-    import {
-        REGISTER_CLIENT_MUTATION,
-        REGISTER_BROADCASTER_MUTATION,
-    } from "$lib/graphql/mutations/auth";
-    import { setUser } from "$lib/stores/store";
     import {
         fetchCountries,
         type CountryData,
     } from "$lib/graphql/queries/country";
     import type { OperationResult } from "@urql/core";
 
-    let { ...restProps }: ComponentProps<typeof Card.Root> = $props();
-    let message = $state("");
-    let formData = $state({
-        email: "",
-        firstName: "",
-        lastName: "",
-        rut: "",
-        countryCode: "",
-        password: "",
-        street: "",
-        city: "",
-        state: "",
-        agencyName: "", // Solo para agencias
-    });
+    let {
+        form,
+        ...restProps
+    }: { form: ActionData } & ComponentProps<typeof Card.Root> = $props();
 
-    let accountType = $state<"select" | "form">("select");
-    let selectedOption = $state<string | null>(null);
+    let hasUserChooseAccountType = $state(false);
+    let accountType: "client" | "broadcaster" | null = $state(null);
+    let messages: string[] | null = $state(null);
+
+    let selectedCountryCode: string | undefined = $state();
 
     let fetchCountriesResult = $state<OperationResult<CountryData> | null>(
         null,
@@ -50,71 +37,31 @@
 
     let countries = $derived(fetchCountriesResult?.data?.countries ?? []);
 
-    async function handleSubmit(e: Event) {
-        e.preventDefault();
-        message = "";
+    let selectedCountryName: string | undefined = $derived(
+        countries.find((c) => c.countryCode === selectedCountryCode)?.name ??
+            "Selecciona un país",
+    );
 
-        try {
-            const baseInput = {
-                email: formData.email,
-                password: formData.password,
-                firstName: formData.firstName,
-                lastName: formData.lastName,
-                rut: formData.rut,
-                countryCode: formData.countryCode,
-                street: formData.street,
-                city: formData.city,
-                state: formData.state,
-            };
+    function chooseAccount(type: "client" | "broadcaster" | null) {
+        accountType = type;
+        hasUserChooseAccountType = type != null;
+        if (!hasUserChooseAccountType) messages = null;
+    }
 
-            const result =
-                selectedOption === "Cliente"
-                    ? await client
-                          .mutation(REGISTER_CLIENT_MUTATION, {
-                              input: {
-                                  ...baseInput,
-                                  agencyName: formData.agencyName,
-                              },
-                          })
-                          .toPromise()
-                    : await client
-                          .mutation(REGISTER_BROADCASTER_MUTATION, {
-                              input: baseInput,
-                          })
-                          .toPromise();
+    function handleSubmit() {
+        return async ({ result, update }: any) => {
+            messages = null;
 
-            if (result.error) {
-                message =
-                    result.error.graphQLErrors[0]?.extensions?.message ??
-                    result.error.message;
-                return;
+            if (result.type === "failure") {
+                messages = result.data.messages;
             }
-
-            const payload =
-                selectedOption === "Cliente"
-                    ? result.data.registerClient
-                    : result.data.registerBroadcaster;
-
-            setUser({
-                userId: payload.user.userId,
-                email: payload.user.email,
-                firstName: payload.user.firstName,
-                lastName: payload.user.lastName,
-                userType: payload.user.__typename,
-            });
-
-            setToken(payload.token);
-
-            goto("/");
-        } catch (error) {
-            message = "Error inesperado, intente nuevamente.";
-            console.error(error);
-        }
+            await update();
+        };
     }
 </script>
 
 <Card.Root {...restProps}>
-    {#if accountType === "select"}
+    {#if !hasUserChooseAccountType}
         <Card.Header>
             <Card.Title class="text-2xl"
                 >¿Qué tipo de cuenta deseas crear?</Card.Title
@@ -125,20 +72,11 @@
         </Card.Header>
         <Card.Content>
             <div class="flex gap-4">
-                <Button
-                    onclick={() => {
-                        selectedOption = "Cliente";
-                        accountType = "form";
-                    }}
-                    class="flex-1"
+                <Button class="flex-1" onclick={() => chooseAccount("client")}
+                    >Agencia</Button
                 >
-                    Agencia
-                </Button>
                 <Button
-                    onclick={() => {
-                        selectedOption = "Locutor";
-                        accountType = "form";
-                    }}
+                    onclick={() => chooseAccount("broadcaster")}
                     variant="outline"
                     class="flex-1"
                 >
@@ -146,23 +84,32 @@
                 </Button>
             </div>
         </Card.Content>
-    {:else if accountType === "form"}
+    {:else}
         <Card.Header>
-            <Card.Title class="text-2xl">Signup ({selectedOption})</Card.Title>
+            <Card.Title class="text-2xl"
+                >Registro {accountType == "client"
+                    ? "cliente"
+                    : "locutor"}</Card.Title
+            >
             <Card.Description
                 >Ingresa tu información a continuación para crear tu cuenta</Card.Description
             >
         </Card.Header>
         <Card.Content>
-            <form onsubmit={handleSubmit}>
+            <form
+                method="POST"
+                action="/auth/signup"
+                use:enhance={handleSubmit}
+            >
+                <input type="hidden" name="accountType" value={accountType} />
                 <Field.Group columns={2}>
                     <Field.Field>
                         <Field.Label for="name">Nombre</Field.Label>
                         <Input
-                            id="name"
+                            id="firstName"
+                            name="firstName"
                             type="text"
-                            placeholder="Martin"
-                            bind:value={formData.firstName}
+                            placeholder="Nombre"
                             required
                             minlength={3}
                             maxlength={50}
@@ -185,10 +132,10 @@
                     <Field.Field>
                         <Field.Label for="apellido">Apellido</Field.Label>
                         <Input
-                            id="apellido"
+                            id="lastName"
+                            name="lastName"
                             type="text"
-                            placeholder="Almeida"
-                            bind:value={formData.lastName}
+                            placeholder="Apellido"
                             required
                             minlength={3}
                             maxlength={50}
@@ -212,9 +159,9 @@
                         <Field.Label for="email">Email</Field.Label>
                         <Input
                             id="email"
+                            name="email"
                             type="email"
-                            placeholder="m@example.com"
-                            bind:value={formData.email}
+                            placeholder="email@example.com"
                             required
                             minlength={10}
                             maxlength={100}
@@ -224,8 +171,9 @@
                         <Field.Label for="password">Contraseña</Field.Label>
                         <Input
                             id="password"
+                            name="password"
                             type="password"
-                            bind:value={formData.password}
+                            placeholder="Contraseña"
                             required
                             minlength={10}
                             maxlength={60}
@@ -236,22 +184,24 @@
                         <Field.Label for="rut">RUT</Field.Label>
                         <Input
                             id="rut"
+                            name="rut"
                             type="text"
-                            bind:value={formData.rut}
+                            placeholder="RUT"
                             required
                             minlength={12}
                             maxlength={12}
                         />
                     </Field.Field>
-                    {#if selectedOption === "Cliente"}
+                    {#if accountType === "client"}
                         <Field.Field>
                             <Field.Label for="agencyName"
                                 >Nombre de Agencia</Field.Label
                             >
                             <Input
                                 id="agencyName"
+                                name="agencyName"
+                                placeholder="Agencia"
                                 type="text"
-                                bind:value={formData.agencyName}
                                 required
                                 minlength={3}
                                 maxlength={100}
@@ -262,8 +212,9 @@
                         <Field.Label for="city">Ciudad</Field.Label>
                         <Input
                             id="city"
+                            name="city"
                             type="text"
-                            bind:value={formData.city}
+                            placeholder="Ciudad"
                             required
                             minlength={4}
                             maxlength={100}
@@ -287,8 +238,9 @@
                         <Field.Label for="state">Departamento</Field.Label>
                         <Input
                             id="state"
+                            name="state"
                             type="text"
-                            bind:value={formData.state}
+                            placeholder="Departamento"
                             required
                             minlength={4}
                             maxlength={100}
@@ -312,8 +264,9 @@
                         <Field.Label for="street">Calle</Field.Label>
                         <Input
                             id="street"
+                            name="street"
                             type="text"
-                            bind:value={formData.street}
+                            placeholder="Calle"
                             required
                             minlength={4}
                             maxlength={100}
@@ -322,14 +275,13 @@
                     <Field.Field>
                         <Field.Label for="pais">Pais</Field.Label>
                         <Select.Root
+                            name="countryCode"
                             type="single"
-                            bind:value={formData.countryCode}
+                            bind:value={selectedCountryCode}
                             required
                         >
-                            <Select.Trigger id="pais">
-                                <span>
-                                    {formData.countryCode || "Seleccionar Pais"}
-                                </span>
+                            <Select.Trigger id="countryCode" name="countryCode">
+                                <span>{selectedCountryName}</span>
                             </Select.Trigger>
                             <Select.Content>
                                 {#each countries as country (country.countryCode)}
@@ -348,11 +300,7 @@
                     <Field.Field>
                         <Button
                             type="button"
-                            onclick={() => {
-                                accountType = "select";
-                                selectedOption = null;
-                                message = "";
-                            }}>Volver</Button
+                            onclick={() => chooseAccount(null)}>Volver</Button
                         >
                     </Field.Field>
                 </Field.Group>
@@ -361,14 +309,16 @@
     {/if}
 </Card.Root>
 
-{#if message}
+{#if messages}
     <div class="grid w-full max-w-xl items-start gap-4">
         <Alert.Root variant="destructive">
             <AlertCircleIcon />
-            <Alert.Title>Error en el inicio de sesión</Alert.Title>
+            <Alert.Title>Error en el registro</Alert.Title>
             <Alert.Description>
                 <p>Por favor verifique los siguientes datos.</p>
-                <p>{message}</p>
+                {#each messages as msg}
+                    <p>{msg}</p>
+                {/each}
             </Alert.Description>
         </Alert.Root>
     </div>

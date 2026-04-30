@@ -1,6 +1,6 @@
 import { createUrqlClient } from "$lib/graphql/client";
 
-export const REGISTER_BROADCASTER_MUTATION = `
+export const SIGNUP_BROADCASTER_MUTATION = `
     mutation registerBroadcaster($input: RegisterBroadcasterInput!) {
         registerBroadcaster(input: $input) {
           token,
@@ -23,13 +23,12 @@ export const REGISTER_BROADCASTER_MUTATION = `
     }
 `;
 
-export async function RegisterBroadcaster() {
-  const { data } = await createUrqlClient().mutation(REGISTER_BROADCASTER_MUTATION, {});
-  return data.completeGoogleBroadcasterRegistration;
-}
+// export async function SignupBroadcaster() {
+//   return await createUrqlClient().mutation(SIGNUP_BROADCASTER_MUTATION, {}).toPromise();
+// }
 
-export const REGISTER_CLIENT_MUTATION = `
-    mutation REGISTER_CLIENT_MUTATION($input: RegisterClientInput!) {
+export const SIGNUP_CLIENT_MUTATION = `
+    mutation registerClient($input: RegisterClientInput!) {
         registerClient(input: $input) {
           token,
           user {
@@ -56,10 +55,9 @@ export const REGISTER_CLIENT_MUTATION = `
     }
 `;
 
-export async function RegisterClient() {
-  const { data } = await createUrqlClient().mutation(REGISTER_CLIENT_MUTATION, {});
-  return data.completeGoogleBroadcasterRegistration;
-}
+// export async function SignupClient() {
+//   return await createUrqlClient().mutation(SIGNUP_CLIENT_MUTATION, {}).toPromise();
+// }
 
 interface GoogleAuthInput {
   code: string;

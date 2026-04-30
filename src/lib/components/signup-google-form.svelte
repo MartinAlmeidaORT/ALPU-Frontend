@@ -1,4 +1,5 @@
 <script lang="ts">
+    import { enhance } from "$app/forms";
     import { Button } from "$lib/components/ui/button/index.js";
     import * as Card from "$lib/components/ui/card/index.js";
     import * as Field from "$lib/components/ui/field/index.js";
@@ -6,128 +7,81 @@
     import * as Select from "$lib/components/ui/select/index.js";
     import * as Alert from "$lib/components/ui/alert/index.js";
     import AlertCircleIcon from "@lucide/svelte/icons/alert-circle";
-    import type { ComponentProps } from "svelte";
     import { onMount } from "svelte";
-    import { goto } from "$app/navigation";
-
-    import {
-        COMPLETE_GOOGLE_SIGNUP_BROADCASTER_MUTATION,
-        COMPLETE_GOOGLE_SIGNUP_CLIENT_MUTATION,
-    } from "$lib/graphql/mutations/auth";
-    import { client } from "$lib/graphql/client";
-    import { setToken } from "$lib/auth/token";
-    import { setUser } from "$lib/stores/store";
-    import {
-        clearGooglePrefill,
-        getGooglePrefill,
-    } from "$lib/stores/google-store";
     import {
         fetchCountries,
         type CountryData,
     } from "$lib/graphql/queries/country";
     import type { OperationResult } from "@urql/core";
+    import type { ActionData } from "../../routes/login/signup-google/$types";
 
-    let { ...restProps }: ComponentProps<typeof Card.Root> = $props();
+    let {
+        form,
+        data,
+        use = $bindable(),
+        ...restProps
+    }: {
+        form: ActionData;
+        data: any;
+        use: any;
+        [key: string]: any;
+    } = $props();
 
-    let message = $state("");
-
-    let userFormData = $state({
-        subject: "",
-        email: "",
-        firstName: "",
+    let googleData = $state({
         lastName: "",
-        rut: "",
-        countryCode: "",
-        street: "",
-        city: "",
-        state: "",
+        firstName: "",
     });
 
-    let clientFormData = $state({
-        agencyName: "",
+    $effect(() => {
+        if (data?.pendingData) {
+            googleData.lastName = data.pendingData.lastName ?? "";
+            googleData.firstName = data.pendingData.firstName ?? "";
+        }
     });
 
-    let accountType = $state<"select" | "form">("select");
+    let hasUserChooseAccountType = $state(false);
+    let accountType: "client" | "broadcaster" | null = $state(null);
+    let messages: string[] | null = $state(null);
 
-    let selectedOption = $state<string | null>(null);
+    let selectedCountryCode: string | undefined = $state();
 
     let fetchCountriesResult = $state<OperationResult<CountryData> | null>(
         null,
     );
 
-    let countries = $derived(fetchCountriesResult?.data?.countries ?? []);
-
     onMount(async () => {
-        const prefill = getGooglePrefill();
-        if (!prefill) {
-            goto("/signup"); // no debería estar acá sin pasar por Google
-            return;
-        }
-        userFormData.subject = prefill.subject ?? "";
-        userFormData.email = prefill.email;
-        userFormData.firstName = prefill.firstName ?? "";
-        userFormData.lastName = prefill.lastName ?? "";
-        clearGooglePrefill();
         fetchCountriesResult = await fetchCountries();
     });
 
-    async function handleSubmit(e: Event) {
-        e.preventDefault();
-        message = "";
+    let countries = $derived(fetchCountriesResult?.data?.countries ?? []);
 
-        try {
-            const result =
-                selectedOption === "Cliente"
-                    ? await client
-                          .mutation(COMPLETE_GOOGLE_SIGNUP_CLIENT_MUTATION, {
-                              input: {
-                                  ...userFormData,
-                                  ...clientFormData,
-                              },
-                          })
-                          .toPromise()
-                    : await client
-                          .mutation(
-                              COMPLETE_GOOGLE_SIGNUP_BROADCASTER_MUTATION,
-                              {
-                                  input: { ...userFormData },
-                              },
-                          )
-                          .toPromise();
+    let selectedCountryName: string | undefined = $derived(
+        countries.find((c) => c.countryCode === selectedCountryCode)?.name ??
+            "Selecciona un país",
+    );
 
-            if (result.error) {
-                message =
-                    result.error.graphQLErrors[0]?.extensions?.message ??
-                    result.error.message;
-                return;
+    function chooseAccount(type: "client" | "broadcaster" | null) {
+        accountType = type;
+        hasUserChooseAccountType = type != null;
+        if (!hasUserChooseAccountType) messages = null;
+    }
+
+    function handleSubmit() {
+        return async ({ result, update }: any) => {
+            messages = null;
+
+            console.log(result);
+
+            if (result.type === "failure") {
+                messages = result.data.messages;
             }
-
-            const payload =
-                selectedOption === "Cliente"
-                    ? result.data.completeGoogleSignUpClient
-                    : result.data.completeGoogleSignUpBroadcaster;
-
-            console.log(payload);
-            setUser({
-                userId: payload.user.userId,
-                email: payload.user.email,
-                firstName: payload.user.firstName,
-                lastName: payload.user.lastName,
-                userType: payload.user.__typename,
-            });
-
-            setToken(payload.token);
-
-            goto("/");
-        } catch (error) {
-            message = "Error inesperado, intente nuevamente.";
-            console.error(error);
-        }
+            await update();
+        };
     }
 </script>
 
 <Card.Root {...restProps}>
-    {#if accountType === "select"}
+    {#if !hasUserChooseAccountType}
         <Card.Header>
             <Card.Title class="text-2xl"
                 >¿Qué tipo de cuenta deseas crear?</Card.Title
@@ -138,20 +92,11 @@
         </Card.Header>
         <Card.Content>
             <div class="flex gap-4">
-                <Button
-                    onclick={() => {
-                        selectedOption = "Agencia";
-                        accountType = "form";
-                    }}
-                    class="flex-1"
-                >
+                <Button onclick={() => chooseAccount("client")} class="flex-1">
                     Agencia
                 </Button>
                 <Button
-                    onclick={() => {
-                        selectedOption = "Locutor";
-                        accountType = "form";
-                    }}
+                    onclick={() => chooseAccount("broadcaster")}
                     variant="outline"
                     class="flex-1"
                 >
@@ -159,23 +104,33 @@
                 </Button>
             </div>
         </Card.Content>
-    {:else if accountType === "form"}
+    {:else}
         <Card.Header>
-            <Card.Title class="text-2xl">Signup ({selectedOption})</Card.Title>
+            <Card.Title class="text-2xl"
+                >Registro {accountType == "client"
+                    ? "cliente"
+                    : "locutor"}</Card.Title
+            >
             <Card.Description
                 >Ingresa tu información a continuación para crear tu cuenta</Card.Description
             >
         </Card.Header>
         <Card.Content>
-            <form onsubmit={handleSubmit}>
+            <form
+                method="POST"
+                action="/login/signup-google"
+                use:enhance={handleSubmit}
+            >
+                <input type="hidden" name="accountType" value={accountType} />
                 <Field.Group columns={2}>
                     <Field.Field>
-                        <Field.Label for="name">Nombre</Field.Label>
+                        <Field.Label for="firstName">Nombre</Field.Label>
                         <Input
-                            id="name"
+                            id="firstName"
+                            name="firstName"
                             type="text"
-                            placeholder="Martin"
-                            bind:value={userFormData.firstName}
+                            placeholder="Nombre"
+                            bind:value={googleData.firstName}
                             required
                             minlength={3}
                             maxlength={50}
@@ -196,12 +151,13 @@
                         />
                     </Field.Field>
                     <Field.Field>
-                        <Field.Label for="apellido">Apellido</Field.Label>
+                        <Field.Label for="lastName">Apellido</Field.Label>
                         <Input
-                            id="apellido"
+                            id="lastName"
+                            name="lastName"
                             type="text"
-                            placeholder="Almeida"
-                            bind:value={userFormData.lastName}
+                            placeholder="Apellido"
+                            bind:value={googleData.lastName}
                             required
                             minlength={3}
                             maxlength={50}
@@ -225,22 +181,24 @@
                         <Field.Label for="rut">RUT</Field.Label>
                         <Input
                             id="rut"
+                            name="rut"
                             type="text"
-                            bind:value={userFormData.rut}
+                            placeholder="RUT"
                             required
                             minlength={12}
                             maxlength={12}
                         />
                     </Field.Field>
-                    {#if selectedOption === "Agencia"}
+                    {#if accountType === "client"}
                         <Field.Field>
                             <Field.Label for="agencyName"
                                 >Nombre de Agencia</Field.Label
                             >
                             <Input
                                 id="agencyName"
+                                name="agencyName"
+                                placeholder="Agencia"
                                 type="text"
-                                bind:value={clientFormData.agencyName}
                                 required
                             />
                         </Field.Field>
@@ -250,8 +208,9 @@
                         <Field.Label for="city">Ciudad</Field.Label>
                         <Input
                             id="city"
+                            name="city"
                             type="text"
-                            bind:value={userFormData.city}
+                            placeholder="Ciudad"
                             required
                             minlength={4}
                             maxlength={100}
@@ -275,22 +234,22 @@
                         <Field.Label for="street">Calle</Field.Label>
                         <Input
                             id="street"
+                            name="street"
                             type="text"
-                            bind:value={userFormData.street}
+                            placeholder="Calle"
                             required
                         />
                     </Field.Field>
                     <Field.Field>
                         <Field.Label for="pais">Pais</Field.Label>
                         <Select.Root
+                            name="countryCode"
                             type="single"
-                            bind:value={userFormData.countryCode}
+                            bind:value={selectedCountryCode}
+                            required
                         >
-                            <Select.Trigger id="pais">
-                                <span>
-                                    {userFormData.countryCode ||
-                                        "Seleccionar Pais"}
-                                </span>
+                            <Select.Trigger id="countryCode" name="countryCode">
+                                <span>{selectedCountryName}</span>
                             </Select.Trigger>
                             <Select.Content>
                                 {#each countries as country (country.countryCode)}
@@ -302,11 +261,12 @@
                         </Select.Root>
                     </Field.Field>
                     <Field.Field>
-                        <Field.Label for="estado">Estado</Field.Label>
+                        <Field.Label for="state">Estado</Field.Label>
                         <Input
-                            id="estado"
+                            id="state"
+                            name="state"
                             type="text"
-                            bind:value={userFormData.state}
+                            placeholder="Departamento"
                             required
                             minlength={4}
                             maxlength={100}
@@ -334,10 +294,7 @@
                     <Field.Field>
                         <Button
                             type="button"
-                            onclick={() => {
-                                accountType = "select";
-                                selectedOption = null;
-                            }}>Volver</Button
+                            onclick={() => chooseAccount(null)}>Volver</Button
                         >
                     </Field.Field>
                 </Field.Group>
@@ -346,13 +303,16 @@
     {/if}
 </Card.Root>
 
-{#if message}
+{#if messages}
     <div class="grid w-full max-w-xl items-start gap-4">
         <Alert.Root variant="destructive">
             <AlertCircleIcon />
             <Alert.Title>Error en el registro</Alert.Title>
             <Alert.Description>
-                <p>{message}</p>
+                <p>Por favor verifique los siguientes datos.</p>
+                {#each messages as msg}
+                    <p>{msg}</p>
+                {/each}
             </Alert.Description>
         </Alert.Root>
     </div>

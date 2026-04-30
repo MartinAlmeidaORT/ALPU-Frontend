@@ -66,6 +66,7 @@ interface GoogleAuthInput {
 interface GoogleAuthResponse {
   token: string;
   requiresRegistration: boolean;
+  subject: string;
   email: string;
   firstName: string;
   lastName: string;

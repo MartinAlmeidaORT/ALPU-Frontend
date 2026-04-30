@@ -18,14 +18,14 @@ export const actions = {
       // Handle GraphQL-specific errors
       if (result.error) {
         return fail(400, {
-          message: resultData.error?.message || "Invalid email or password"
+          messages: result.error.graphQLErrors?.map((e) => e.message) || ["Invalid email or password"]
         });
       }
 
       const token = resultData.token;
 
       if (!token) {
-        return fail(500, { message: "No token received" });
+        return fail(500, { messages: ["No token received"] });
       }
 
       cookies.set('session_id', token, {
@@ -36,7 +36,7 @@ export const actions = {
       });
     }
     catch (err) {
-      return fail(500, { message: "An unexpected error occurred" });
+      return fail(500, { messages: ["An unexpected error occurred"] });
     }
 
     throw redirect(302, '/contracts');

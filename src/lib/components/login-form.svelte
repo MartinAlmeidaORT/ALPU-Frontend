@@ -8,19 +8,20 @@
     import { redirectToGoogle } from "$lib/auth/google";
 
     let { form }: { form: ActionData } = $props();
-    let errorMessage: string | null = $state(null);
+    let messages: string[] | null = $state(null);
 
     $effect(() => {
-        if (form?.message) errorMessage = form.message;
+        if (form?.messages) messages = form.messages;
     });
 
     function handleSubmit() {
         return async ({ result, update }: any) => {
-            errorMessage = null;
+            messages = null;
 
             if (result.type === "failure") {
-                errorMessage =
-                    result.data?.message || "An unexpected error occurred";
+                messages = result.data?.messages || [
+                    "An unexpected error occurred",
+                ];
             }
             await update();
         };
@@ -85,10 +86,12 @@
                     </Button>
                 </Field.Field>
             </Field.Group>
-            {#if errorMessage}
-                <p class="text-sm font-medium text-destructive">
-                    {errorMessage}
-                </p>
+            {#if messages}
+                {#each messages as msg}
+                    <p class="text-sm font-medium text-destructive">
+                        {msg}
+                    </p>
+                {/each}
             {/if}
         </form>
     </Card.Content>

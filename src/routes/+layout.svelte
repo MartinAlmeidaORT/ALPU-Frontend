@@ -6,9 +6,14 @@
   import { IsMobile } from '$lib/components/hooks/is-mobile.svelte.js';
 
   let { children } = $props();
+  let logoutFormRef: HTMLFormElement;
 
   const isAuth = $derived(page.data.session);
   const isMobile = new IsMobile();
+
+  function handleLogout() {
+    logoutFormRef?.submit();
+  }
 </script>
 
 <div class="w-full flex justify-center py-4">
@@ -24,12 +29,12 @@
         </NavigationMenu.Item>
         <NavigationMenu.Item>
           <NavigationMenu.Link>
-            <form method="POST" action="/auth/logout">
-              <button class={navigationMenuTriggerStyle()}>Cerrar sesión</button
-              >
-            </form>
+            {#snippet child()}
+              <button onclick={handleLogout} class={`${navigationMenuTriggerStyle()} cursor-pointer`}>Cerrar sesión</button>
+            {/snippet}
           </NavigationMenu.Link>
         </NavigationMenu.Item>
+        <form bind:this={logoutFormRef} method="POST" action="/auth/logout" style="display: none;"></form>
       {:else}
         <NavigationMenu.Item>
           <NavigationMenu.Link>

@@ -34,14 +34,13 @@
             <Table.Root>
             <Table.Caption>Todos los servicios.</Table.Caption>
             <Table.Header>
-                <h1 class="text-2xl font-bold -mb-2">Servicios</h1>
                 <Table.Row>
-                    <Table.Head class="w-25 px-1">Medio/Tipo</Table.Head>
-                    <Table.Head class="px-1">1 semana</Table.Head>
-                    <Table.Head class="px-1">1 mes</Table.Head>
-                    <Table.Head class="px-1">3 meses</Table.Head>
-                        <Table.Head class="px-1">6 meses</Table.Head>
-                    <Table.Head class="text-end px-1">1 año</Table.Head>
+                    <Table.Head class="w-25 px-1 text-base font-semibold">Medio/Tipo</Table.Head>
+                    <Table.Head class="px-1 text-base font-semibold">1 semana</Table.Head>
+                    <Table.Head class="px-1 text-base font-semibold">1 mes</Table.Head>
+                    <Table.Head class="px-1 text-base font-semibold">3 meses</Table.Head>
+                        <Table.Head class="px-1 text-base font-semibold">6 meses</Table.Head>
+                    <Table.Head class="text-end px-1 text-base font-semibold">1 año</Table.Head>
                     </Table.Row>
             </Table.Header>
             <Table.Body>
@@ -51,7 +50,8 @@
                     <Table.Cell class="font-medium px-1">{service.name}</Table.Cell>
                     {#each service.servicePrices.toReversed() as servicePrice(servicePrice.durationId)}
                     <Table.Cell class="px-1">
-                        <Button
+                        <Button variant="outline"
+                            bgColor="bg-[#1F5BB8] text-white hover:bg-[#1a4a94] hover:text-white"
                             onclick={() => {
                             serviceSelected = {name: service.name, price: servicePrice.price, type: service.__typename};
                             }}
@@ -64,7 +64,8 @@
                 {:else if service.__typename === "ServiceSpecial"}
                     <Table.Cell class="font-medium px-1">{service.name}</Table.Cell>
                     <Table.Cell class="px-1">
-                        <Button
+                        <Button variant="outline"
+                            bgColor="bg-[#1F5BB8] text-white hover:bg-[#1a4a94] hover:text-white"
                             onclick={() => {
                             serviceSelected = {name: service.name, price: service.price, type: service.__typename};
                             }}
@@ -76,7 +77,8 @@
                 {:else if service.__typename === "ServiceIVR"}
                     <Table.Cell class="font-medium px-1">{service.name}</Table.Cell>
                     <Table.Cell class="px-1">
-                        <Button
+                        <Button variant="outline"
+                            bgColor="bg-[#1F5BB8] text-white hover:bg-[#1a4a94] hover:text-white"
                             onclick={() => {
                             serviceSelected = {name: service.name, price: service.initialMessagePrice, type: service.__typename};
                             }}
@@ -88,7 +90,7 @@
                 {:else if service.__typename === "ServiceNarrative"}
                     <Table.Cell class="font-medium px-1">{service.name}</Table.Cell>
                     <Table.Cell class="px-1">
-                        <Button
+                        <Button variant="outline" bgColor="bg-[#1F5BB8] text-white hover:bg-[#1a4a94] hover:text-white"
                             onclick={() => {
                             serviceSelected = {name: service.name, price: service.basePrice, type: service.__typename};
                             }}
@@ -106,107 +108,127 @@
         </Table.Root>
         </div>
 
-        <div class="flex-1">
+        <div class="flex-1 min-w-[300px]">
             <h1 class="text-2xl font-bold mb-4">Detalles</h1>
             {#if serviceSelected.name != ""}
                 <FieldGroup columns={2} class="bg-gray-50 p-4 rounded-lg">
                     <Field.Content>
-                        <Field.Description>Servicio seleccionado</Field.Description>
+                        <Field.Description>Servicio</Field.Description>
                         <Field.Title>{serviceSelected.name}</Field.Title>
                     </Field.Content>
-                    <Field.Content>
-                        <Field.Description>Precio base</Field.Description>
-                        <Field.Title>${serviceSelected.price}</Field.Title>
-                    </Field.Content>
+                    {#if serviceSelected.type === "ServiceNarrative"}
+                        <Field.Content>
+                            <Field.Description>Hasta 3 minutos</Field.Description>
+                            <Field.Title>${serviceSelected.price}</Field.Title>
+                        </Field.Content>
+                    {:else if serviceSelected.type === "ServiceIVR"} 
+                        <Field.Content>
+                            <Field.Description>Mensaje inicial</Field.Description>
+                            <Field.Title>${serviceSelected.price}</Field.Title>
+                        </Field.Content>
+                    {:else}
+                        <Field.Content>
+                            <Field.Description>Precio base</Field.Description>
+                            <Field.Title>${serviceSelected.price}</Field.Title>
+                        </Field.Content>
+                    {/if}
                     <Field.Field orientation="horizontal">
                         <Checkbox id="discInterior" />
                         <Field.Label for="discInterior">Descuento interior (-70%)</Field.Label>
                     </Field.Field>
                     {#if serviceSelected.type === "ServiceDuration"} 
-                    <Field.Field orientation="horizontal">
-                        <Select.Root type="single" bind:value={pieces}>
-                            <Select.Trigger id="checkout-7j9-exp-year-f59">
-                            <span>
-                                {pieces || "0"}
-                            </span>
-                            </Select.Trigger>
-                            <Select.Content>
-                            <Select.Item value="1">1</Select.Item>
-                            <Select.Item value="2">2</Select.Item>
-                            <Select.Item value="3">3</Select.Item>
-                            <Select.Item value="4">4</Select.Item>
-                            <Select.Item value="5">5</Select.Item>
-                            </Select.Content>
-                        </Select.Root>
-                        <Field.Label for="piezas">Piezas</Field.Label>
-                    </Field.Field>
+                        <Field.Field orientation="horizontal">
+                            <Select.Root type="single" bind:value={pieces}>
+                                <Select.Trigger id="checkout-7j9-exp-year-f59">
+                                <span>
+                                    {pieces || "0"}
+                                </span>
+                                </Select.Trigger>
+                                <Select.Content>
+                                <Select.Item value="1">1</Select.Item>
+                                <Select.Item value="2">2</Select.Item>
+                                <Select.Item value="3">3</Select.Item>
+                                <Select.Item value="4">4</Select.Item>
+                                <Select.Item value="5">5</Select.Item>
+                                </Select.Content>
+                            </Select.Root>
+                            <Field.Label for="piezas">Piezas</Field.Label>
+                        </Field.Field>
                     {:else if serviceSelected.type === "ServiceIVR"}
-                    <Field.Field orientation="horizontal">
-                        <Select.Root type="single" bind:value={pieces}>
-                            <Select.Trigger id="checkout-7j9-exp-year-f59">
-                            <span>
-                                {pieces || "0"}
-                            </span>
-                            </Select.Trigger>
-                            <Select.Content>
-                            <Select.Item value="1">1</Select.Item>
-                            <Select.Item value="2">2</Select.Item>
-                            <Select.Item value="3">3</Select.Item>
-                            <Select.Item value="4">4</Select.Item>
-                            <Select.Item value="5">5</Select.Item>
-                            </Select.Content>
-                        </Select.Root>
-                        <Field.Label for="mensajes">Mensajes adicionales</Field.Label>
-                    </Field.Field>
-                    <Field.Field class="col-span-2">
-                        <Field.Label for ="mensajeIVR">Mensaje</Field.Label>
-                        <Input
-                            id="mensajeIVR"
-                            type="text"
-                            placeholder="Ingrese su mensaje"
-                        />
-                    </Field.Field>
+                        <Field.Field orientation="horizontal">
+                            <Select.Root type="single" bind:value={pieces}>
+                                <Select.Trigger id="checkout-7j9-exp-year-f59">
+                                <span>
+                                    {pieces || "0"}
+                                </span>
+                                </Select.Trigger>
+                                <Select.Content>
+                                <Select.Item value="1">1</Select.Item>
+                                <Select.Item value="2">2</Select.Item>
+                                <Select.Item value="3">3</Select.Item>
+                                <Select.Item value="4">4</Select.Item>
+                                <Select.Item value="5">5</Select.Item>
+                                </Select.Content>
+                            </Select.Root>
+                            <Field.Label for="mensajes">Mensajes adicionales</Field.Label>
+                        </Field.Field>
+                        <Field.Field class="col-span-2">
+                            <Field.Label for ="mensajeIVR">Mensaje</Field.Label>
+                            <Input
+                                id="mensajeIVR"
+                                type="text"
+                                placeholder="Ingrese su mensaje"
+                            />
+                        </Field.Field>
                     {:else if serviceSelected.type === "ServiceNarrative"}
-                    <Field.Field>
-                        <Field.Label for ="minutosNarrcion">Minutos de narración</Field.Label>
-                        <Input
-                            id="minutosNarrcion"
-                            type="text"
-                            placeholder="0"
-                        />
-                    </Field.Field>
-                    <Field.Field orientation="horizontal">
-                        <Select.Root type="single" bind:value={roles}>
-                            <Select.Trigger id="checkout-7j9-exp-year-f59">
-                            <span>
-                                {roles || "0"}
-                            </span>
-                            </Select.Trigger>
-                            <Select.Content>
-                            <Select.Item value="1">1</Select.Item>
-                            <Select.Item value="2">2</Select.Item>
-                            <Select.Item value="3">3</Select.Item>
-                            <Select.Item value="4">4</Select.Item>
-                            <Select.Item value="5">5</Select.Item>
-                            </Select.Content>
-                        </Select.Root>
-                        <Field.Label for="roles">Roles</Field.Label>
-                    </Field.Field>
-                    <Field.Field orientation="horizontal">
-                        <Checkbox id="contenidoNoComercial" />
-                        <Field.Label for="contenidoNoComercial">Contenido no comercial (-20%)</Field.Label>
-                    </Field.Field>
-                    <Field.Field orientation="horizontal">
-                        <Checkbox id="difusionEninternet" />
-                        <Field.Label for="difusionEninternet">Difusión en internet (+100%)</Field.Label>
-                    </Field.Field>
-                    <Field.Field orientation="horizontal">
-                        <Checkbox id="sincroLabial" />
-                        <Field.Label for="sincroLabial">Sincronización labial (+20%)</Field.Label>
-                    </Field.Field>
+                        <Field.Field>
+                            <Field.Label for ="minutosNarrcion">Minutos de narración</Field.Label>
+                            <Input
+                                id="minutosNarrcion"
+                                type="text"
+                                placeholder="Minuto adicional {serviceSelected.extraPrice}"
+                            />
+                        </Field.Field>
+                        <Field.Field orientation="horizontal">
+                            <Select.Root type="single" bind:value={roles}>
+                                <Select.Trigger id="checkout-7j9-exp-year-f59">
+                                <span>
+                                    {roles || "0"}
+                                </span>
+                                </Select.Trigger>
+                                <Select.Content>
+                                <Select.Item value="1">1</Select.Item>
+                                <Select.Item value="2">2</Select.Item>
+                                <Select.Item value="3">3</Select.Item>
+                                <Select.Item value="4">4</Select.Item>
+                                <Select.Item value="5">5</Select.Item>
+                                </Select.Content>
+                            </Select.Root>
+                            <Field.Label for="roles">Roles</Field.Label>
+                        </Field.Field>
+                        <Field.Field orientation="horizontal">
+                            <Checkbox id="contenidoNoComercial" />
+                            <Field.Label for="contenidoNoComercial">Contenido no comercial (-20%)</Field.Label>
+                        </Field.Field>
+                        <Field.Field orientation="horizontal">
+                            <Checkbox id="difusionEninternet" />
+                            <Field.Label for="difusionEninternet">Difusión en internet (+100%)</Field.Label>
+                        </Field.Field>
+                        <Field.Field orientation="horizontal">
+                            <Checkbox id="sincroLabial" />
+                            <Field.Label for="sincroLabial">Sincronización labial (+20%)</Field.Label>
+                        </Field.Field>
+                    {:else if serviceSelected.type === "ServiceSpecial"}
+                        {#if serviceSelected.name.includes("MAESTRO DE CEREMONIAS")}
+                            <Field.Field orientation="horizontal">
+                                <Checkbox id="difusiónMediosMasivos" />
+                                <Field.Label for="difusiónMediosMasivos">Difusión en medios masivos (+30%)</Field.Label>
+                            </Field.Field>
+                        {/if}
                     {/if}
                         <Button
-                            type="button" class="col-span-2" onclick={() => {
+                            type="button" class="col-span-2" variant="outline" bgColor="bg-[#1F5BB8] text-white hover:bg-[#1a4a94] hover:text-white"
+                            onclick={() => {
 
                             }}>Agregar</Button
                         >

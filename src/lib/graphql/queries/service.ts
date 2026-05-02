@@ -46,7 +46,8 @@ const SERVICE_QUERY = `
             }
           ... on ServiceNarrative {
                 basePrice
-          }
+                extraPrice
+            }
         }
     }
 `;

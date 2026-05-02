@@ -38,6 +38,7 @@
 		WithElementRef<HTMLAnchorAttributes> & {
 			variant?: ButtonVariant;
 			size?: ButtonSize;
+			bgColor?: string;
 		};
 </script>
 
@@ -46,6 +47,7 @@
 		class: className,
 		variant = "default",
 		size = "default",
+		bgColor = undefined,
 		ref = $bindable(null),
 		href = undefined,
 		type = "button",
@@ -53,13 +55,17 @@
 		children,
 		...restProps
 	}: ButtonProps = $props();
+
+	const buttonClass = bgColor
+		? cn(buttonVariants({ variant, size }), bgColor, className)
+		: cn(buttonVariants({ variant, size }), className);
 </script>
 
 {#if href}
 	<a
 		bind:this={ref}
 		data-slot="button"
-		class={cn(buttonVariants({ variant, size }), className)}
+		class={buttonClass}
 		href={disabled ? undefined : href}
 		aria-disabled={disabled}
 		role={disabled ? "link" : undefined}
@@ -72,7 +78,7 @@
 	<button
 		bind:this={ref}
 		data-slot="button"
-		class={cn(buttonVariants({ variant, size }), className)}
+		class={buttonClass}
 		{type}
 		{disabled}
 		{...restProps}

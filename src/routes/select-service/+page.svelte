@@ -6,16 +6,40 @@
     import { Checkbox } from "$lib/components/ui/checkbox/index.js";
     import * as Field from "$lib/components/ui/field/index.js";
     import * as Select from "$lib/components/ui/select/index.js";
+    import { Textarea } from "$lib/components/ui/textarea/index.js";
     import type { OperationResult } from "@urql/core";
     import {
         fetchServices,
+        calculateServicePrice,
         type ServiceData,
+        type ServiceDuration,
+        type ServiceSpecial,
+        type ServiceIVR,
+        type ServiceNarrative,
+        type ServiceOptions,
+        type CalculateContractInput,
     } from "$lib/graphql/queries/service";
   import { onMount } from "svelte";
-    let serviceSelected = $state({name: "", price: 0, type: ""});
-    let totalServices = $state([])
+  
+  type ServiceSelected = {
+    service: ServiceDuration | ServiceSpecial | ServiceIVR | ServiceNarrative;
+    selectedPrice?: number;
+    selectedDurationId?: string;
+  } | null;
+  
+    let serviceSelected: ServiceSelected = $state(null);
     let pieces = $state("0");
-    let roles = $state("0");
+    let totalServices = $state<Array<{serviceId: string, options: ServiceOptions}>>([]);    
+    let totalContrato = $state<any>(null);   
+    let isInterior = $state(false);
+    let additionalPieces = $state("0");
+    let nonCommercialContent = $state(false);
+    let internetBroadcast = $state(false);
+    let lipSync = $state(false);
+    let narrativeRoles = $state("0");
+    let narrativeMinutes = $state("");
+    let ivrMessage = $state("");
+    let broadcastInMassMedia = $state(false);
     let fetchServicesResult = $state<OperationResult<ServiceData> | null>(
         null,
     );
@@ -24,6 +48,66 @@
         fetchServicesResult = await fetchServices();
     });
     let services = $derived(fetchServicesResult?.data?.services ?? []);
+
+    async function calculateServicesSelectedPrice() {
+        if (!serviceSelected) return;
+
+        const options: ServiceOptions = {
+            isInterior
+        };
+
+        options.durationId = serviceSelected.selectedDurationId;
+        options.pieces = parseInt(additionalPieces);
+        options.messageIVR = ivrMessage;
+        options.additionalMessageIVR = parseInt(additionalPieces);
+        options.narrativeMinutes =parseInt(narrativeMinutes) || 0;
+        options.roleQuantity = parseInt(narrativeRoles);
+        options.isNonComercial = nonCommercialContent;
+        options.hasInternetPromo = internetBroadcast;
+        options.hasLipSync = lipSync;
+        options.hasMassMediaBroadcast = broadcastInMassMedia;
+
+
+        totalServices.push({
+                serviceId: serviceSelected.service.serviceId,
+                options: options
+        })
+        const input: CalculateContractInput = {
+            broadcasterId: 1,
+            clientId: 2,
+            services: totalServices
+        };
+
+        const result = await calculateServicePrice(input);
+        if (result == null) {
+            console.error("Error calculating price");
+            return;
+        }
+        totalContrato = result.data?.calculateContract?? null;
+        console.log("Total price:", totalContrato);
+        serviceSelected = null;
+        isInterior = false;
+    }
+
+    async function removeService(index: number) {
+        totalServices = totalServices.filter((_, i) => i !== index);
+        
+        if (totalServices.length === 0) {
+            totalContrato = null;
+            return;
+        }
+
+        const input: CalculateContractInput = {
+            broadcasterId: 1,
+            clientId: 2,
+            services: totalServices
+        };
+
+        const result = await calculateServicePrice(input);
+        if (result != null) {
+            totalContrato = result.data?.calculateContract?? null;
+        }
+    }
 
 </script>
  
@@ -53,7 +137,7 @@
                         <Button variant="outline"
                             bgColor="bg-[#1F5BB8] text-white hover:bg-[#1a4a94] hover:text-white"
                             onclick={() => {
-                            serviceSelected = {name: service.name, price: servicePrice.price, type: service.__typename};
+                            serviceSelected = { service, selectedPrice: servicePrice.price, selectedDurationId: servicePrice.durationId };
                             }}
                             class="flex-1"
                             >
@@ -67,7 +151,7 @@
                         <Button variant="outline"
                             bgColor="bg-[#1F5BB8] text-white hover:bg-[#1a4a94] hover:text-white"
                             onclick={() => {
-                            serviceSelected = {name: service.name, price: service.price, type: service.__typename};
+                            serviceSelected = { service, selectedPrice: service.price };
                             }}
                             class="flex-1"
                             >
@@ -80,7 +164,7 @@
                         <Button variant="outline"
                             bgColor="bg-[#1F5BB8] text-white hover:bg-[#1a4a94] hover:text-white"
                             onclick={() => {
-                            serviceSelected = {name: service.name, price: service.initialMessagePrice, type: service.__typename};
+                            serviceSelected = { service, selectedPrice: service.initialMessagePrice };
                             }}
                             class="flex-1"
                             >
@@ -92,7 +176,7 @@
                     <Table.Cell class="px-1">
                         <Button variant="outline" bgColor="bg-[#1F5BB8] text-white hover:bg-[#1a4a94] hover:text-white"
                             onclick={() => {
-                            serviceSelected = {name: service.name, price: service.basePrice, type: service.__typename};
+                            serviceSelected = { service, selectedPrice: service.basePrice };
                             }}
                             class="flex-1"
                             >
@@ -109,145 +193,164 @@
         </div>
 
         <div class="flex-1 min-w-[300px]">
-            <h1 class="text-2xl font-bold mb-4">Detalles</h1>
-            {#if serviceSelected.name != ""}
-                <FieldGroup columns={2} class="bg-gray-50 p-4 rounded-lg">
-                    <Field.Content>
-                        <Field.Description>Servicio</Field.Description>
-                        <Field.Title>{serviceSelected.name}</Field.Title>
-                    </Field.Content>
-                    {#if serviceSelected.type === "ServiceNarrative"}
+            <div>
+                <h1 class="text-2xl font-bold mb-4">Detalles</h1>
+                {#if serviceSelected !== null}
+                    <FieldGroup columns={2} class="bg-gray-50 p-4 rounded-lg">
                         <Field.Content>
-                            <Field.Description>Hasta 3 minutos</Field.Description>
-                            <Field.Title>${serviceSelected.price}</Field.Title>
+                            <Field.Description>Servicio</Field.Description>
+                            <Field.Title>{serviceSelected.service.name}</Field.Title>
                         </Field.Content>
-                    {:else if serviceSelected.type === "ServiceIVR"} 
-                        <Field.Content>
-                            <Field.Description>Mensaje inicial</Field.Description>
-                            <Field.Title>${serviceSelected.price}</Field.Title>
-                        </Field.Content>
-                    {:else}
-                        <Field.Content>
-                            <Field.Description>Precio base</Field.Description>
-                            <Field.Title>${serviceSelected.price}</Field.Title>
-                        </Field.Content>
-                    {/if}
-                    <Field.Field orientation="horizontal">
-                        <Checkbox id="discInterior" />
-                        <Field.Label for="discInterior">Descuento interior (-70%)</Field.Label>
-                    </Field.Field>
-                    {#if serviceSelected.type === "ServiceDuration"} 
-                        <Field.Field orientation="horizontal">
-                            <Select.Root type="single" bind:value={pieces}>
-                                <Select.Trigger id="checkout-7j9-exp-year-f59">
-                                <span>
-                                    {pieces || "0"}
-                                </span>
-                                </Select.Trigger>
-                                <Select.Content>
-                                <Select.Item value="1">1</Select.Item>
-                                <Select.Item value="2">2</Select.Item>
-                                <Select.Item value="3">3</Select.Item>
-                                <Select.Item value="4">4</Select.Item>
-                                <Select.Item value="5">5</Select.Item>
-                                </Select.Content>
-                            </Select.Root>
-                            <Field.Label for="piezas">Piezas</Field.Label>
-                        </Field.Field>
-                    {:else if serviceSelected.type === "ServiceIVR"}
-                        <Field.Field orientation="horizontal">
-                            <Select.Root type="single" bind:value={pieces}>
-                                <Select.Trigger id="checkout-7j9-exp-year-f59">
-                                <span>
-                                    {pieces || "0"}
-                                </span>
-                                </Select.Trigger>
-                                <Select.Content>
-                                <Select.Item value="1">1</Select.Item>
-                                <Select.Item value="2">2</Select.Item>
-                                <Select.Item value="3">3</Select.Item>
-                                <Select.Item value="4">4</Select.Item>
-                                <Select.Item value="5">5</Select.Item>
-                                </Select.Content>
-                            </Select.Root>
-                            <Field.Label for="mensajes">Mensajes adicionales</Field.Label>
-                        </Field.Field>
-                        <Field.Field class="col-span-2">
-                            <Field.Label for ="mensajeIVR">Mensaje</Field.Label>
-                            <Input
-                                id="mensajeIVR"
-                                type="text"
-                                placeholder="Ingrese su mensaje"
-                            />
-                        </Field.Field>
-                    {:else if serviceSelected.type === "ServiceNarrative"}
-                        <Field.Field>
-                            <Field.Label for ="minutosNarrcion">Minutos de narración</Field.Label>
-                            <Input
-                                id="minutosNarrcion"
-                                type="text"
-                                placeholder="Minuto adicional {serviceSelected.extraPrice}"
-                            />
-                        </Field.Field>
-                        <Field.Field orientation="horizontal">
-                            <Select.Root type="single" bind:value={roles}>
-                                <Select.Trigger id="checkout-7j9-exp-year-f59">
-                                <span>
-                                    {roles || "0"}
-                                </span>
-                                </Select.Trigger>
-                                <Select.Content>
-                                <Select.Item value="1">1</Select.Item>
-                                <Select.Item value="2">2</Select.Item>
-                                <Select.Item value="3">3</Select.Item>
-                                <Select.Item value="4">4</Select.Item>
-                                <Select.Item value="5">5</Select.Item>
-                                </Select.Content>
-                            </Select.Root>
-                            <Field.Label for="roles">Roles</Field.Label>
-                        </Field.Field>
-                        <Field.Field orientation="horizontal">
-                            <Checkbox id="contenidoNoComercial" />
-                            <Field.Label for="contenidoNoComercial">Contenido no comercial (-20%)</Field.Label>
-                        </Field.Field>
-                        <Field.Field orientation="horizontal">
-                            <Checkbox id="difusionEninternet" />
-                            <Field.Label for="difusionEninternet">Difusión en internet (+100%)</Field.Label>
-                        </Field.Field>
-                        <Field.Field orientation="horizontal">
-                            <Checkbox id="sincroLabial" />
-                            <Field.Label for="sincroLabial">Sincronización labial (+20%)</Field.Label>
-                        </Field.Field>
-                    {:else if serviceSelected.type === "ServiceSpecial"}
-                        {#if serviceSelected.name.includes("MAESTRO DE CEREMONIAS")}
-                            <Field.Field orientation="horizontal">
-                                <Checkbox id="difusiónMediosMasivos" />
-                                <Field.Label for="difusiónMediosMasivos">Difusión en medios masivos (+30%)</Field.Label>
-                            </Field.Field>
+                        {#if serviceSelected.service.__typename === "ServiceNarrative"}
+                            <Field.Content>
+                                <Field.Description>Hasta 3 minutos</Field.Description>
+                                <Field.Title>${serviceSelected.selectedPrice}</Field.Title>
+                            </Field.Content>
+                        {:else if serviceSelected.service.__typename === "ServiceIVR"} 
+                            <Field.Content>
+                                <Field.Description>Mensaje inicial</Field.Description>
+                                <Field.Title>${serviceSelected.selectedPrice}</Field.Title>
+                            </Field.Content>
+                        {:else if serviceSelected.service.__typename === "ServiceSpecial"}
+                            <Field.Content>
+                                <Field.Description>Precio base</Field.Description>
+                                <Field.Title>${serviceSelected.selectedPrice}</Field.Title>
+                            </Field.Content>
+                        {:else if serviceSelected.service.__typename === "ServiceDuration"} 
+                            <Field.Content>
+                                <Field.Description>Precio base</Field.Description>
+                                <Field.Title>${serviceSelected.selectedPrice}</Field.Title>
+                            </Field.Content>
                         {/if}
-                    {/if}
-                        <Button
-                            type="button" class="col-span-2" variant="outline" bgColor="bg-[#1F5BB8] text-white hover:bg-[#1a4a94] hover:text-white"
-                            onclick={() => {
-
-                            }}>Agregar</Button
-                        >
-                </FieldGroup>
-            {:else}
-                <p class="text-center text-gray-500 p-4">Selecciona un servicio</p>
-            {/if}
+                        <Field.Field orientation="horizontal">
+                            <Checkbox id="discInterior" bind:checked={isInterior}/>
+                            <Field.Label for="discInterior">Descuento interior (-70%)</Field.Label>
+                        </Field.Field>
+                        {#if serviceSelected.service.__typename === "ServiceDuration"} 
+                            <Field.Field orientation="horizontal">
+                                <Select.Root type="single" bind:value={pieces}>
+                                    <Select.Trigger id="checkout-7j9-exp-year-f59">
+                                    <span>
+                                        {pieces || "0"}
+                                    </span>
+                                    </Select.Trigger>
+                                    <Select.Content>
+                                    <Select.Item value="1">1</Select.Item>
+                                    <Select.Item value="2">2</Select.Item>
+                                    <Select.Item value="3">3</Select.Item>
+                                    <Select.Item value="4">4</Select.Item>
+                                    <Select.Item value="5">5</Select.Item>
+                                    </Select.Content>
+                                </Select.Root>
+                                <Field.Label for="piezas">Piezas</Field.Label>
+                            </Field.Field>
+                        {:else if serviceSelected.service.__typename === "ServiceIVR"}
+                            <Field.Field orientation="horizontal">
+                                <Select.Root type="single" bind:value={additionalPieces}>
+                                    <Select.Trigger id="checkout-7j9-exp-year-f59">
+                                    <span>
+                                        {additionalPieces || "0"}
+                                    </span>
+                                    </Select.Trigger>
+                                    <Select.Content>
+                                    <Select.Item value="1">1</Select.Item>
+                                    <Select.Item value="2">2</Select.Item>
+                                    <Select.Item value="3">3</Select.Item>
+                                    <Select.Item value="4">4</Select.Item>
+                                    <Select.Item value="5">5</Select.Item>
+                                    </Select.Content>
+                                </Select.Root>
+                                <Field.Label for="mensajes">Mensajes adicionales</Field.Label>
+                            </Field.Field>
+                            <Field.Field class="col-span-2">
+                                <Field.Label for ="ivrMessage">Mensaje</Field.Label>
+                                <Textarea
+                                    id="ivrMessage"
+                                    bind:value={ivrMessage}
+                                    placeholder="Ingrese su mensaje"
+                                />
+                            </Field.Field>
+                        {:else if serviceSelected.service.__typename === "ServiceNarrative"}
+                            <Field.Field>
+                                <Field.Label for ="minutosNarrcion">Minutos de narración</Field.Label>
+                                <Input
+                                    id="minutosNarrcion"
+                                    bind:value={narrativeMinutes}
+                                    type="text"
+                                    placeholder="Minuto adicional {serviceSelected.service.extraPrice}"
+                                />
+                            </Field.Field>
+                            <Field.Field orientation="horizontal">
+                                <Select.Root type="single" bind:value={narrativeRoles}>
+                                    <Select.Trigger id="checkout-7j9-exp-year-f59">
+                                    <span>
+                                        {narrativeRoles || "0"}
+                                    </span>
+                                    </Select.Trigger>
+                                    <Select.Content>
+                                    <Select.Item value="1">1</Select.Item>
+                                    <Select.Item value="2">2</Select.Item>
+                                    <Select.Item value="3">3</Select.Item>
+                                    <Select.Item value="4">4</Select.Item>
+                                    <Select.Item value="5">5</Select.Item>
+                                    </Select.Content>
+                                </Select.Root>
+                                <Field.Label for="roles">Roles</Field.Label>
+                            </Field.Field>
+                            <Field.Field orientation="horizontal">
+                                <Checkbox id="nonCommercialContent" bind:checked={nonCommercialContent} />
+                                <Field.Label for="nonCommercialContent">Contenido no comercial (-20%)</Field.Label>
+                            </Field.Field>
+                            <Field.Field orientation="horizontal">
+                                <Checkbox id="internetBroadcast" bind:checked={internetBroadcast} />
+                                <Field.Label for="internetBroadcast">Difusión en internet (+100%)</Field.Label>
+                            </Field.Field>
+                            <Field.Field orientation="horizontal">
+                                <Checkbox id="lipSync" bind:checked={lipSync} />
+                                <Field.Label for="lipSync">Sincronización labial (+20%)</Field.Label>
+                            </Field.Field>
+                        {:else if serviceSelected.service.__typename === "ServiceSpecial"}
+                            {#if serviceSelected.service.name.includes("MAESTRO DE CEREMONIAS")}
+                                <Field.Field orientation="horizontal">
+                                    <Checkbox id="broadcastInMassMedia" bind:checked={broadcastInMassMedia} />
+                                    <Field.Label for="broadcastInMassMedia">Difusión en medios masivos (+30%)</Field.Label>
+                                </Field.Field>
+                            {/if}
+                        {/if}
+                            <Button
+                                type="button" class="col-span-2" variant="outline" bgColor="bg-[#1F5BB8] text-white hover:bg-[#1a4a94] hover:text-white"
+                                onclick={() => calculateServicesSelectedPrice()}>Agregar</Button
+                            >
+                    </FieldGroup>
+                {:else}
+                    <p class="text-center text-gray-500 p-4">Selecciona un servicio</p>
+                {/if}
+            </div>
+            <div>
+                {#if totalContrato}
+                    <div class="mt-4 space-y-2">
+                        <h1 class="text-2xl font-bold mb-4">Total a pagar</h1>
+                        {#each totalContrato.servicePrice as service, i (i)}
+                            <div class="flex justify-between p-2 bg-gray-100 rounded">
+                                <span>{service.service.name}</span>
+                                <span>${service.totalPriceWithDiscount}</span>
+                                <Button
+                                    variant="outline"
+                                    bgColor="bg-red-500 text-white hover:bg-red-600 hover:text-white"
+                                    onclick={() => removeService(i)}>Eliminar</Button
+                                >
+                            </div>
+                        {/each}
+                        {#if totalContrato !== null}
+                            <h1 class="text-2xl font-bold mt-4">Total ${totalContrato.totalPrice}</h1>
+                        {/if}
+                    </div>
+                {/if}
+            </div>
         </div>
     </div>
 </div>
 
-{#if totalServices.length > 0}
-<div class="flex w-full justify-center px-4 pt-8">
-            <h1 class="text-2xl font-bold mb-4">Total a pagar</h1>
-                <div class="space-y-4 p-4 bg-gray-50 rounded-lg">
-                    for
-                </div>
-</div>
-{/if}
 
 
 

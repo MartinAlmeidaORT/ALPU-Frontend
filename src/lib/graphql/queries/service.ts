@@ -22,8 +22,26 @@ export interface ServiceIVR extends Service {
   initialMessagePrice: number;
 }
 
+export interface ServiceNarrative extends Service {
+  basePrice: number;
+  extraPrice: number;
+}
+
 export interface ServiceData {
   services: Service[];
+}
+
+export interface ServiceOptions {
+  [key: string]: any;
+}
+
+export interface CalculateContractInput {
+  broadcasterId: number;
+  clientId: number;
+  services: {
+    serviceId: string;
+    options: ServiceOptions;
+  }[];
 }
 
 const SERVICE_QUERY = `
@@ -52,6 +70,25 @@ const SERVICE_QUERY = `
     }
 `;
 
+const CALCULATE_CONTRACT_MUTATION = `
+  mutation CalculateContract($input: CalculateContractInput!) {
+    calculateContract(input: $input) {
+      totalPrice
+      servicePrice {
+        service {
+          name
+        }
+        price
+        totalPriceWithDiscount
+      }
+    }
+  }
+`;
+
 export async function fetchServices(): Promise<OperationResult<ServiceData>> {
   return await createUrqlClient().query(SERVICE_QUERY, {}).toPromise();
+}
+
+export async function calculateServicePrice(input: CalculateContractInput): Promise<OperationResult<{ totalPrice: number }>> {
+  return await createUrqlClient().mutation(CALCULATE_CONTRACT_MUTATION, { input }).toPromise();
 }

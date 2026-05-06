@@ -1,6 +1,6 @@
-import { createClient, cacheExchange, fetchExchange } from "@urql/svelte";
+import { createClient, cacheExchange, fetchExchange, type Client } from "@urql/svelte";
 
-export const createUrqlClient = (token?: string) => {
+export const createUrqlClient = (token?: string): Client => {
   return createClient({
     url: import.meta.env.VITE_API_URL,
     exchanges: [cacheExchange, fetchExchange],

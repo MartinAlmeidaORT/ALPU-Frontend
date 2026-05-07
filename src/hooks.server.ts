@@ -11,11 +11,11 @@ export const handle: Handle = async ({ event, resolve }) => {
     throw redirect(303, '/');
   }
 
-  if (isLoginPage && session) {
+  if (isLoginPage && session === null) {
     throw redirect(303, '/');
   }
 
   event.locals.urql = createUrqlClient(session);
 
-  return resolve(event);
+  return await resolve(event);
 };

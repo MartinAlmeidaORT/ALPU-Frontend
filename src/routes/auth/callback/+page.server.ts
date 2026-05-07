@@ -27,7 +27,7 @@ export async function load({ cookies, url }) {
     cookies.set("session_id", resultData.token, {
       path: "/",
       httpOnly: true,
-      sameSite: "strict",
+      sameSite: "lax",
       maxAge: 60 * 60 * 24, // 1 day
     });
 

@@ -1,325 +1,290 @@
 <script lang="ts">
-    import type { ActionData } from "../../routes/auth/signup/$types";
-    import { enhance } from "$app/forms";
-    import { Button } from "$lib/components/ui/button/index.js";
-    import * as Card from "$lib/components/ui/card/index.js";
-    import * as Field from "$lib/components/ui/field/index.js";
-    import { Input } from "$lib/components/ui/input/index.js";
-    import * as Select from "$lib/components/ui/select/index.js";
-    import * as Alert from "$lib/components/ui/alert/index.js";
-    import AlertCircleIcon from "@lucide/svelte/icons/alert-circle";
-    import type { ComponentProps } from "svelte";
-    import { onMount } from "svelte";
-    import {
-        fetchCountries,
-        type CountryData,
-    } from "$lib/graphql/queries/country";
-    import type { OperationResult } from "@urql/core";
+  import type { ActionData } from '../../routes/auth/signup/$types';
+  import { enhance } from '$app/forms';
+  import { Button } from '$lib/components/ui/button/index.js';
+  import * as Card from '$lib/components/ui/card/index.js';
+  import * as Field from '$lib/components/ui/field/index.js';
+  import { Input } from '$lib/components/ui/input/index.js';
+  import * as Select from '$lib/components/ui/select/index.js';
+  import * as Alert from '$lib/components/ui/alert/index.js';
+  import AlertCircleIcon from '@lucide/svelte/icons/alert-circle';
+  import type { ComponentProps } from 'svelte';
+  import { onMount } from 'svelte';
+  import { fetchCountries } from '$lib/graphql/queries/country';
+  import type { OperationResult } from '@urql/core';
+  import type { CountriesQuery } from '$lib/graphql/types/graphql';
 
-    let {
-        form,
-        ...restProps
-    }: { form: ActionData } & ComponentProps<typeof Card.Root> = $props();
+  let {
+    form,
+    ...restProps
+  }: { form: ActionData } & ComponentProps<typeof Card.Root> = $props();
 
-    let hasUserChooseAccountType = $state(false);
-    let accountType: "client" | "broadcaster" | null = $state(null);
-    let messages: string[] | null = $state(null);
+  let hasUserChooseAccountType = $state(false);
+  let accountType: 'client' | 'broadcaster' | null = $state(null);
+  let messages: string[] | null = $state(null);
 
-    let selectedCountryCode: string | undefined = $state();
+  let countriesFetch = $state<OperationResult<CountriesQuery> | null>(null);
+  let selectedCountryCode: string | undefined = $state();
+  let selectedCountryName: string | undefined = $derived(
+    countriesFetch?.data?.countries.find(
+      (c) => c.countryCode === selectedCountryCode,
+    )?.name ?? 'Selecciona un país',
+  );
 
-    let fetchCountriesResult = $state<OperationResult<CountryData> | null>(
-        null,
-    );
+  onMount(async () => {
+    countriesFetch = await fetchCountries();
+  });
 
-    onMount(async () => {
-        fetchCountriesResult = await fetchCountries();
-    });
+  function chooseAccount(type: 'client' | 'broadcaster' | null) {
+    accountType = type;
+    hasUserChooseAccountType = type != null;
+    if (!hasUserChooseAccountType) messages = null;
+  }
 
-    let countries = $derived(fetchCountriesResult?.data?.countries ?? []);
+  function handleSubmit() {
+    return async ({ result, update }: any) => {
+      messages = null;
 
-    let selectedCountryName: string | undefined = $derived(
-        countries.find((c) => c.countryCode === selectedCountryCode)?.name ??
-            "Selecciona un país",
-    );
-
-    function chooseAccount(type: "client" | "broadcaster" | null) {
-        accountType = type;
-        hasUserChooseAccountType = type != null;
-        if (!hasUserChooseAccountType) messages = null;
-    }
-
-    function handleSubmit() {
-        return async ({ result, update }: any) => {
-            messages = null;
-
-            if (result.type === "failure") {
-                messages = result.data.messages;
-            }
-            await update();
-        };
-    }
+      if (result.type === 'failure') {
+        messages = result.data.messages;
+      }
+      await update();
+    };
+  }
 </script>
 
 <Card.Root {...restProps}>
-    {#if !hasUserChooseAccountType}
-        <Card.Header>
-            <Card.Title class="text-2xl"
-                >¿Qué tipo de cuenta deseas crear?</Card.Title
+  {#if !hasUserChooseAccountType}
+    <Card.Header>
+      <Card.Title class="text-2xl">¿Qué tipo de cuenta deseas crear?</Card.Title
+      >
+      <Card.Description>Selecciona una opción para continuar</Card.Description>
+    </Card.Header>
+    <Card.Content>
+      <div class="flex gap-4">
+        <Button class="flex-1" onclick={() => chooseAccount('client')}
+          >Agencia</Button
+        >
+        <Button
+          onclick={() => chooseAccount('broadcaster')}
+          variant="outline"
+          class="flex-1"
+        >
+          Locutor
+        </Button>
+      </div>
+    </Card.Content>
+  {:else}
+    <Card.Header>
+      <Card.Title class="text-2xl"
+        >Registro {accountType == 'client' ? 'cliente' : 'locutor'}</Card.Title
+      >
+      <Card.Description
+        >Ingresa tu información a continuación para crear tu cuenta</Card.Description
+      >
+    </Card.Header>
+    <Card.Content>
+      <form method="POST" action="/auth/signup" use:enhance={handleSubmit}>
+        <input type="hidden" name="accountType" value={accountType} />
+        <Field.Group columns={2}>
+          <Field.Field>
+            <Field.Label for="name">Nombre</Field.Label>
+            <Input
+              id="firstName"
+              name="firstName"
+              type="text"
+              placeholder="Nombre"
+              required
+              minlength={3}
+              maxlength={50}
+              pattern="[A-Za-z]+"
+              oninvalid={(e) => {
+                const input = e.target as HTMLInputElement;
+                if (input.validity.patternMismatch) {
+                  input.setCustomValidity('Solo se permiten letras');
+                }
+              }}
+              oninput={(e) => {
+                (e.target as HTMLInputElement).setCustomValidity('');
+              }}
+            />
+          </Field.Field>
+          <Field.Field>
+            <Field.Label for="apellido">Apellido</Field.Label>
+            <Input
+              id="lastName"
+              name="lastName"
+              type="text"
+              placeholder="Apellido"
+              required
+              minlength={3}
+              maxlength={50}
+              pattern="[A-Za-z]+"
+              oninvalid={(e) => {
+                const input = e.target as HTMLInputElement;
+                if (input.validity.patternMismatch) {
+                  input.setCustomValidity('Solo se permiten letras');
+                }
+              }}
+              oninput={(e) => {
+                (e.target as HTMLInputElement).setCustomValidity('');
+              }}
+            />
+          </Field.Field>
+          <Field.Field>
+            <Field.Label for="email">Email</Field.Label>
+            <Input
+              id="email"
+              name="email"
+              type="email"
+              placeholder="email@example.com"
+              required
+              minlength={10}
+              maxlength={100}
+            />
+          </Field.Field>
+          <Field.Field>
+            <Field.Label for="password">Contraseña</Field.Label>
+            <Input
+              id="password"
+              name="password"
+              type="password"
+              placeholder="Contraseña"
+              required
+              minlength={10}
+              maxlength={60}
+            />
+            <Field.Description></Field.Description>
+          </Field.Field>
+          <Field.Field>
+            <Field.Label for="rut">RUT</Field.Label>
+            <Input
+              id="rut"
+              name="rut"
+              type="text"
+              placeholder="RUT"
+              required
+              minlength={12}
+              maxlength={12}
+            />
+          </Field.Field>
+          {#if accountType === 'client'}
+            <Field.Field>
+              <Field.Label for="agencyName">Nombre de Agencia</Field.Label>
+              <Input
+                id="agencyName"
+                name="agencyName"
+                placeholder="Agencia"
+                type="text"
+                required
+                minlength={3}
+                maxlength={100}
+              />
+            </Field.Field>
+          {/if}
+          <Field.Field>
+            <Field.Label for="city">Ciudad</Field.Label>
+            <Input
+              id="city"
+              name="city"
+              type="text"
+              placeholder="Ciudad"
+              required
+              minlength={4}
+              maxlength={100}
+              pattern="[A-Za-z]+"
+              oninvalid={(e) => {
+                const input = e.target as HTMLInputElement;
+                if (input.validity.patternMismatch) {
+                  input.setCustomValidity('Solo se permiten letras');
+                }
+              }}
+              oninput={(e) => {
+                (e.target as HTMLInputElement).setCustomValidity('');
+              }}
+            />
+          </Field.Field>
+          <Field.Field>
+            <Field.Label for="state">Departamento</Field.Label>
+            <Input
+              id="state"
+              name="state"
+              type="text"
+              placeholder="Departamento"
+              required
+              minlength={4}
+              maxlength={100}
+              pattern="[A-Za-z]+"
+              oninvalid={(e) => {
+                const input = e.target as HTMLInputElement;
+                if (input.validity.patternMismatch) {
+                  input.setCustomValidity('Solo se permiten letras');
+                }
+              }}
+              oninput={(e) => {
+                (e.target as HTMLInputElement).setCustomValidity('');
+              }}
+            />
+          </Field.Field>
+          <Field.Field>
+            <Field.Label for="street">Calle</Field.Label>
+            <Input
+              id="street"
+              name="street"
+              type="text"
+              placeholder="Calle"
+              required
+              minlength={4}
+              maxlength={100}
+            />
+          </Field.Field>
+          <Field.Field>
+            <Field.Label for="pais">Pais</Field.Label>
+            <Select.Root
+              name="countryCode"
+              type="single"
+              bind:value={selectedCountryCode}
+              required
             >
-            <Card.Description
-                >Selecciona una opción para continuar</Card.Description
+              <Select.Trigger id="countryCode" name="countryCode">
+                <span>{selectedCountryName}</span>
+              </Select.Trigger>
+              <Select.Content>
+                {#each countriesFetch?.data?.countries as country}
+                  <Select.Item value={country.countryCode}>
+                    {country.name}
+                  </Select.Item>
+                {/each}
+              </Select.Content>
+            </Select.Root>
+          </Field.Field>
+        </Field.Group>
+        <Field.Group class="mt-4" columns={2}>
+          <Field.Field>
+            <Button type="submit">Crear</Button>
+          </Field.Field>
+          <Field.Field>
+            <Button type="button" onclick={() => chooseAccount(null)}
+              >Volver</Button
             >
-        </Card.Header>
-        <Card.Content>
-            <div class="flex gap-4">
-                <Button class="flex-1" onclick={() => chooseAccount("client")}
-                    >Agencia</Button
-                >
-                <Button
-                    onclick={() => chooseAccount("broadcaster")}
-                    variant="outline"
-                    class="flex-1"
-                >
-                    Locutor
-                </Button>
-            </div>
-        </Card.Content>
-    {:else}
-        <Card.Header>
-            <Card.Title class="text-2xl"
-                >Registro {accountType == "client"
-                    ? "cliente"
-                    : "locutor"}</Card.Title
-            >
-            <Card.Description
-                >Ingresa tu información a continuación para crear tu cuenta</Card.Description
-            >
-        </Card.Header>
-        <Card.Content>
-            <form
-                method="POST"
-                action="/auth/signup"
-                use:enhance={handleSubmit}
-            >
-                <input type="hidden" name="accountType" value={accountType} />
-                <Field.Group columns={2}>
-                    <Field.Field>
-                        <Field.Label for="name">Nombre</Field.Label>
-                        <Input
-                            id="firstName"
-                            name="firstName"
-                            type="text"
-                            placeholder="Nombre"
-                            required
-                            minlength={3}
-                            maxlength={50}
-                            pattern="[A-Za-z]+"
-                            oninvalid={(e) => {
-                                const input = e.target as HTMLInputElement;
-                                if (input.validity.patternMismatch) {
-                                    input.setCustomValidity(
-                                        "Solo se permiten letras",
-                                    );
-                                }
-                            }}
-                            oninput={(e) => {
-                                (
-                                    e.target as HTMLInputElement
-                                ).setCustomValidity("");
-                            }}
-                        />
-                    </Field.Field>
-                    <Field.Field>
-                        <Field.Label for="apellido">Apellido</Field.Label>
-                        <Input
-                            id="lastName"
-                            name="lastName"
-                            type="text"
-                            placeholder="Apellido"
-                            required
-                            minlength={3}
-                            maxlength={50}
-                            pattern="[A-Za-z]+"
-                            oninvalid={(e) => {
-                                const input = e.target as HTMLInputElement;
-                                if (input.validity.patternMismatch) {
-                                    input.setCustomValidity(
-                                        "Solo se permiten letras",
-                                    );
-                                }
-                            }}
-                            oninput={(e) => {
-                                (
-                                    e.target as HTMLInputElement
-                                ).setCustomValidity("");
-                            }}
-                        />
-                    </Field.Field>
-                    <Field.Field>
-                        <Field.Label for="email">Email</Field.Label>
-                        <Input
-                            id="email"
-                            name="email"
-                            type="email"
-                            placeholder="email@example.com"
-                            required
-                            minlength={10}
-                            maxlength={100}
-                        />
-                    </Field.Field>
-                    <Field.Field>
-                        <Field.Label for="password">Contraseña</Field.Label>
-                        <Input
-                            id="password"
-                            name="password"
-                            type="password"
-                            placeholder="Contraseña"
-                            required
-                            minlength={10}
-                            maxlength={60}
-                        />
-                        <Field.Description></Field.Description>
-                    </Field.Field>
-                    <Field.Field>
-                        <Field.Label for="rut">RUT</Field.Label>
-                        <Input
-                            id="rut"
-                            name="rut"
-                            type="text"
-                            placeholder="RUT"
-                            required
-                            minlength={12}
-                            maxlength={12}
-                        />
-                    </Field.Field>
-                    {#if accountType === "client"}
-                        <Field.Field>
-                            <Field.Label for="agencyName"
-                                >Nombre de Agencia</Field.Label
-                            >
-                            <Input
-                                id="agencyName"
-                                name="agencyName"
-                                placeholder="Agencia"
-                                type="text"
-                                required
-                                minlength={3}
-                                maxlength={100}
-                            />
-                        </Field.Field>
-                    {/if}
-                    <Field.Field>
-                        <Field.Label for="city">Ciudad</Field.Label>
-                        <Input
-                            id="city"
-                            name="city"
-                            type="text"
-                            placeholder="Ciudad"
-                            required
-                            minlength={4}
-                            maxlength={100}
-                            pattern="[A-Za-z]+"
-                            oninvalid={(e) => {
-                                const input = e.target as HTMLInputElement;
-                                if (input.validity.patternMismatch) {
-                                    input.setCustomValidity(
-                                        "Solo se permiten letras",
-                                    );
-                                }
-                            }}
-                            oninput={(e) => {
-                                (
-                                    e.target as HTMLInputElement
-                                ).setCustomValidity("");
-                            }}
-                        />
-                    </Field.Field>
-                    <Field.Field>
-                        <Field.Label for="state">Departamento</Field.Label>
-                        <Input
-                            id="state"
-                            name="state"
-                            type="text"
-                            placeholder="Departamento"
-                            required
-                            minlength={4}
-                            maxlength={100}
-                            pattern="[A-Za-z]+"
-                            oninvalid={(e) => {
-                                const input = e.target as HTMLInputElement;
-                                if (input.validity.patternMismatch) {
-                                    input.setCustomValidity(
-                                        "Solo se permiten letras",
-                                    );
-                                }
-                            }}
-                            oninput={(e) => {
-                                (
-                                    e.target as HTMLInputElement
-                                ).setCustomValidity("");
-                            }}
-                        />
-                    </Field.Field>
-                    <Field.Field>
-                        <Field.Label for="street">Calle</Field.Label>
-                        <Input
-                            id="street"
-                            name="street"
-                            type="text"
-                            placeholder="Calle"
-                            required
-                            minlength={4}
-                            maxlength={100}
-                        />
-                    </Field.Field>
-                    <Field.Field>
-                        <Field.Label for="pais">Pais</Field.Label>
-                        <Select.Root
-                            name="countryCode"
-                            type="single"
-                            bind:value={selectedCountryCode}
-                            required
-                        >
-                            <Select.Trigger id="countryCode" name="countryCode">
-                                <span>{selectedCountryName}</span>
-                            </Select.Trigger>
-                            <Select.Content>
-                                {#each countries as country (country.countryCode)}
-                                    <Select.Item value={country.countryCode}>
-                                        {country.name}
-                                    </Select.Item>
-                                {/each}
-                            </Select.Content>
-                        </Select.Root>
-                    </Field.Field>
-                </Field.Group>
-                <Field.Group class="mt-4" columns={2}>
-                    <Field.Field>
-                        <Button type="submit">Crear</Button>
-                    </Field.Field>
-                    <Field.Field>
-                        <Button
-                            type="button"
-                            onclick={() => chooseAccount(null)}>Volver</Button
-                        >
-                    </Field.Field>
-                </Field.Group>
-            </form>
-        </Card.Content>
-    {/if}
+          </Field.Field>
+        </Field.Group>
+      </form>
+    </Card.Content>
+  {/if}
 </Card.Root>
 
 {#if messages}
-    <div class="grid w-full max-w-xl items-start gap-4">
-        <Alert.Root variant="destructive">
-            <AlertCircleIcon />
-            <Alert.Title>Error en el registro</Alert.Title>
-            <Alert.Description>
-                <p>Por favor verifique los siguientes datos.</p>
-                {#each messages as msg}
-                    <p>{msg}</p>
-                {/each}
-            </Alert.Description>
-        </Alert.Root>
-    </div>
+  <div class="grid w-full max-w-xl items-start gap-4">
+    <Alert.Root variant="destructive">
+      <AlertCircleIcon />
+      <Alert.Title>Error en el registro</Alert.Title>
+      <Alert.Description>
+        <p>Por favor verifique los siguientes datos.</p>
+        {#each messages as msg}
+          <p>{msg}</p>
+        {/each}
+      </Alert.Description>
+    </Alert.Root>
+  </div>
 {/if}

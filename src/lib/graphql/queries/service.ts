@@ -1,5 +1,6 @@
 import { createUrqlClient } from '$lib/graphql/client';
 import type { OperationResult } from '@urql/core';
+import { graphql } from '../types';
 
 export interface Service {
   serviceId: string;
@@ -45,7 +46,7 @@ export interface CalculateContractInput {
   }[];
 }
 
-const SERVICE_QUERY = `
+const SERVICE_QUERY = graphql(`
     query services {
         services {
           serviceId,
@@ -70,9 +71,9 @@ const SERVICE_QUERY = `
             }
         }
     }
-`;
+`);
 
-const CALCULATE_CONTRACT_MUTATION = `
+const CALCULATE_CONTRACT_MUTATION = graphql(`
   mutation CalculateContract($input: CalculateContractInput!) {
     calculateContract(input: $input) {
       totalPrice
@@ -89,7 +90,7 @@ const CALCULATE_CONTRACT_MUTATION = `
       }
     }
   }
-`;
+`);
 
 export async function fetchServices(): Promise<OperationResult<ServiceData>> {
   return await createUrqlClient().query(SERVICE_QUERY, {}).toPromise();

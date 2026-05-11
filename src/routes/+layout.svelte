@@ -30,11 +30,20 @@
         <NavigationMenu.Item>
           <NavigationMenu.Link>
             {#snippet child()}
-              <button onclick={handleLogout} class={`${navigationMenuTriggerStyle()} cursor-pointer`}>Cerrar sesión</button>
+              <button
+                onclick={handleLogout}
+                class={`${navigationMenuTriggerStyle()} cursor-pointer`}
+                >Cerrar sesión</button
+              >
             {/snippet}
           </NavigationMenu.Link>
         </NavigationMenu.Item>
-        <form bind:this={logoutFormRef} method="POST" action="/auth/logout" style="display: none;"></form>
+        <form
+          bind:this={logoutFormRef}
+          method="POST"
+          action="/auth/logout"
+          style="display: none;"
+        ></form>
       {:else}
         <NavigationMenu.Item>
           <NavigationMenu.Link>

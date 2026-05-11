@@ -12,7 +12,10 @@
   import { fetchDepartments } from '$lib/graphql/queries/department';
   import type { OperationResult } from '@urql/core';
   import type { ActionData } from '../../routes/login/signup-google/$types';
-  import type { CountriesQuery, DepartmentsQuery } from '$lib/graphql/types/graphql';
+  import type {
+    CountriesQuery,
+    DepartmentsQuery,
+  } from '$lib/graphql/types/graphql';
 
   let {
     form,
@@ -43,19 +46,21 @@
   let messages: string[] | null = $state(null);
   let departmentsFetch = $state<OperationResult<DepartmentsQuery> | null>(null);
   let countriesFetch = $state<OperationResult<CountriesQuery> | null>(null);
-  let selectedCountryCode: string = $state("UY ");
+  let selectedCountryCode: string = $state('UY ');
   let selectedDepartmentId: string | undefined = $state();
   let selectedCountryName: string | undefined = $state();
 
   $effect(() => {
-    fetchDepartments(selectedCountryCode).then(result => {
+    fetchDepartments(selectedCountryCode).then((result) => {
       departmentsFetch = result;
     });
   });
 
   $effect(() => {
     if (countriesFetch?.data?.countries) {
-      const country = countriesFetch.data.countries.find(c => c.countryCode === selectedCountryCode);
+      const country = countriesFetch.data.countries.find(
+        (c) => c.countryCode === selectedCountryCode,
+      );
       selectedCountryName = country ? country.name : 'Selecciona un país';
     }
   });
@@ -251,13 +256,13 @@
             </Select.Root>
           </Field.Field>
           <Field.Field>
-             <Field.Label for="department">Departamento</Field.Label>
+            <Field.Label for="department">Departamento</Field.Label>
             <Select.Root
               name="departmentId"
               type="single"
               bind:value={selectedDepartmentId}
               required
-              >
+            >
               <Select.Trigger id="departmentId" name="departmentId">
                 <span>{selectedDepartmentName}</span>
               </Select.Trigger>

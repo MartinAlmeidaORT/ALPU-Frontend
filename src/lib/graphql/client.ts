@@ -1,4 +1,9 @@
-import { createClient, cacheExchange, fetchExchange, type Client } from "@urql/svelte";
+import {
+  cacheExchange,
+  createClient,
+  fetchExchange,
+  type Client,
+} from '@urql/svelte';
 
 export const createUrqlClient = (token?: string): Client => {
   return createClient({

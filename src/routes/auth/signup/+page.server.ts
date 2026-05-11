@@ -1,10 +1,12 @@
-import { fail, redirect } from "@sveltejs/kit";
-import { SIGNUP_BROADCASTER_MUTATION, SIGNUP_CLIENT_MUTATION } from "$lib/graphql/mutations/auth";
-import { createUrqlClient } from "$lib/graphql/client.js";
+import { createUrqlClient } from '$lib/graphql/client.js';
+import {
+  SIGNUP_BROADCASTER_MUTATION,
+  SIGNUP_CLIENT_MUTATION,
+} from '$lib/graphql/mutations/auth';
+import { fail, redirect } from '@sveltejs/kit';
 
 export const actions = {
   default: async ({ request, cookies }) => {
-
     try {
       const form = await request.formData();
       const data = Object.fromEntries(form);
@@ -15,29 +17,33 @@ export const actions = {
       let dataKey: string;
 
       switch (accountType) {
-        case "broadcaster":
+        case 'broadcaster':
           mutationString = SIGNUP_BROADCASTER_MUTATION;
           dataKey = 'registerBroadcaster';
           break;
-        case "client":
+        case 'client':
           mutationString = SIGNUP_CLIENT_MUTATION;
           dataKey = 'registerClient';
           break;
         default:
           return fail(400, {
             data: null,
-            messages: ["Invalid account type"]
+            messages: ['Invalid account type'],
           });
       }
 
-      const result = await createUrqlClient().mutation(mutationString, {
-        input: input,
-      }).toPromise();
+      const result = await createUrqlClient()
+        .mutation(mutationString, {
+          input: input,
+        })
+        .toPromise();
 
       if (result.error) {
         return fail(400, {
           data: null,
-          messages: result.error.graphQLErrors?.map((e) => e.message) || ["Invalid signup data"]
+          messages: result.error.graphQLErrors?.map((e) => e.message) || [
+            'Invalid signup data',
+          ],
         });
       }
 
@@ -49,7 +55,7 @@ export const actions = {
         if (!token) {
           return fail(500, {
             data: null,
-            messages: ["No token received"]
+            messages: ['No token received'],
           });
         }
 
@@ -57,18 +63,17 @@ export const actions = {
           path: '/',
           httpOnly: true,
           sameSite: 'strict',
-          maxAge: 60 * 60 * 24 // 1 day
+          maxAge: 60 * 60 * 24, // 1 day
         });
       }
-    }
-    catch (err) {
-      console.error(err)
+    } catch (err) {
+      console.error(err);
       return fail(500, {
         data: null,
-        messages: ["An unexpected error occurred"]
+        messages: ['An unexpected error occurred'],
       });
     }
 
     throw redirect(302, '/contracts');
-  }
+  },
 };

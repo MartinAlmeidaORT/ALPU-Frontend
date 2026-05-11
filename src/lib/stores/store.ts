@@ -1,4 +1,4 @@
-import { writable, derived } from "svelte/store";
+import { derived, writable } from 'svelte/store';
 
 interface AuthUser {
   userId: number;

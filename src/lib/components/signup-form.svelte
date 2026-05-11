@@ -13,7 +13,10 @@
   import { fetchCountries } from '$lib/graphql/queries/country';
   import { fetchDepartments } from '$lib/graphql/queries/department';
   import type { OperationResult } from '@urql/core';
-  import type { CountriesQuery, DepartmentsQuery } from '$lib/graphql/types/graphql';
+  import type {
+    CountriesQuery,
+    DepartmentsQuery,
+  } from '$lib/graphql/types/graphql';
 
   let {
     form,
@@ -26,19 +29,21 @@
 
   let countriesFetch = $state<OperationResult<CountriesQuery> | null>(null);
   let departmentsFetch = $state<OperationResult<DepartmentsQuery> | null>(null);
-  let selectedCountryCode: string = $state("UY ");
+  let selectedCountryCode: string = $state('UY ');
   let selectedDepartmentId: string | undefined = $state();
   let selectedCountryName: string | undefined = $state();
 
-  $effect( () => {
-    fetchDepartments(selectedCountryCode).then(result => {
-    departmentsFetch = result;
+  $effect(() => {
+    fetchDepartments(selectedCountryCode).then((result) => {
+      departmentsFetch = result;
     });
   });
 
   $effect(() => {
     if (countriesFetch?.data?.countries) {
-      const country = countriesFetch.data.countries.find(c => c.countryCode === selectedCountryCode);
+      const country = countriesFetch.data.countries.find(
+        (c) => c.countryCode === selectedCountryCode,
+      );
       selectedCountryName = country ? country.name : 'Selecciona un país';
     }
   });

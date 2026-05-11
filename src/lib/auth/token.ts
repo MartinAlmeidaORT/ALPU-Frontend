@@ -1,4 +1,4 @@
-const TOKEN_KEY = "jwt";
+const TOKEN_KEY = 'jwt';
 
 export function getToken(): string | null {
   return localStorage.getItem(TOKEN_KEY);

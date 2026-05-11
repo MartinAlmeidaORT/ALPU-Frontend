@@ -47,30 +47,30 @@ export interface CalculateContractInput {
 }
 
 const SERVICE_QUERY = graphql(`
-    query services {
-        services {
-          serviceId,
-          name,
-          __typename
-          ... on ServiceDuration {
-            servicePrices(order: {durationId: DESC}) {
-                durationId
-                price
-                variantPrice
-                }
-            }
-          ... on ServiceSpecial {
-                price
-            }
-          ... on ServiceIVR {
-                initialMessagePrice
-            }
-          ... on ServiceNarrative {
-                basePrice
-                extraPrice
-            }
+  query services {
+    services {
+      serviceId
+      name
+      __typename
+      ... on ServiceDuration {
+        servicePrices(order: { durationId: DESC }) {
+          durationId
+          price
+          variantPrice
         }
+      }
+      ... on ServiceSpecial {
+        price
+      }
+      ... on ServiceIVR {
+        initialMessagePrice
+      }
+      ... on ServiceNarrative {
+        basePrice
+        extraPrice
+      }
     }
+  }
 `);
 
 const CALCULATE_CONTRACT_MUTATION = graphql(`

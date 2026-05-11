@@ -2,14 +2,14 @@ export type Maybe<T> = T | null;
 export type InputMaybe<T> = Maybe<T>;
 /** All built-in and custom scalars, mapped to their actual values */
 export type Scalars = {
-  ID: { input: string; output: string; }
-  String: { input: string; output: string; }
-  Boolean: { input: boolean; output: boolean; }
-  Int: { input: number; output: number; }
-  Float: { input: number; output: number; }
-  DateTime: { input: unknown; output: unknown; }
-  Decimal: { input: unknown; output: unknown; }
-  LocalDate: { input: unknown; output: unknown; }
+  ID: { input: string; output: string };
+  String: { input: string; output: string };
+  Boolean: { input: boolean; output: boolean };
+  Int: { input: number; output: number };
+  Float: { input: number; output: number };
+  DateTime: { input: unknown; output: unknown };
+  Decimal: { input: unknown; output: unknown };
+  LocalDate: { input: unknown; output: unknown };
 };
 
 export type Address = {
@@ -82,7 +82,7 @@ export type BillFilterInput = {
 
 export enum BillType {
   Expense = 'EXPENSE',
-  Income = 'INCOME'
+  Income = 'INCOME',
 }
 
 export type BillTypeOperationFilterInput = {
@@ -531,7 +531,7 @@ export type MembershipFilterInput = {
 
 export enum MembershipState {
   Expired = 'EXPIRED',
-  Valid = 'VALID'
+  Valid = 'VALID',
 }
 
 export type MembershipStateOperationFilterInput = {
@@ -552,36 +552,29 @@ export type Mutation = {
   registerClient: AuthPayload;
 };
 
-
 export type MutationCalculateContractArgs = {
   input: CalculateContractInput;
 };
-
 
 export type MutationCompleteGoogleSignUpBroadcasterArgs = {
   input: CompleteGoogleSignUpBroadcasterInput;
 };
 
-
 export type MutationCompleteGoogleSignUpClientArgs = {
   input: CompleteGoogleSignUpClientInput;
 };
-
 
 export type MutationGoogleAuthArgs = {
   input: GoogleAuthInput;
 };
 
-
 export type MutationLoginArgs = {
   input: UserLoginInput;
 };
 
-
 export type MutationRegisterBroadcasterArgs = {
   input: RegisterBroadcasterInput;
 };
-
 
 export type MutationRegisterClientArgs = {
   input: RegisterClientInput;
@@ -634,11 +627,9 @@ export type Query = {
   users: Array<User>;
 };
 
-
 export type QueryDepartmentsArgs = {
   where?: InputMaybe<DepartmentFilterInput>;
 };
-
 
 export type QueryServicesArgs = {
   order?: InputMaybe<Array<ServiceSortInput>>;
@@ -708,7 +699,6 @@ export type ServiceDuration = Service & {
   servicePrices: Array<ServicePrice>;
   volumeDiscounts: Array<VolumeDiscount>;
 };
-
 
 export type ServiceDurationServicePricesArgs = {
   order?: InputMaybe<Array<ServicePriceSortInput>>;
@@ -839,7 +829,7 @@ export type ServiceSpecial = Service & {
 
 export enum SortEnumType {
   Asc = 'ASC',
-  Desc = 'DESC'
+  Desc = 'DESC',
 }
 
 export type StringOperationFilterInput = {
@@ -891,7 +881,7 @@ export type UserLoginInput = {
 export enum UserState {
   Enabled = 'ENABLED',
   Penalized = 'PENALIZED',
-  Pending = 'PENDING'
+  Pending = 'PENDING',
 }
 
 export type UserStateOperationFilterInput = {

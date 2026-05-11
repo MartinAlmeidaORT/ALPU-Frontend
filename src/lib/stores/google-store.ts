@@ -6,14 +6,14 @@ interface GooglePrefill {
 }
 
 export function setGooglePrefill(data: GooglePrefill) {
-  sessionStorage.setItem("googlePrefill", JSON.stringify(data));
+  sessionStorage.setItem('googlePrefill', JSON.stringify(data));
 }
 
 export function getGooglePrefill(): GooglePrefill | null {
-  const data = sessionStorage.getItem("googlePrefill");
+  const data = sessionStorage.getItem('googlePrefill');
   return data ? JSON.parse(data) : null;
 }
 
 export function clearGooglePrefill() {
-  sessionStorage.removeItem("googlePrefill");
+  sessionStorage.removeItem('googlePrefill');
 }

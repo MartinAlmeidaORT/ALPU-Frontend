@@ -8,7 +8,7 @@ export const actions = {
     try {
       const form = await request.formData();
       const data = Object.fromEntries(form);
-
+      data.departmentId = Number(data.departmentId);
       const { accountType, ...input } = data;
 
       let mutationString: string;

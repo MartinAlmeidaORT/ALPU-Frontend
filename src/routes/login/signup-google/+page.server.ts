@@ -23,6 +23,7 @@ export const actions = {
       const formData = await request.formData();
       const pendingData = JSON.parse(cookies.get('pending_signup') || '{}');
       const data = Object.fromEntries(formData.entries());
+      data.departmentId = Number(data.departmentId);
 
       const { accountType, ...input } = { ...pendingData, ...data };
 

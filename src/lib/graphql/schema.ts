@@ -17,7 +17,7 @@ export type Address = {
   city: Scalars['String']['output'];
   country: Country;
   countryCode: Scalars['String']['output'];
-  state: Scalars['String']['output'];
+  department: Department;
   street?: Maybe<Scalars['String']['output']>;
 };
 
@@ -27,8 +27,9 @@ export type AddressFilterInput = {
   city?: InputMaybe<StringOperationFilterInput>;
   country?: InputMaybe<CountryFilterInput>;
   countryCode?: InputMaybe<StringOperationFilterInput>;
+  department?: InputMaybe<DepartmentFilterInput>;
+  departmentId?: InputMaybe<IntOperationFilterInput>;
   or?: InputMaybe<Array<AddressFilterInput>>;
-  state?: InputMaybe<StringOperationFilterInput>;
   street?: InputMaybe<StringOperationFilterInput>;
 };
 
@@ -198,11 +199,11 @@ export type ClientFilterInput = {
 export type CompleteGoogleSignUpBroadcasterInput = {
   city: Scalars['String']['input'];
   countryCode: Scalars['String']['input'];
+  departmentId: Scalars['Int']['input'];
   email: Scalars['String']['input'];
   firstName: Scalars['String']['input'];
   lastName: Scalars['String']['input'];
   rut: Scalars['String']['input'];
-  state: Scalars['String']['input'];
   street?: InputMaybe<Scalars['String']['input']>;
   subject: Scalars['String']['input'];
 };
@@ -211,11 +212,11 @@ export type CompleteGoogleSignUpClientInput = {
   agencyName: Scalars['String']['input'];
   city: Scalars['String']['input'];
   countryCode: Scalars['String']['input'];
+  departmentId: Scalars['Int']['input'];
   email: Scalars['String']['input'];
   firstName: Scalars['String']['input'];
   lastName: Scalars['String']['input'];
   rut: Scalars['String']['input'];
-  state: Scalars['String']['input'];
   street?: InputMaybe<Scalars['String']['input']>;
   subject: Scalars['String']['input'];
 };
@@ -262,7 +263,9 @@ export type ContractFilterInput = {
 export type Country = {
   __typename?: 'Country';
   countryCode: Scalars['String']['output'];
+  departments: Array<Department>;
   name: Scalars['String']['output'];
+  region?: Maybe<Region>;
 };
 
 export type CountryFilterInput = {
@@ -650,6 +653,13 @@ export type RangeIvr = {
   serviceId: Scalars['Int']['output'];
 };
 
+export type Region = {
+  __typename?: 'Region';
+  countries: Array<Country>;
+  multiplier: Scalars['Decimal']['output'];
+  regionId: Scalars['Int']['output'];
+};
+
 export type RegionFilterInput = {
   and?: InputMaybe<Array<RegionFilterInput>>;
   countries?: InputMaybe<ListFilterInputTypeOfCountryFilterInput>;
@@ -661,12 +671,12 @@ export type RegionFilterInput = {
 export type RegisterBroadcasterInput = {
   city: Scalars['String']['input'];
   countryCode: Scalars['String']['input'];
+  departmentId: Scalars['Int']['input'];
   email: Scalars['String']['input'];
   firstName: Scalars['String']['input'];
   lastName: Scalars['String']['input'];
   password: Scalars['String']['input'];
   rut: Scalars['String']['input'];
-  state: Scalars['String']['input'];
   street?: InputMaybe<Scalars['String']['input']>;
 };
 
@@ -674,12 +684,12 @@ export type RegisterClientInput = {
   agencyName: Scalars['String']['input'];
   city: Scalars['String']['input'];
   countryCode: Scalars['String']['input'];
+  departmentId: Scalars['Int']['input'];
   email: Scalars['String']['input'];
   firstName: Scalars['String']['input'];
   lastName: Scalars['String']['input'];
   password: Scalars['String']['input'];
   rut: Scalars['String']['input'];
-  state: Scalars['String']['input'];
   street?: InputMaybe<Scalars['String']['input']>;
 };
 

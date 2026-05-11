@@ -18,7 +18,10 @@ export const SIGNUP_BROADCASTER_MUTATION = graphql(`
                 countryCode,
                 name
               },
-              state,
+              department {
+                departmentId,
+                name
+              },
               city,
               street
             }
@@ -41,7 +44,10 @@ export const SIGNUP_CLIENT_MUTATION = graphql(`
                 countryCode,
                 name
               },
-              state,
+              department {
+                departmentId,
+                name
+              },
               city,
               street,
             },
@@ -105,9 +111,12 @@ export const COMPLETE_GOOGLE_SIGNUP_BROADCASTER_MUTATION = graphql(`
                 countryCode,
                 name
               }
+              department {
+                departmentId,
+                name
+              }
               street,
               city,
-              state,
             }
           }
         }
@@ -135,9 +144,12 @@ export const COMPLETE_GOOGLE_SIGNUP_CLIENT_MUTATION = graphql(`
                 countryCode,
                 name
               },
+              department {
+                departmentId,
+                name
+              },
               street,
               city,
-              state,
             },
             ... on Client {
               agency {

@@ -40,7 +40,6 @@
     if (countriesFetch?.data?.countries) {
       const country = countriesFetch.data.countries.find(c => c.countryCode === selectedCountryCode);
       selectedCountryName = country ? country.name : 'Selecciona un país';
-      console.log(countriesFetch)
     }
   });
   let selectedDepartmentName: string | undefined = $derived(

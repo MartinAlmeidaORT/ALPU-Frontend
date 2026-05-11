@@ -9,9 +9,10 @@
   import AlertCircleIcon from '@lucide/svelte/icons/alert-circle';
   import { onMount } from 'svelte';
   import { fetchCountries } from '$lib/graphql/queries/country';
+  import { fetchDepartments } from '$lib/graphql/queries/department';
   import type { OperationResult } from '@urql/core';
   import type { ActionData } from '../../routes/login/signup-google/$types';
-  import type { CountriesQuery } from '$lib/graphql/types/graphql';
+  import type { CountriesQuery, DepartmentsQuery } from '$lib/graphql/types/graphql';
 
   let {
     form,
@@ -40,16 +41,33 @@
   let hasUserChooseAccountType = $state(false);
   let accountType: 'client' | 'broadcaster' | null = $state(null);
   let messages: string[] | null = $state(null);
-
+  let departmentsFetch = $state<OperationResult<DepartmentsQuery> | null>(null);
   let countriesFetch = $state<OperationResult<CountriesQuery> | null>(null);
-  let selectedCountryCode: string | undefined = $state();
-  let selectedCountryName: string | undefined = $derived(
-    countriesFetch?.data?.countries?.find(
-      (c) => c.countryCode === selectedCountryCode,
-    )?.name ?? 'Selecciona un país',
+  let selectedCountryCode: string = $state("UY ");
+  let selectedDepartmentId: string | undefined = $state();
+  let selectedCountryName: string | undefined = $state();
+
+  $effect(() => {
+    fetchDepartments(selectedCountryCode).then(result => {
+      departmentsFetch = result;
+    });
+  });
+
+  $effect(() => {
+    if (countriesFetch?.data?.countries) {
+      const country = countriesFetch.data.countries.find(c => c.countryCode === selectedCountryCode);
+      selectedCountryName = country ? country.name : 'Selecciona un país';
+    }
+  });
+
+  let selectedDepartmentName: string | undefined = $derived(
+    departmentsFetch?.data?.departments?.find(
+      (d) => d.departmentId === Number(selectedDepartmentId),
+    )?.name ?? 'Selecciona un departamento',
   );
 
   onMount(async () => {
+    departmentsFetch = await fetchDepartments(selectedCountryCode);
     countriesFetch = await fetchCountries();
   });
 
@@ -233,26 +251,24 @@
             </Select.Root>
           </Field.Field>
           <Field.Field>
-            <Field.Label for="state">Estado</Field.Label>
-            <Input
-              id="state"
-              name="state"
-              type="text"
-              placeholder="Departamento"
+             <Field.Label for="department">Departamento</Field.Label>
+            <Select.Root
+              name="departmentId"
+              type="single"
+              bind:value={selectedDepartmentId}
               required
-              minlength={4}
-              maxlength={100}
-              pattern="[A-Za-z]+"
-              oninvalid={(e) => {
-                const input = e.target as HTMLInputElement;
-                if (input.validity.patternMismatch) {
-                  input.setCustomValidity('Solo se permiten letras');
-                }
-              }}
-              oninput={(e) => {
-                (e.target as HTMLInputElement).setCustomValidity('');
-              }}
-            />
+              >
+              <Select.Trigger id="departmentId" name="departmentId">
+                <span>{selectedDepartmentName}</span>
+              </Select.Trigger>
+              <Select.Content>
+                {#each departmentsFetch?.data?.departments as department}
+                  <Select.Item value={String(department.departmentId)}>
+                    {department.name}
+                  </Select.Item>
+                {/each}
+              </Select.Content>
+            </Select.Root>
           </Field.Field>
         </Field.Group>
         <Field.Group class="mt-4" columns={2}>

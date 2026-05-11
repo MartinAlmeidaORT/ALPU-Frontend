@@ -7,36 +7,23 @@ export type Scalars = {
   Boolean: { input: boolean; output: boolean; }
   Int: { input: number; output: number; }
   Float: { input: number; output: number; }
-  DateTime: { input: unknown; output: unknown; }
   Decimal: { input: unknown; output: unknown; }
   LocalDate: { input: unknown; output: unknown; }
 };
 
 export type Address = {
   __typename?: 'Address';
-  addressId: Scalars['Int']['output'];
   city: Scalars['String']['output'];
   country: Country;
   countryCode: Scalars['String']['output'];
   state: Scalars['String']['output'];
   street?: Maybe<Scalars['String']['output']>;
-  validateAddress: ResultOfAppError;
-  validateCity: ResultOfAppError;
-  validateState: ResultOfAppError;
-  validateStreet: ResultOfAppError;
 };
 
 export type Agency = {
   __typename?: 'Agency';
   agencyId: Scalars['Int']['output'];
-  clients: Array<Client>;
   name: Scalars['String']['output'];
-};
-
-export type AppError = {
-  __typename?: 'AppError';
-  kind: ErrorKind;
-  message: Scalars['String']['output'];
 };
 
 export type AuthPayload = {
@@ -65,27 +52,14 @@ export enum BillType {
 
 export type Broadcaster = User & {
   __typename?: 'Broadcaster';
-  address: Address;
-  addressId: Scalars['Int']['output'];
+  address?: Maybe<Address>;
   category: BroadcasterCategory;
-  categoryId: Scalars['Int']['output'];
-  contracts: Array<Contract>;
-  demos: Array<Demo>;
   email: Scalars['String']['output'];
   firstName: Scalars['String']['output'];
   lastName: Scalars['String']['output'];
-  memberships: Array<Membership>;
-  notifications: Array<Notification>;
   rut: Scalars['String']['output'];
   userId: Scalars['Int']['output'];
   userState: UserState;
-  validateEmail: ResultOfAppError;
-  validateFirstName: ResultOfAppError;
-  validateGoogleSignUp: ResultOfAppError;
-  validateLastName: ResultOfAppError;
-  validatePassword: ResultOfAppError;
-  validateRUT: ResultOfAppError;
-  validateSignUp: ResultOfAppError;
 };
 
 export type BroadcasterCategory = {
@@ -96,27 +70,34 @@ export type BroadcasterCategory = {
   name: Scalars['String']['output'];
 };
 
+export type CalculateContractInput = {
+  broadcasterId: Scalars['Int']['input'];
+  clientId: Scalars['Int']['input'];
+  services: Array<CalculateContractServiceInput>;
+};
+
+export type CalculateContractPayload = {
+  __typename?: 'CalculateContractPayload';
+  servicePrice: Array<ServicePricePayload>;
+  totalPrice: Scalars['Decimal']['output'];
+};
+
+export type CalculateContractServiceInput = {
+  options: ServiceFlagsInput;
+  pieceName: Scalars['String']['input'];
+  serviceId: Scalars['Int']['input'];
+};
+
 export type Client = User & {
   __typename?: 'Client';
-  address: Address;
-  addressId: Scalars['Int']['output'];
-  agency: Agency;
-  agencyId: Scalars['Int']['output'];
-  contracts: Array<Contract>;
+  address?: Maybe<Address>;
+  agency?: Maybe<Agency>;
   email: Scalars['String']['output'];
   firstName: Scalars['String']['output'];
   lastName: Scalars['String']['output'];
-  notifications: Array<Notification>;
   rut: Scalars['String']['output'];
   userId: Scalars['Int']['output'];
   userState: UserState;
-  validateEmail: ResultOfAppError;
-  validateFirstName: ResultOfAppError;
-  validateGoogleSignUp: ResultOfAppError;
-  validateLastName: ResultOfAppError;
-  validatePassword: ResultOfAppError;
-  validateRUT: ResultOfAppError;
-  validateSignUp: ResultOfAppError;
 };
 
 export type CompleteGoogleSignUpBroadcasterInput = {
@@ -165,18 +146,8 @@ export type Contract = {
 
 export type Country = {
   __typename?: 'Country';
-  contracts: Array<Contract>;
   countryCode: Scalars['String']['output'];
   name: Scalars['String']['output'];
-  region?: Maybe<Region>;
-  regionId?: Maybe<Scalars['Int']['output']>;
-};
-
-export type Demo = {
-  __typename?: 'Demo';
-  broadcaster: Broadcaster;
-  broadcasterId: Scalars['Int']['output'];
-  fileName: Scalars['String']['output'];
 };
 
 export type Discount = {
@@ -187,14 +158,19 @@ export type Discount = {
   name: Scalars['String']['output'];
 };
 
-export enum ErrorKind {
-  Conflict = 'CONFLICT',
-  Forbidden = 'FORBIDDEN',
-  Internal = 'INTERNAL',
-  NotFound = 'NOT_FOUND',
-  Unauthorized = 'UNAUTHORIZED',
-  Validation = 'VALIDATION'
-}
+export type Duration = {
+  __typename?: 'Duration';
+  durationId: Scalars['Int']['output'];
+  name: Scalars['String']['output'];
+  servicePrices: Array<ServicePrice>;
+  time: Scalars['Int']['output'];
+};
+
+export type DurationSortInput = {
+  durationId?: InputMaybe<SortEnumType>;
+  name?: InputMaybe<SortEnumType>;
+  time?: InputMaybe<SortEnumType>;
+};
 
 export type ExtraCharge = {
   __typename?: 'ExtraCharge';
@@ -218,30 +194,20 @@ export type GoogleAuthInput = {
   code: Scalars['String']['input'];
 };
 
-export type Membership = {
-  __typename?: 'Membership';
-  amount?: Maybe<Scalars['Decimal']['output']>;
-  broadcaster: Broadcaster;
-  broadcasterId: Scalars['Int']['output'];
-  dueDate?: Maybe<Scalars['LocalDate']['output']>;
-  membershipId: Scalars['Int']['output'];
-  payDate?: Maybe<Scalars['LocalDate']['output']>;
-  state: MembershipState;
-};
-
-export enum MembershipState {
-  Expired = 'EXPIRED',
-  Valid = 'VALID'
-}
-
 export type Mutation = {
   __typename?: 'Mutation';
+  calculateContract: CalculateContractPayload;
   completeGoogleSignUpBroadcaster: AuthPayload;
   completeGoogleSignUpClient: AuthPayload;
   googleAuth: GoogleAuth;
   login: AuthPayload;
   registerBroadcaster: AuthPayload;
   registerClient: AuthPayload;
+};
+
+
+export type MutationCalculateContractArgs = {
+  input: CalculateContractInput;
 };
 
 
@@ -274,21 +240,10 @@ export type MutationRegisterClientArgs = {
   input: RegisterClientInput;
 };
 
-export type Notification = {
-  __typename?: 'Notification';
-  date: Scalars['DateTime']['output'];
-  description: Scalars['String']['output'];
-  isRead?: Maybe<Scalars['Boolean']['output']>;
-  notificationId: Scalars['Int']['output'];
-  title: Scalars['String']['output'];
-  user: User;
-  userId: Scalars['Int']['output'];
-};
-
 export type Piece = {
   __typename?: 'Piece';
   contract: Contract;
-  contractId: Scalars['Int']['output'];
+  contractId?: Maybe<Scalars['Int']['output']>;
   extraCharges: Array<ExtraCharge>;
   name: Scalars['String']['output'];
   pieceId: Scalars['Int']['output'];
@@ -302,14 +257,22 @@ export type Query = {
   countries: Array<Country>;
   /** Healthcheck */
   ping: Scalars['String']['output'];
+  services: Array<Service>;
   users: Array<User>;
 };
 
-export type Region = {
-  __typename?: 'Region';
-  countries: Array<Country>;
-  multiplier: Scalars['Decimal']['output'];
-  regionId: Scalars['Int']['output'];
+
+export type QueryServicesArgs = {
+  order?: InputMaybe<Array<ServiceSortInput>>;
+};
+
+export type RangeIvr = {
+  __typename?: 'RangeIVR';
+  maxWord?: Maybe<Scalars['Int']['output']>;
+  minWord: Scalars['Int']['output'];
+  pricePerWord: Scalars['Decimal']['output'];
+  service: ServiceIvr;
+  serviceId: Scalars['Int']['output'];
 };
 
 export type RegisterBroadcasterInput = {
@@ -337,39 +300,154 @@ export type RegisterClientInput = {
   street?: InputMaybe<Scalars['String']['input']>;
 };
 
-export type ResultOfAppError = {
-  __typename?: 'ResultOfAppError';
-  error?: Maybe<AppError>;
-  errors: Array<AppError>;
-  isFailure: Scalars['Boolean']['output'];
-  isSuccess: Scalars['Boolean']['output'];
-};
-
 export type Service = {
-  __typename?: 'Service';
   name: Scalars['String']['output'];
   pieces: Array<Piece>;
   serviceId: Scalars['Int']['output'];
   volumeDiscounts: Array<VolumeDiscount>;
 };
 
+export type ServiceDuration = Service & {
+  __typename?: 'ServiceDuration';
+  name: Scalars['String']['output'];
+  pieces: Array<Piece>;
+  serviceId: Scalars['Int']['output'];
+  servicePrices: Array<ServicePrice>;
+  volumeDiscounts: Array<VolumeDiscount>;
+};
+
+
+export type ServiceDurationServicePricesArgs = {
+  order?: InputMaybe<Array<ServicePriceSortInput>>;
+};
+
+export type ServiceDurationSortInput = {
+  name?: InputMaybe<SortEnumType>;
+  serviceId?: InputMaybe<SortEnumType>;
+};
+
+export type ServiceFlagPayload = {
+  __typename?: 'ServiceFlagPayload';
+  isOn: Scalars['Boolean']['output'];
+  label: Scalars['String']['output'];
+};
+
+export type ServiceFlags = {
+  __typename?: 'ServiceFlags';
+  additionalMessageIVR?: Maybe<Scalars['Int']['output']>;
+  durationId?: Maybe<Scalars['Int']['output']>;
+  hasInternetPromo?: Maybe<Scalars['Boolean']['output']>;
+  hasLipSync?: Maybe<Scalars['Boolean']['output']>;
+  hasMassMediaBroadcast?: Maybe<Scalars['Boolean']['output']>;
+  hasMedia?: Maybe<Scalars['Boolean']['output']>;
+  isInterior?: Maybe<Scalars['Boolean']['output']>;
+  isNonComercial?: Maybe<Scalars['Boolean']['output']>;
+  messageIVR?: Maybe<Scalars['String']['output']>;
+  multipleBroadcaster?: Maybe<Scalars['Boolean']['output']>;
+  narrativeMinutes?: Maybe<Scalars['Int']['output']>;
+  overridePrice?: Maybe<Scalars['Decimal']['output']>;
+  pieces?: Maybe<Scalars['Int']['output']>;
+  roleQuantity?: Maybe<Scalars['Int']['output']>;
+};
+
+export type ServiceFlagsInput = {
+  additionalMessageIVR?: InputMaybe<Scalars['Int']['input']>;
+  durationId?: InputMaybe<Scalars['Int']['input']>;
+  hasInternetPromo?: InputMaybe<Scalars['Boolean']['input']>;
+  hasLipSync?: InputMaybe<Scalars['Boolean']['input']>;
+  hasMassMediaBroadcast?: InputMaybe<Scalars['Boolean']['input']>;
+  hasMedia?: InputMaybe<Scalars['Boolean']['input']>;
+  isInterior?: InputMaybe<Scalars['Boolean']['input']>;
+  isNonComercial?: InputMaybe<Scalars['Boolean']['input']>;
+  messageIVR?: InputMaybe<Scalars['String']['input']>;
+  multipleBroadcaster?: InputMaybe<Scalars['Boolean']['input']>;
+  narrativeMinutes?: InputMaybe<Scalars['Int']['input']>;
+  overridePrice?: InputMaybe<Scalars['Decimal']['input']>;
+  pieces?: InputMaybe<Scalars['Int']['input']>;
+  roleQuantity?: InputMaybe<Scalars['Int']['input']>;
+};
+
+export type ServiceIvr = Service & {
+  __typename?: 'ServiceIVR';
+  additionalMessagePrice: Scalars['Decimal']['output'];
+  initialMessagePrice: Scalars['Decimal']['output'];
+  name: Scalars['String']['output'];
+  pieces: Array<Piece>;
+  rangeIVR: Array<RangeIvr>;
+  serviceId: Scalars['Int']['output'];
+  updateMessagePrice: Scalars['Decimal']['output'];
+  volumeDiscounts: Array<VolumeDiscount>;
+};
+
+export type ServiceNarrative = Service & {
+  __typename?: 'ServiceNarrative';
+  basePrice: Scalars['Decimal']['output'];
+  extraPrice: Scalars['Decimal']['output'];
+  name: Scalars['String']['output'];
+  pieces: Array<Piece>;
+  rolPrice: Scalars['Decimal']['output'];
+  serviceId: Scalars['Int']['output'];
+  volumeDiscounts: Array<VolumeDiscount>;
+};
+
+export type ServicePrice = {
+  __typename?: 'ServicePrice';
+  duration: Duration;
+  durationId: Scalars['Int']['output'];
+  price: Scalars['Decimal']['output'];
+  service: ServiceDuration;
+  serviceId: Scalars['Int']['output'];
+  variantPrice?: Maybe<Scalars['Decimal']['output']>;
+};
+
+export type ServicePricePayload = {
+  __typename?: 'ServicePricePayload';
+  discount: Scalars['Decimal']['output'];
+  durationId?: Maybe<Scalars['Int']['output']>;
+  pieceName: Scalars['String']['output'];
+  price: Scalars['Decimal']['output'];
+  service: Scalars['String']['output'];
+  serviceFlags: Array<ServiceFlagPayload>;
+  totalPriceWithDiscount: Scalars['Decimal']['output'];
+  variants?: Maybe<Scalars['Int']['output']>;
+};
+
+export type ServicePriceSortInput = {
+  duration?: InputMaybe<DurationSortInput>;
+  durationId?: InputMaybe<SortEnumType>;
+  price?: InputMaybe<SortEnumType>;
+  service?: InputMaybe<ServiceDurationSortInput>;
+  serviceId?: InputMaybe<SortEnumType>;
+  variantPrice?: InputMaybe<SortEnumType>;
+};
+
+export type ServiceSortInput = {
+  name?: InputMaybe<SortEnumType>;
+  serviceId?: InputMaybe<SortEnumType>;
+};
+
+export type ServiceSpecial = Service & {
+  __typename?: 'ServiceSpecial';
+  name: Scalars['String']['output'];
+  pieces: Array<Piece>;
+  price: Scalars['Decimal']['output'];
+  serviceId: Scalars['Int']['output'];
+  volumeDiscounts: Array<VolumeDiscount>;
+};
+
+export enum SortEnumType {
+  Asc = 'ASC',
+  Desc = 'DESC'
+}
+
 export type User = {
-  address: Address;
-  addressId: Scalars['Int']['output'];
+  address?: Maybe<Address>;
   email: Scalars['String']['output'];
   firstName: Scalars['String']['output'];
   lastName: Scalars['String']['output'];
-  notifications: Array<Notification>;
   rut: Scalars['String']['output'];
   userId: Scalars['Int']['output'];
   userState: UserState;
-  validateEmail: ResultOfAppError;
-  validateFirstName: ResultOfAppError;
-  validateGoogleSignUp: ResultOfAppError;
-  validateLastName: ResultOfAppError;
-  validatePassword: ResultOfAppError;
-  validateRUT: ResultOfAppError;
-  validateSignUp: ResultOfAppError;
 };
 
 export type UserLoginInput = {

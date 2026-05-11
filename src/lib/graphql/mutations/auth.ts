@@ -1,6 +1,10 @@
 import { createUrqlClient } from "$lib/graphql/client";
+import type { OperationResult } from "@urql/core";
+import { graphql } from "../types";
+import type { CompleteGoogleSignUpBroadcasterMutation, CompleteGoogleSignUpClientMutation, GoogleAuthMutation, LoginMutation } from "../types/graphql";
+import type { UserLoginInput } from "../schema";
 
-export const SIGNUP_BROADCASTER_MUTATION = `
+export const SIGNUP_BROADCASTER_MUTATION = graphql(`
     mutation registerBroadcaster($input: RegisterBroadcasterInput!) {
         registerBroadcaster(input: $input) {
           token,
@@ -21,13 +25,9 @@ export const SIGNUP_BROADCASTER_MUTATION = `
           }
         }
     }
-`;
+`);
 
-// export async function SignupBroadcaster() {
-//   return await createUrqlClient().mutation(SIGNUP_BROADCASTER_MUTATION, {}).toPromise();
-// }
-
-export const SIGNUP_CLIENT_MUTATION = `
+export const SIGNUP_CLIENT_MUTATION = graphql(`
     mutation registerClient($input: RegisterClientInput!) {
         registerClient(input: $input) {
           token,
@@ -53,26 +53,9 @@ export const SIGNUP_CLIENT_MUTATION = `
           }
         }
     }
-`;
+`);
 
-// export async function SignupClient() {
-//   return await createUrqlClient().mutation(SIGNUP_CLIENT_MUTATION, {}).toPromise();
-// }
-
-interface GoogleAuthInput {
-  code: string;
-}
-
-interface GoogleAuthResponse {
-  token: string;
-  requiresRegistration: boolean;
-  subject: string;
-  email: string;
-  firstName: string;
-  lastName: string;
-}
-
-export const GOOGLE_AUTH_MUTATION = `
+export const GOOGLE_AUTH_MUTATION = graphql(`
     mutation googleAuth($code: String!) {
         googleAuth(input: { code: $code }) {
             token
@@ -83,30 +66,13 @@ export const GOOGLE_AUTH_MUTATION = `
             lastName
         }
     }
-`;
+`);
 
-export async function googleAuth(code: string) {
-  const { data } = await createUrqlClient().mutation(GOOGLE_AUTH_MUTATION, { code });
-  return data;
+export async function googleAuth(code: string): Promise<OperationResult<GoogleAuthMutation>> {
+  return createUrqlClient().mutation(GOOGLE_AUTH_MUTATION, { code });
 }
 
-interface LoginInput {
-  email: string;
-  password: string;
-}
-
-interface LoginResponse {
-  token: string;
-  user: {
-    userId: string;
-    email: string;
-    firstName: string;
-    lastName: string;
-    userType: string;
-  };
-}
-
-export const LOGIN_MUTATION = `
+export const LOGIN_MUTATION = graphql(`
   mutation login($input: UserLoginInput!) {
     login(input: $input) {
       token
@@ -119,14 +85,13 @@ export const LOGIN_MUTATION = `
       }
     }
   }
-`;
+`);
 
-export async function login({ email, password }: LoginInput): Promise<LoginResponse> {
-  const { data } = await createUrqlClient().mutation(LOGIN_MUTATION, { input: { email, password } }).toPromise();
-  return data;
+export async function login({ email, password }: UserLoginInput): Promise<OperationResult<LoginMutation>> {
+  return await createUrqlClient().mutation(LOGIN_MUTATION, { input: { email, password } }).toPromise();
 }
 
-export const COMPLETE_GOOGLE_SIGNUP_BROADCASTER_MUTATION = `
+export const COMPLETE_GOOGLE_SIGNUP_BROADCASTER_MUTATION = graphql(`
     mutation completeGoogleSignUpBroadcaster($input: CompleteGoogleSignUpBroadcasterInput!) {
         completeGoogleSignUpBroadcaster(input: $input) {
           token,
@@ -147,17 +112,16 @@ export const COMPLETE_GOOGLE_SIGNUP_BROADCASTER_MUTATION = `
           }
         }
     }
-`;
+`);
 
-export async function CompleteGoogleSignUpBroadcaster() {
-  const { data } = await createUrqlClient().mutation(
+export async function CompleteGoogleSignUpBroadcaster(): Promise<OperationResult<CompleteGoogleSignUpBroadcasterMutation>> {
+  return await createUrqlClient().mutation(
     COMPLETE_GOOGLE_SIGNUP_BROADCASTER_MUTATION,
     {},
   );
-  return data.completeGoogleBroadcasterRegistration;
 }
 
-export const COMPLETE_GOOGLE_SIGNUP_CLIENT_MUTATION = `
+export const COMPLETE_GOOGLE_SIGNUP_CLIENT_MUTATION = graphql(`
     mutation completeGoogleSignUpClient($input: CompleteGoogleSignUpClientInput!) {
         completeGoogleSignUpClient(input: $input) {
           token,
@@ -183,12 +147,11 @@ export const COMPLETE_GOOGLE_SIGNUP_CLIENT_MUTATION = `
           }
         }
     }
-`;
+`);
 
-export async function CompleteGoogleSignUpClient() {
-  const { data } = await createUrqlClient().mutation(
+export async function CompleteGoogleSignUpClient(): Promise<OperationResult<CompleteGoogleSignUpClientMutation>> {
+  return await createUrqlClient().mutation(
     COMPLETE_GOOGLE_SIGNUP_CLIENT_MUTATION,
     {},
   );
-  return data.completeGoogleSignUpClient;
 }

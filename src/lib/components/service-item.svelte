@@ -47,7 +47,6 @@
       options.hasInternetPromo = internetBroadcast;
       options.hasLipSync = lipSync;
     }
-
     onAddPiece(nombrePieza, service, options);
     resetForm();
   }

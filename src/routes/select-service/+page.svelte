@@ -86,6 +86,13 @@
     isPriceSuggested = false;
     priceSuggested = null;
     nombrePieza = '';
+    nonCommercialContent = false;
+    internetBroadcast = false;
+    lipSync = false;
+    narrativeRoles = '0';
+    narrativeMinutes = '';
+    ivrMessage = '';
+    broadcastInMassMedia = false;
     checkDurationErrors();
   }
 

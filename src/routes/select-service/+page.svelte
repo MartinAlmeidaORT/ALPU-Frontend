@@ -12,20 +12,14 @@
   import {
     fetchServices,
     calculateServicePrice,
-    type ServiceData,
-    type Service,
-    type ServiceOptions,
-    type CalculateContractInput,
-    type ServiceSpecial,
-    type ServiceDuration,
-    type ServiceIVR,
-    type ServiceNarrative,
   } from '$lib/graphql/queries/service';
   import { onMount } from 'svelte';
   import Label from '$lib/components/ui/label/label.svelte';
+  import type { CampaignInput, CampaignServiceInput, PieceInput } from '$lib/graphql/schema';
+  import type { ServicesQuery } from '$lib/graphql/types/graphql';
 
   type ServiceSelected = {
-    service: Service;
+    service: NonNullable<ServicesQuery['services']>[number];
     selectedPrice?: number;
     selectedDurationId?: string;
   } | null;
@@ -33,14 +27,12 @@
   let serviceSelected: ServiceSelected = $state(null);
   let errorMessages = $state<String | null>(null);
   let nombrePieza = $state('');
-  let totalServices = $state<
-    Array<{ serviceId: string; options: ServiceOptions; pieceName: string }>
-  >([]);
+  let totalServices = $state<CampaignServiceInput[]>([]);
   let totalContrato = $state<any>(null);
   let isInterior = $state(false);
   let isPriceSuggested = $state(false);
   let priceSuggested = $state(null);
-  let additionalPieces = $state('0');
+  let additionalPieces = $state< PieceInput[] >([]);
   let nonCommercialContent = $state(false);
   let internetBroadcast = $state(false);
   let lipSync = $state(false);
@@ -48,7 +40,7 @@
   let narrativeMinutes = $state('');
   let ivrMessage = $state('');
   let broadcastInMassMedia = $state(false);
-  let fetchServicesResult = $state<OperationResult<ServiceData> | null>(null);
+  let fetchServicesResult = $state<OperationResult<ServicesQuery> | null>(null);
 
   onMount(async () => {
     fetchServicesResult = await fetchServices();
@@ -60,7 +52,6 @@
 
     if (isPriceSuggested && priceSuggested != null) {
       if (
-        serviceSelected.service.initialMessagePrice > priceSuggested ||
         serviceSelected.service.basePrice > priceSuggested
       ) {
         errorMessages = 'Precio sugerido no puede ser menor al precio base';
@@ -68,15 +59,15 @@
       }
     }
 
-    const options: ServiceOptions = {
+    const options: any = {
       isInterior,
       overridePrice: priceSuggested,
     };
 
     options.durationId = serviceSelected.selectedDurationId;
-    options.pieces = parseInt(additionalPieces);
+    options.pieces = additionalPieces;
     options.messageIVR = ivrMessage;
-    options.additionalMessageIVR = parseInt(additionalPieces);
+    options.additionalMessageIVR = additionalPieces;
     options.narrativeMinutes = parseInt(narrativeMinutes) || 0;
     options.roleQuantity = parseInt(narrativeRoles);
     options.isNonComercial = nonCommercialContent;
@@ -88,11 +79,13 @@
     totalServices.push({
       serviceId: serviceSelected.service.serviceId,
       options: options,
-      pieceName: nombrePieza,
+      pieces: additionalPieces
     });
-    const input: CalculateContractInput = {
+    const input: CampaignInput = {
       broadcasterId: 1,
       clientId: 2,
+      inCash: true,
+      campaign: "Test",
       services: totalServices,
     };
 
@@ -105,19 +98,22 @@
     isInterior = false;
     isPriceSuggested = false;
     checkDurationErrors();
+    additionalPieces.push({ name: nombrePieza });
   }
 
   async function removeService(index: number) {
     totalServices = totalServices.filter((_, i) => i !== index);
-
+    
     if (totalServices.length === 0) {
       totalContrato = null;
       return;
     }
 
-    const input: CalculateContractInput = {
+    const input: CampaignInput = {
       broadcasterId: 1,
       clientId: 2,
+      inCash: true,
+      campaign: "Test",
       services: totalServices,
     };
 
@@ -131,12 +127,12 @@
   async function checkDurationErrors() {
     let durationId = '';
     totalServices.forEach((service) => {
-      if (service.options.durationId !== durationId && durationId !== '') {
+      if (service.options !== durationId && durationId !== '') {
         errorMessages =
           'Está agregando servicios con duraciones distintas. Esto queda a criterio del usuario y puede afectar el contrato';
         return;
       }
-      durationId = service.options.durationId;
+      //durationId = service.options.durationId;
       errorMessages = null;
     });
   }
@@ -159,27 +155,27 @@
       </div>
       <Accordion.Root type="single" class="w-full" value="item-1">
         {#each services as service (service.serviceId)}
-          {#if service.__typename === 'ServiceDuration'}
-            <Accordion.Item value={service.serviceId}>
+          {#if service.__typename === 'ServicePeriod'}
+            <Accordion.Item value={String(service.serviceId)}>
               <Accordion.Trigger
                 class="grid grid-cols-[1fr_repeat(5,70px)] gap-2 min-h-16 px-2 items-center"
               >
                 <span class="truncate hover:underline cursor-pointer"
                   >{service.name}</span
                 >
-                {#each service.servicePrices.toReversed() as servicePrice (servicePrice.durationId)}
+                {#each service.periods as servicePrice}
                   <Button
                     variant="outline"
                     bgColor="bg-[#1F5BB8] text-white hover:bg-[#1a4a94] hover:text-white"
                     onclick={() => {
                       serviceSelected = {
                         service,
-                        selectedDurationId: servicePrice.durationId,
+                        selectedDurationId: servicePrice.interval,
                       };
                     }}
                     class="flex-1"
                   >
-                    {servicePrice.price}
+                    {servicePrice.basePrice}
                   </Button>
                 {/each}
               </Accordion.Trigger>
@@ -189,19 +185,19 @@
                     class="grid grid-cols-[1fr_repeat(5,70px)] gap-2 min-h-16 px-2 items-center"
                   >
                     <span class="truncate">SUBSIGUIENTE</span>
-                    {#each (service as ServiceDuration).servicePrices.toReversed() as servicePrice (servicePrice.durationId)}
+                    {#each service.periods as servicePrice}
                       <Button
                         variant="outline"
                         bgColor="bg-[#1F5BB8] text-white hover:bg-[#1a4a94] hover:text-white"
                         onclick={() => {
                           serviceSelected = {
                             service,
-                            selectedDurationId: servicePrice.durationId,
+                            selectedDurationId: servicePrice.interval,
                           };
                         }}
                         class="flex-1"
                       >
-                        {servicePrice.variantPrice}
+                        {servicePrice.extraPrice}
                       </Button>
                     {/each}
                   </div>
@@ -234,15 +230,15 @@
                 </div>
               </Accordion.Content>
             </Accordion.Item>
-          {:else if service.__typename === 'ServiceSpecial'}
-            <Accordion.Item value={service.serviceId}>
+          {:else if service.__typename === 'ServiceDate'}
+            <Accordion.Item value={String(service.serviceId)}>
               <Accordion.Trigger class="gap-2 min-h-16 px-2 items-center"
                 >{service.name}</Accordion.Trigger
               >
               <Accordion.Content class="flex flex-col gap-4 text-balance">
                 <div class="flex gap-3 px-2">
                   <Label for="serviceSpecialBasePrice"
-                    >Precio base ${(service as ServiceSpecial).price}</Label
+                    >Precio base ${service.basePrice}</Label
                   >
                   <div class="flex items-center gap-2">
                     {#if service.name.includes('MAESTRO DE CEREMONIAS')}
@@ -277,16 +273,15 @@
                 </div>
               </Accordion.Content>
             </Accordion.Item>
-          {:else if service.__typename === 'ServiceIVR'}
-            <Accordion.Item value={service.serviceId}>
+          {:else if service.__typename === 'ServiceIvr'}
+            <Accordion.Item value={String(service.serviceId)}>
               <Accordion.Trigger class="gap-2 min-h-16 px-2 items-center"
                 >{service.name}</Accordion.Trigger
               >
               <Accordion.Content class="flex flex-col gap-4 text-balance">
                 <div class="flex gap-3 px-2">
                   <Label for="serviceIVRInitialMessagePrice"
-                    >Precio mensaje inicial ${(service as ServiceIVR)
-                      .initialMessagePrice}</Label
+                    >Precio mensaje inicial ${service.basePrice}</Label
                   >
                   <div class="flex items-center gap-2">
                     <Checkbox
@@ -334,15 +329,14 @@
               </Accordion.Content>
             </Accordion.Item>
           {:else if service.__typename === 'ServiceNarrative'}
-            <Accordion.Item value={service.serviceId}>
+            <Accordion.Item value={String(service.serviceId)}>
               <Accordion.Trigger class="gap-2 min-h-16 px-2 items-center"
                 >{service.name}</Accordion.Trigger
               >
               <Accordion.Content class="flex flex-col gap-4 text-balance">
                 <div class="flex gap-3 px-2">
                   <Label for="serviceNarrativeInitialPrice"
-                    >Hasta 3 minutos ${(service as ServiceNarrative)
-                      .basePrice}</Label
+                    >Hasta 3 minutos ${service.basePrice}</Label
                   >
                   <div class="flex items-center gap-2">
                     <Label for="nombrePieza">Nombre</Label>

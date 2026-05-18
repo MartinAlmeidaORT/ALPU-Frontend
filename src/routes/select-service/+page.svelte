@@ -17,6 +17,8 @@
   import Label from '$lib/components/ui/label/label.svelte';
   import type { CampaignInput, CampaignServiceInput, PieceInput } from '$lib/graphql/schema';
   import type { ServicesQuery } from '$lib/graphql/types/graphql';
+  import ServiceItem from '$lib/components/service-item.svelte';
+  import ServiceSummary from '$lib/components/service-summary.svelte';
 
   type ServiceSelected = {
     service: NonNullable<ServicesQuery['services']>[number];
@@ -25,7 +27,7 @@
   } | null;
 
   let serviceSelected: ServiceSelected = $state(null);
-  let errorMessages = $state<String | null>(null);
+  let errorMessages = $state<string | null>(null);
   let nombrePieza = $state('');
   let totalServices = $state<CampaignServiceInput[]>([]);
   let totalContrato = $state<any>(null);
@@ -47,45 +49,30 @@
   });
   let services = $derived(fetchServicesResult?.data?.services ?? []);
 
-  async function calculateServicesSelectedPrice() {
-    if (!serviceSelected) return;
-
+  async function handleAddPiece(pieceName: string, svc: any, options: any) {
     if (isPriceSuggested && priceSuggested != null) {
-      if (
-        serviceSelected.service.basePrice > priceSuggested
-      ) {
+      if (svc.basePrice && svc.basePrice > priceSuggested) {
         errorMessages = 'Precio sugerido no puede ser menor al precio base';
         return;
       }
     }
 
-    const options: any = {
-      isInterior,
-      overridePrice: priceSuggested,
-    };
-
-    options.durationId = serviceSelected.selectedDurationId;
+    additionalPieces.push({ name: pieceName });
     options.pieces = additionalPieces;
     options.messageIVR = ivrMessage;
     options.additionalMessageIVR = additionalPieces;
-    options.narrativeMinutes = parseInt(narrativeMinutes) || 0;
-    options.roleQuantity = parseInt(narrativeRoles);
-    options.isNonComercial = nonCommercialContent;
-    options.hasInternetPromo = internetBroadcast;
-    options.hasLipSync = lipSync;
-    options.hasMassMediaBroadcast = broadcastInMassMedia;
-    options.multipleBroadcaster = null;
 
     totalServices.push({
-      serviceId: serviceSelected.service.serviceId,
+      serviceId: svc.serviceId,
       options: options,
-      pieces: additionalPieces
+      pieces: additionalPieces,
     });
+
     const input: CampaignInput = {
       broadcasterId: 1,
       clientId: 2,
       inCash: true,
-      campaign: "Test",
+      campaign: 'Test',
       services: totalServices,
     };
 
@@ -97,8 +84,17 @@
     serviceSelected = null;
     isInterior = false;
     isPriceSuggested = false;
+    priceSuggested = null;
+    nombrePieza = '';
     checkDurationErrors();
-    additionalPieces.push({ name: nombrePieza });
+  }
+
+  async function removeAllServices() {
+    totalServices = [];
+    totalContrato = null;
+    additionalPieces = [];
+    errorMessages = null;
+    checkDurationErrors();
   }
 
   async function removeService(index: number) {
@@ -155,306 +151,21 @@
       </div>
       <Accordion.Root type="single" class="w-full" value="item-1">
         {#each services as service (service.serviceId)}
-          {#if service.__typename === 'ServicePeriod'}
-            <Accordion.Item value={String(service.serviceId)}>
-              <Accordion.Trigger
-                class="grid grid-cols-[1fr_repeat(5,70px)] gap-2 min-h-16 px-2 items-center"
-              >
-                <span class="truncate hover:underline cursor-pointer"
-                  >{service.name}</span
-                >
-                {#each service.periods as servicePrice}
-                  <Button
-                    variant="outline"
-                    bgColor="bg-[#1F5BB8] text-white hover:bg-[#1a4a94] hover:text-white"
-                    onclick={() => {
-                      serviceSelected = {
-                        service,
-                        selectedDurationId: servicePrice.interval,
-                      };
-                    }}
-                    class="flex-1"
-                  >
-                    {servicePrice.basePrice}
-                  </Button>
-                {/each}
-              </Accordion.Trigger>
-              <Accordion.Content class="flex flex-col gap-4 text-balance">
-                {#if !service.name.includes('PRESENTACIÓN DE PROGRAMAS') && !service.name.includes('LOCUCIÓN A CÁMARA') && !service.name.includes('ZÓCALO')}
-                  <div
-                    class="grid grid-cols-[1fr_repeat(5,70px)] gap-2 min-h-16 px-2 items-center"
-                  >
-                    <span class="truncate">SUBSIGUIENTE</span>
-                    {#each service.periods as servicePrice}
-                      <Button
-                        variant="outline"
-                        bgColor="bg-[#1F5BB8] text-white hover:bg-[#1a4a94] hover:text-white"
-                        onclick={() => {
-                          serviceSelected = {
-                            service,
-                            selectedDurationId: servicePrice.interval,
-                          };
-                        }}
-                        class="flex-1"
-                      >
-                        {servicePrice.extraPrice}
-                      </Button>
-                    {/each}
-                  </div>
-                {/if}
-                <div class="flex gap-3 px-2">
-                  {#if service.name.includes('RADIO') || service.name.includes('TELEVISIÓN') || service.name.includes('CINE')}
-                    <div class="flex items-center gap-2">
-                      <Checkbox id="discInterior" bind:checked={isInterior} />
-                      <Label for="discInterior">Descuento interior (-70%)</Label
-                      >
-                    </div>
-                  {/if}
-                  <div class="flex items-center gap-2">
-                    <Label for="nombrePieza">Nombre</Label>
-                    <Input
-                      id="nombrePieza"
-                      bind:value={nombrePieza}
-                      type="text"
-                      placeholder="Nombre de la pieza"
-                    />
-                  </div>
-                  <Button
-                    type="button"
-                    class="col-span-2"
-                    variant="outline"
-                    bgColor="bg-[#22964F] text-white hover:bg-[#1a6d3b] hover:text-white"
-                    onclick={() => calculateServicesSelectedPrice()}
-                    >Agregar</Button
-                  >
-                </div>
-              </Accordion.Content>
-            </Accordion.Item>
-          {:else if service.__typename === 'ServiceDate'}
-            <Accordion.Item value={String(service.serviceId)}>
-              <Accordion.Trigger class="gap-2 min-h-16 px-2 items-center"
-                >{service.name}</Accordion.Trigger
-              >
-              <Accordion.Content class="flex flex-col gap-4 text-balance">
-                <div class="flex gap-3 px-2">
-                  <Label for="serviceSpecialBasePrice"
-                    >Precio base ${service.basePrice}</Label
-                  >
-                  <div class="flex items-center gap-2">
-                    {#if service.name.includes('MAESTRO DE CEREMONIAS')}
-                      <Checkbox
-                        id="broadcastInMassMedia"
-                        bind:checked={broadcastInMassMedia}
-                      />
-                      <Label for="broadcastInMassMedia"
-                        >Difusión en medios masivos (+30%)</Label
-                      >
-                    {/if}
-                  </div>
-                  <div class="flex items-center gap-2">
-                    <Label for="nombrePieza">Nombre</Label>
-                    <Input
-                      id="nombrePieza"
-                      bind:value={nombrePieza}
-                      type="text"
-                      placeholder="Nombre de la pieza"
-                    />
-                  </div>
-                  <Button
-                    type="button"
-                    class="col-span-2"
-                    variant="outline"
-                    bgColor="bg-[#22964F] text-white hover:bg-[#1a6d3b] hover:text-white"
-                    onclick={() => {
-                      serviceSelected = { service };
-                      calculateServicesSelectedPrice();
-                    }}>Agregar</Button
-                  >
-                </div>
-              </Accordion.Content>
-            </Accordion.Item>
-          {:else if service.__typename === 'ServiceIvr'}
-            <Accordion.Item value={String(service.serviceId)}>
-              <Accordion.Trigger class="gap-2 min-h-16 px-2 items-center"
-                >{service.name}</Accordion.Trigger
-              >
-              <Accordion.Content class="flex flex-col gap-4 text-balance">
-                <div class="flex gap-3 px-2">
-                  <Label for="serviceIVRInitialMessagePrice"
-                    >Precio mensaje inicial ${service.basePrice}</Label
-                  >
-                  <div class="flex items-center gap-2">
-                    <Checkbox
-                      id="ispriceSuggestion"
-                      bind:checked={isPriceSuggested}
-                    />
-                    <Label for="ispriceSuggestion">Sugerir precio</Label>
-                    {#if isPriceSuggested}
-                      <Input
-                        id="suggestedPrice"
-                        bind:value={priceSuggested}
-                        type="number"
-                        placeholder="Precio sugerido"
-                      />
-                    {/if}
-                  </div>
-                  <div class="flex items-center gap-2">
-                    <Label for="nombrePieza">Nombre</Label>
-                    <Input
-                      id="nombrePieza"
-                      bind:value={nombrePieza}
-                      type="text"
-                      placeholder="Nombre de la pieza"
-                    />
-                  </div>
-                  <Button
-                    type="button"
-                    class="col-span-2"
-                    variant="outline"
-                    bgColor="bg-[#22964F] text-white hover:bg-[#1a6d3b] hover:text-white"
-                    onclick={() => {
-                      serviceSelected = { service };
-                      calculateServicesSelectedPrice();
-                    }}>Agregar</Button
-                  >
-                </div>
-                <div class="items-center gap-2 px-2">
-                  <Label for="ivrMessage" class="py-2">Mensaje</Label>
-                  <Textarea
-                    id="ivrMessage"
-                    bind:value={ivrMessage}
-                    placeholder="Ingrese su mensaje"
-                  />
-                </div>
-              </Accordion.Content>
-            </Accordion.Item>
-          {:else if service.__typename === 'ServiceNarrative'}
-            <Accordion.Item value={String(service.serviceId)}>
-              <Accordion.Trigger class="gap-2 min-h-16 px-2 items-center"
-                >{service.name}</Accordion.Trigger
-              >
-              <Accordion.Content class="flex flex-col gap-4 text-balance">
-                <div class="flex gap-3 px-2">
-                  <Label for="serviceNarrativeInitialPrice"
-                    >Hasta 3 minutos ${service.basePrice}</Label
-                  >
-                  <div class="flex items-center gap-2">
-                    <Label for="nombrePieza">Nombre</Label>
-                    <Input
-                      id="nombrePieza"
-                      bind:value={nombrePieza}
-                      type="text"
-                      placeholder="Nombre de la pieza"
-                    />
-                  </div>
-                  <div class="flex items-center gap-2">
-                    <Checkbox
-                      id="nonCommercialContent"
-                      bind:checked={nonCommercialContent}
-                    />
-                    <Label for="nonCommercialContent"
-                      >Contenido no comercial (-20%)</Label
-                    >
-                  </div>
-                  <div class="flex items-center gap-2">
-                    <Checkbox id="lypSinc" bind:checked={lipSync} />
-                    <Label for="lypSinc">Sincro labial(+20%)</Label>
-                  </div>
-                  <div class="flex items-center gap-2">
-                    <Checkbox
-                      id="internetBroadcast"
-                      bind:checked={internetBroadcast}
-                    />
-                    <Label for="internetBroadcast"
-                      >Difusión en internet (+100%)</Label
-                    >
-                  </div>
-                </div>
-                <div class="flex gap-3 px-2">
-                  <div class="flex items-center gap-2">
-                    <Select.Root type="single" bind:value={narrativeMinutes}>
-                      <Label>Minutos</Label>
-                      <Input
-                        id="narrativeMinutes"
-                        bind:value={narrativeMinutes}
-                        type="number"
-                        placeholder="Minutos"
-                      />
-                    </Select.Root>
-                  </div>
-                  <div class="flex items-center gap-2">
-                    <Checkbox
-                      id="ispriceSuggestion"
-                      bind:checked={isPriceSuggested}
-                    />
-                    <Label for="ispriceSuggestion">Sugerir precio</Label>
-                    {#if isPriceSuggested}
-                      <Input
-                        id="suggestedPrice"
-                        bind:value={priceSuggested}
-                        type="number"
-                        placeholder="Precio sugerido"
-                      />
-                    {/if}
-                  </div>
-                  <Button
-                    type="button"
-                    class="col-span-2"
-                    variant="outline"
-                    bgColor="bg-[#22964F] text-white hover:bg-[#1a6d3b] hover:text-white"
-                    onclick={() => {
-                      serviceSelected = { service };
-                      calculateServicesSelectedPrice();
-                    }}>Agregar</Button
-                  >
-                </div>
-              </Accordion.Content>
-            </Accordion.Item>
-          {/if}
+          <ServiceItem
+            {service}
+            onAddPiece={(pieceName, svc, options) => handleAddPiece(pieceName, svc, options)}
+          />
         {/each}
       </Accordion.Root>
     </div>
 
     <div class="flex-1 min-w-[300px] w-full">
-      <div class="space-y-2 bg-white rounded-lg p-4 text-center">
-        {#if errorMessages}
-          <div
-            class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded"
-          >
-            {errorMessages}
-          </div>
-        {/if}
-        <h1 class="text-2xl font-bold mb-4">Total a pagar</h1>
-        {#if !totalContrato}
-          <span>No ha seleccionado ningún servicio.</span>
-        {:else}
-          {#each totalContrato.servicePrice as service, i (i)}
-            <div>
-              <div class="flex justify-between p-2 bg-gray-100 rounded">
-                <span>{service.pieceName}</span>
-                <span>{service.service}</span>
-                <span>${service.totalPriceWithDiscount}</span>
-                {#each service.serviceFlags as flag}
-                  {console.log(flag)}
-                  {#if flag != null && flag != false}
-                    <span class="text-sm text-gray-500">{flag.label}</span>
-                  {/if}
-                {/each}
-                <Button
-                  variant="outline"
-                  bgColor="bg-red-500 text-white hover:bg-red-600 hover:text-white"
-                  onclick={() => removeService(i)}>Eliminar</Button
-                >
-              </div>
-            </div>
-          {/each}
-          {#if totalContrato !== null}
-            <h1 class="text-2xl font-bold mt-4">
-              Total ${totalContrato.totalPrice}
-            </h1>
-          {/if}
-        {/if}
-      </div>
+      <ServiceSummary
+        {totalContrato}
+        {errorMessages}
+        onRemoveService={(i) => removeService(i)}
+        onRemoveAllServices={() => removeAllServices()}
+      />
     </div>
   </div>
 </div>

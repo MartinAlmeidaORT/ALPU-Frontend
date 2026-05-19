@@ -1,12 +1,4 @@
 <script lang="ts">
-  import * as Table from '$lib/components/ui/table/index.js';
-  import { Button } from '$lib/components/ui/button/index.js';
-  import { Input } from '$lib/components/ui/input/index.js';
-  import FieldGroup from '$lib/components/ui/field/field-group.svelte';
-  import { Checkbox } from '$lib/components/ui/checkbox/index.js';
-  import * as Field from '$lib/components/ui/field/index.js';
-  import * as Select from '$lib/components/ui/select/index.js';
-  import { Textarea } from '$lib/components/ui/textarea/index.js';
   import * as Accordion from '$lib/components/ui/accordion/index.js';
   import type { OperationResult } from '@urql/core';
   import {
@@ -14,9 +6,8 @@
     calculateServicePrice,
   } from '$lib/graphql/queries/service';
   import { onMount } from 'svelte';
-  import Label from '$lib/components/ui/label/label.svelte';
   import type { CampaignInput, CampaignServiceInput, PieceInput } from '$lib/graphql/schema';
-  import type { ServicesQuery } from '$lib/graphql/types/graphql';
+  import type { ServicesQuery, CalculateContractQuery } from '$lib/graphql/types/graphql';
   import ServiceItem from '$lib/components/service-item.svelte';
   import ServiceSummary from '$lib/components/service-summary.svelte';
 
@@ -30,11 +21,10 @@
   let errorMessages = $state<string | null>(null);
   let nombrePieza = $state('');
   let totalServices = $state<CampaignServiceInput[]>([]);
-  let totalContrato = $state<any>(null);
+  let totalContrato = $state<CalculateContractQuery['calculateContract'] | null>(null);
   let isInterior = $state(false);
   let isPriceSuggested = $state(false);
   let priceSuggested = $state(null);
-  let additionalPieces = $state< PieceInput[] >([]);
   let nonCommercialContent = $state(false);
   let internetBroadcast = $state(false);
   let lipSync = $state(false);
@@ -57,16 +47,24 @@
       }
     }
 
-    additionalPieces.push({ name: pieceName });
-    options.pieces = additionalPieces;
-    options.messageIVR = ivrMessage;
-    options.additionalMessageIVR = additionalPieces;
+    // Buscar si ya existe un servicio con el mismo serviceId
+    const existingServiceIndex = totalServices.findIndex(
+      (s) => s.serviceId === svc.serviceId
+    );
 
-    totalServices.push({
-      serviceId: svc.serviceId,
-      options: options,
-      pieces: additionalPieces,
-    });
+    if (existingServiceIndex !== -1) {
+      // Agregar la pieza al servicio existente
+      totalServices[existingServiceIndex].pieces?.push({ name: pieceName });
+    } else {
+      // Crear un nuevo servicio con la pieza
+      totalServices.push({
+        serviceId: svc.serviceId,
+        options: options,
+        pieces: [{ name: pieceName }],
+      });
+    }
+
+    totalServices = totalServices; // Trigger reactivity
 
     const input: CampaignInput = {
       broadcasterId: 1,
@@ -99,7 +97,6 @@
   async function removeAllServices() {
     totalServices = [];
     totalContrato = null;
-    additionalPieces = [];
     errorMessages = null;
     checkDurationErrors();
   }
@@ -127,6 +124,35 @@
     checkDurationErrors();
   }
 
+  async function removePiece(serviceIndex: number, pieceIndex: number) {
+    if (totalServices[serviceIndex].pieces) {
+      totalServices[serviceIndex].pieces = totalServices[serviceIndex].pieces!.filter(
+        (_, i) => i !== pieceIndex
+      );
+
+      // Si el servicio no tiene piezas, eliminar el servicio completo
+      if (totalServices[serviceIndex].pieces!.length === 0) {
+        await removeService(serviceIndex);
+        return;
+      }
+
+      totalServices = totalServices; // Trigger reactivity
+
+      const input: CampaignInput = {
+        broadcasterId: 1,
+        clientId: 2,
+        inCash: true,
+        campaign: "Test",
+        services: totalServices,
+      };
+
+      const result = await calculateServicePrice(input);
+      if (result != null) {
+        totalContrato = result.data?.calculateContract ?? null;
+      }
+    }
+  }
+
   async function checkDurationErrors() {
     let durationId = '';
     totalServices.forEach((service) => {
@@ -149,11 +175,11 @@
           class="grid grid-cols-[1fr_repeat(5,70px)] gap-2 px-2 py-2 border-b font-semibold text-xs"
         >
           <div></div>
-          <h2 class="text-center">1 semana</h2>
-          <h2 class="text-center">1 mes</h2>
-          <h2 class="text-center">3 meses</h2>
-          <h2 class="text-center">6 meses</h2>
-          <h2 class="text-center">1 año</h2>
+          <h2 class="text-center font-bold">1 semana</h2>
+          <h2 class="text-center font-bold">1 mes</h2>
+          <h2 class="text-center font-bold">3 meses</h2>
+          <h2 class="text-center font-bold">6 meses</h2>
+          <h2 class="text-center font-bold">1 año</h2>
         </div>
       </div>
       <Accordion.Root type="single" class="w-full" value="item-1">
@@ -172,6 +198,7 @@
         {errorMessages}
         onRemoveService={(i) => removeService(i)}
         onRemoveAllServices={() => removeAllServices()}
+        onRemovePiece={(serviceIndex, pieceIndex) => removePiece(serviceIndex, pieceIndex)}
       />
     </div>
   </div>

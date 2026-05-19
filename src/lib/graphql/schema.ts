@@ -612,6 +612,7 @@ export type PriceAdjustmentBreakdown = {
   amount: Scalars['Decimal']['output'];
   applyDiscount: Scalars['Decimal']['output'];
   key: Scalars['String']['output'];
+  name: Scalars['String']['output'];
   type: PriceAdjustmentType;
 };
 
@@ -623,6 +624,7 @@ export enum PriceAdjustmentType {
 export type PriceBreakdown = {
   __typename?: 'PriceBreakdown';
   adjustments: Array<PriceAdjustmentBreakdown>;
+  beforeDiscount: Scalars['Decimal']['output'];
   services: Array<ServiceBreakdown>;
   total: Scalars['Decimal']['output'];
 };
@@ -715,6 +717,7 @@ export type ServiceBreakdown = {
   __typename?: 'ServiceBreakdown';
   adjustments: Array<PriceAdjustmentBreakdown>;
   basePrice: Scalars['Decimal']['output'];
+  beforeDiscount: Scalars['Decimal']['output'];
   pieces: Array<PieceBreakdown>;
   serviceName: Scalars['String']['output'];
   serviceType: ServiceType;

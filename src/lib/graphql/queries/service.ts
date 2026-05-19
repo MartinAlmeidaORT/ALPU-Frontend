@@ -38,23 +38,31 @@ const CALCULATE_CONTRACT_MUTATION = graphql(`
   query CalculateContract($input: CampaignInput!) {
     calculateContract(input: $input) {
       total
+      beforeDiscount
       adjustments {
+        name
         key
         type
         amount
         applyDiscount
       }
       services {
+        pieces {
+          name
+          price
+        }
         serviceName
         basePrice
         subsequentPrice
         adjustments {
+          name
           key
           type
           amount
           applyDiscount
         }
         subTotal
+        beforeDiscount
       }
     }
   }

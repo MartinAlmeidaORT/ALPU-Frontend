@@ -26,26 +26,79 @@
   let narrativeMinutes = '';
   let ivrMessage = '';
   let broadcastInMassMedia = false;
-  let selectedDurationId = '';
+  let selectedPeriod = '';
+  let internalUse = false;
+  let additionalIvrMessage = 0;
+  let canIvrUpdate = false;
+  
 
   function handleAddPiece() {
-    const options: any = {
-      isInterior,
-      overridePrice: priceSuggested,
-    };
-
-    if (service.__typename === 'ServicePeriod') {
-      options.durationId = selectedDurationId;
-    } else if (service.__typename === 'ServiceDate') {
-      options.hasMassMediaBroadcast = broadcastInMassMedia;
-    } else if (service.__typename === 'ServiceIvr') {
-      options.messageIVR = ivrMessage;
-    } else if (service.__typename === 'ServiceNarrative') {
-      options.narrativeMinutes = parseInt(narrativeMinutes) || 0;
-      options.roleQuantity = parseInt(narrativeRoles);
-      options.isNonComercial = nonCommercialContent;
-      options.hasInternetPromo = internetBroadcast;
-      options.hasLipSync = lipSync;
+    const options: any = {};
+    switch (service.type) {
+      case 'TV_GENERIC':
+        options.period = selectedPeriod;
+        options.isInterior = isInterior;
+        break;
+      case 'TV_ZOCALO':
+        options.period = selectedPeriod;
+        options.isInterior = isInterior;
+        break;
+      case 'TV_HOST':
+        options.period = selectedPeriod;
+        options.isInterior = isInterior;
+        break;
+      case 'RADIO_GENERIC':
+        options.period = selectedPeriod;
+        options.isInterior = isInterior;
+        break;
+      case 'RADIO_ZOCALO':
+        options.period = selectedPeriod;
+        options.isInterior = isInterior;
+        break;
+      case 'RADIO_HOST':
+        options.period = selectedPeriod;
+        options.isInterior = isInterior;
+        break;
+      case 'INTERNET_VIDEO':
+        options.period = selectedPeriod;
+        break;
+      case 'INTERNET_AUDIO':
+        options.period = selectedPeriod;
+        break;
+      case 'CINEMA':
+        options.period = selectedPeriod;
+        options.isInterior = isInterior;
+        break;
+      case 'CAMERA':
+        options.period = selectedPeriod;
+        options.forInternalUse = internalUse;
+        break;
+      case 'NARRATIVE':
+        options.extraMinutes = parseInt(narrativeMinutes) || 0;
+        options.extraRoles = parseInt(narrativeRoles);
+        options.isNonCommercial = nonCommercialContent;
+        options.onInternet = internetBroadcast;
+        options.hasLipSync = lipSync;
+        options.priceOverride = priceSuggested;
+        break;
+      case 'IVR':
+        options.messageText = ivrMessage;
+        options.additionalMessages = additionalIvrMessage;
+        options.canUpdate = canIvrUpdate;
+        options.isInterior = isInterior;
+        options.priceOverride = priceSuggested;
+        break;
+      case 'EVENT':
+        options.forMassBroadcast = broadcastInMassMedia;
+        options.date = null; // Aquí podrías agregar un selector de fecha si es necesario
+        break;
+      case 'OTHERS_VIDEO':
+        break;
+      case 'OTHERS_AUDIO':
+        break;
+      case 'OTHERS':
+        options.period = selectedPeriod;
+        break;
     }
     onAddPiece(nombrePieza, service, options);
     resetForm();
@@ -63,7 +116,6 @@
     narrativeMinutes = '';
     ivrMessage = '';
     broadcastInMassMedia = false;
-    selectedDurationId = '';
   }
 
   function shouldShowInteriorDiscount(): boolean {
@@ -71,6 +123,12 @@
       service.name.includes('RADIO') ||
       service.name.includes('TELEVISIÓN') ||
       service.name.includes('CINE')
+    );
+  }
+
+  function shouldShowForInteralUse(): boolean {
+    return (
+      service.type == 'CAMERA'
     );
   }
 
@@ -93,7 +151,7 @@
         <Button
           variant="outline"
           bgColor="bg-[#1F5BB8] text-white hover:bg-[#1a4a94] hover:text-white"
-          onclick={() => (selectedDurationId = servicePrice.interval)}
+          onclick={() => (selectedPeriod = servicePrice.interval)}
           class="flex-1"
         >
           {servicePrice.basePrice}
@@ -110,7 +168,7 @@
             <Button
               variant="outline"
               bgColor="bg-[#1F5BB8] text-white hover:bg-[#1a4a94] hover:text-white"
-              onclick={() => (selectedDurationId = servicePrice.interval)}
+              onclick={() => (selectedPeriod = servicePrice.interval)}
               class="flex-1"
             >
               {servicePrice.extraPrice}
@@ -123,6 +181,12 @@
           <div class="flex items-center gap-2">
             <Checkbox id="discInterior_{service.serviceId}" bind:checked={isInterior} />
             <Label for="discInterior_{service.serviceId}">Descuento interior (-70%)</Label>
+          </div>
+        {/if}
+        {#if shouldShowForInteralUse()}
+          <div class="flex items-center gap-2">
+            <Checkbox id="forInternalUse_{service.serviceId}" bind:checked={internalUse} />
+            <Label for="forInternalUse_{service.serviceId}">Para uso interno</Label>
           </div>
         {/if}
         <div class="flex items-center gap-2">
@@ -212,6 +276,11 @@
               placeholder="Precio sugerido"
             />
           {/if}
+          <Checkbox
+            id="canIvrUpdate{service.serviceId}"
+            bind:checked={canIvrUpdate}
+          />
+          <Label for="canIvrUpdate{service.serviceId}">Actualizar IVR</Label>
         </div>
         <div class="flex items-center gap-2">
           <Label for="nombrePieza_{service.serviceId}">Nombre</Label>

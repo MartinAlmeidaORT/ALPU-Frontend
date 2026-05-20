@@ -62,13 +62,15 @@
     <div class="rounded-md border bg-white">
     <div class="flex items-center mx-1 py-4">
         <Input
-        placeholder="Nombre del contrato"
-        value={(table.getColumn("id")?.getFilterValue() as string) ?? ""}
+        placeholder="Buscar por cliente o broadcaster..."
+        value={(table.getColumn("broadcaster")?.getFilterValue() as string) ?? ""}
         onchange={(e) => {
-            table.getColumn("id")?.setFilterValue(e.currentTarget.value);
+            const value = e.currentTarget.value;
+            table.getColumn("broadcaster")?.setFilterValue(value);
         }}
         oninput={(e) => {
-            table.getColumn("id")?.setFilterValue(e.currentTarget.value);
+            const value = e.currentTarget.value;
+            table.getColumn("broadcaster")?.setFilterValue(value);
         }}
         class="max-w-sm"
         />

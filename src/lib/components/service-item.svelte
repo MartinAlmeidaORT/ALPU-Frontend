@@ -7,7 +7,7 @@
   import Label from '$lib/components/ui/label/label.svelte';
   import * as Select from '$lib/components/ui/select/index.js';
   import type { ServicesQuery } from '$lib/graphql/types/graphql';
-
+  import { toast } from "svelte-sonner";
   type Service = NonNullable<ServicesQuery['services']>[number];
 
   // Props
@@ -31,8 +31,15 @@
   let additionalIvrMessage = 0;
   let canIvrUpdate = false;
   
-
+            
   function handleAddPiece() {
+    if (!nombrePieza || nombrePieza.trim() === '') {
+      toast.error("Error al agregar un medio", {
+        description: "La pieza debe tener un nombre",
+      });
+      return;
+    }
+
     const options: any = {};
     switch (service.type) {
       case 'TV_GENERIC':
@@ -385,7 +392,9 @@
           class="col-span-2"
           variant="outline"
           bgColor="bg-[#22964F] text-white hover:bg-[#1a6d3b] hover:text-white"
-          onclick={() => handleAddPiece()}
+          onclick={() => {
+            handleAddPiece()}
+          }
         >
           Agregar
         </Button>

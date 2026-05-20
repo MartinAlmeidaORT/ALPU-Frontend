@@ -1,38 +1,35 @@
+import { fetchContracts } from '$lib/graphql/queries/contracts';
+import type { TableContract } from './columns';
+
 export async function load() {
- // logic to fetch payments data here
-// const payments = await getPayments();
-const contracts = [{
-    id: "1",
-    broadcasterName: "Broadcaster A",
-    AgencyName: "Agency X",
-    state: "Active"
-    },
-    {
-    id: "2",
-    broadcasterName: "Broadcaster B",
-    AgencyName: "Agency Y",
-    state: "Pending"
-    },
-    {
-    id: "3",
-    broadcasterName: "Broadcaster C",
-    AgencyName: "Agency Z",
-    state: "Inactive"
-    },
-    {
-    id: "4",
-    broadcasterName: "Broadcaster D",
-    AgencyName: "Agency W",
-    state: "Active"
-    },
-    {
-    id: "5",
-    broadcasterName: "Broadcaster E",
-    AgencyName: "Agency V",
-    state: "Pending"
+  try {
+    const result = await fetchContracts(10);
+    
+    
+    if (result.error) {
+      return {
+        contracts: [],
+        error: `GraphQL Error: ${result.error.message}`
+      };
     }
-];
- return {
-  contracts
- };
+    
+    if (!result.data) {
+      return {
+        contracts: [],
+        error: 'No data returned from GraphQL'
+      };
+    }
+    
+    const contracts = (result.data?.contracts?.nodes || []) as TableContract[];
+    
+    return {
+      contracts,
+      totalCount: result.data?.contracts?.totalCount || 0
+    };
+  } catch (error) {
+    return {
+      contracts: [],
+      error: error instanceof Error ? error.message : 'Unknown error'
+    };
+  }
 }

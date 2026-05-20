@@ -35,6 +35,16 @@ export type AddressFilterInput = {
   street?: InputMaybe<StringOperationFilterInput>;
 };
 
+export type AddressSortInput = {
+  addressId?: InputMaybe<SortEnumType>;
+  city?: InputMaybe<SortEnumType>;
+  country?: InputMaybe<CountrySortInput>;
+  countryCode?: InputMaybe<SortEnumType>;
+  department?: InputMaybe<DepartmentSortInput>;
+  departmentId?: InputMaybe<SortEnumType>;
+  street?: InputMaybe<SortEnumType>;
+};
+
 export type Agency = {
   __typename?: 'Agency';
   agencyId: Scalars['Int']['output'];
@@ -49,10 +59,21 @@ export type AgencyFilterInput = {
   or?: InputMaybe<Array<AgencyFilterInput>>;
 };
 
+export type AgencySortInput = {
+  agencyId?: InputMaybe<SortEnumType>;
+  name?: InputMaybe<SortEnumType>;
+};
+
 export type AuthPayload = {
   __typename?: 'AuthPayload';
   token: Scalars['String']['output'];
   user?: Maybe<User>;
+};
+
+export type BaseCampaignService = {
+  basePriceOverride: Scalars['Decimal']['output'];
+  campaign: Campaign;
+  pieces: Array<Piece>;
 };
 
 export type BaseCampaignServiceFilterInput = {
@@ -149,6 +170,12 @@ export type BroadcasterCategoryFilterInput = {
   or?: InputMaybe<Array<BroadcasterCategoryFilterInput>>;
 };
 
+export type BroadcasterCategorySortInput = {
+  broadcasterCategoryId?: InputMaybe<SortEnumType>;
+  lifetimeJobCount?: InputMaybe<SortEnumType>;
+  name?: InputMaybe<SortEnumType>;
+};
+
 export type BroadcasterFilterInput = {
   address?: InputMaybe<AddressFilterInput>;
   addressId?: InputMaybe<IntOperationFilterInput>;
@@ -168,6 +195,35 @@ export type BroadcasterFilterInput = {
   rut?: InputMaybe<StringOperationFilterInput>;
   userId?: InputMaybe<IntOperationFilterInput>;
   userState?: InputMaybe<UserStateOperationFilterInput>;
+};
+
+export type BroadcasterSortInput = {
+  address?: InputMaybe<AddressSortInput>;
+  addressId?: InputMaybe<SortEnumType>;
+  category?: InputMaybe<BroadcasterCategorySortInput>;
+  categoryId?: InputMaybe<SortEnumType>;
+  email?: InputMaybe<SortEnumType>;
+  firstName?: InputMaybe<SortEnumType>;
+  googleId?: InputMaybe<SortEnumType>;
+  lastName?: InputMaybe<SortEnumType>;
+  password?: InputMaybe<SortEnumType>;
+  rut?: InputMaybe<SortEnumType>;
+  userId?: InputMaybe<SortEnumType>;
+  userState?: InputMaybe<SortEnumType>;
+};
+
+export type CameraCampaignService = BaseCampaignService & PeriodCampaignService & {
+  __typename?: 'CameraCampaignService';
+  basePriceOverride: Scalars['Decimal']['output'];
+  campaign: Campaign;
+  pieces: Array<Piece>;
+};
+
+export type Campaign = {
+  __typename?: 'Campaign';
+  contract: Contract;
+  name: Scalars['String']['output'];
+  services: Array<BaseCampaignService>;
 };
 
 export type CampaignFilterInput = {
@@ -192,6 +248,13 @@ export type CampaignServiceInput = {
   options: Scalars['JSON']['input'];
   pieces: Array<PieceInput>;
   serviceId: Scalars['Int']['input'];
+};
+
+export type CinemaCampaignService = BaseCampaignService & PeriodCampaignService & {
+  __typename?: 'CinemaCampaignService';
+  basePriceOverride: Scalars['Decimal']['output'];
+  campaign: Campaign;
+  pieces: Array<Piece>;
 };
 
 export type Client = User & {
@@ -225,6 +288,21 @@ export type ClientFilterInput = {
   userState?: InputMaybe<UserStateOperationFilterInput>;
 };
 
+export type ClientSortInput = {
+  address?: InputMaybe<AddressSortInput>;
+  addressId?: InputMaybe<SortEnumType>;
+  agency?: InputMaybe<AgencySortInput>;
+  agencyId?: InputMaybe<SortEnumType>;
+  email?: InputMaybe<SortEnumType>;
+  firstName?: InputMaybe<SortEnumType>;
+  googleId?: InputMaybe<SortEnumType>;
+  lastName?: InputMaybe<SortEnumType>;
+  password?: InputMaybe<SortEnumType>;
+  rut?: InputMaybe<SortEnumType>;
+  userId?: InputMaybe<SortEnumType>;
+  userState?: InputMaybe<SortEnumType>;
+};
+
 export type CompleteGoogleSignUpBroadcasterInput = {
   city: Scalars['String']['input'];
   countryCode: Scalars['String']['input'];
@@ -250,13 +328,30 @@ export type CompleteGoogleSignUpClientInput = {
   subject: Scalars['String']['input'];
 };
 
+export type Contract = {
+  __typename?: 'Contract';
+  broadcaster: Broadcaster;
+  broadcasterApproved: Scalars['Boolean']['output'];
+  campaigns: Array<Campaign>;
+  client: Client;
+  clientApproved: Scalars['Boolean']['output'];
+  contractId: Scalars['Int']['output'];
+  country: Country;
+  countryCode: Scalars['String']['output'];
+  date: Scalars['LocalDate']['output'];
+  dueDate: Scalars['LocalDate']['output'];
+  state: ContractState;
+};
+
 export type ContractFilterInput = {
   and?: InputMaybe<Array<ContractFilterInput>>;
   bills?: InputMaybe<ListFilterInputTypeOfBillFilterInput>;
   broadcaster?: InputMaybe<BroadcasterFilterInput>;
+  broadcasterApproved?: InputMaybe<BooleanOperationFilterInput>;
   broadcasterId?: InputMaybe<IntOperationFilterInput>;
   campaigns?: InputMaybe<ListFilterInputTypeOfCampaignFilterInput>;
   client?: InputMaybe<ClientFilterInput>;
+  clientApproved?: InputMaybe<BooleanOperationFilterInput>;
   clientId?: InputMaybe<IntOperationFilterInput>;
   contractId?: InputMaybe<IntOperationFilterInput>;
   country?: InputMaybe<CountryFilterInput>;
@@ -264,8 +359,61 @@ export type ContractFilterInput = {
   date?: InputMaybe<LocalDateOperationFilterInput>;
   dueDate?: InputMaybe<LocalDateOperationFilterInput>;
   or?: InputMaybe<Array<ContractFilterInput>>;
+  state?: InputMaybe<ContractStateOperationFilterInput>;
   termYears?: InputMaybe<IntOperationFilterInput>;
   totalPrice?: InputMaybe<DecimalOperationFilterInput>;
+};
+
+export type ContractSortInput = {
+  broadcaster?: InputMaybe<BroadcasterSortInput>;
+  broadcasterApproved?: InputMaybe<SortEnumType>;
+  broadcasterId?: InputMaybe<SortEnumType>;
+  client?: InputMaybe<ClientSortInput>;
+  clientApproved?: InputMaybe<SortEnumType>;
+  clientId?: InputMaybe<SortEnumType>;
+  contractId?: InputMaybe<SortEnumType>;
+  country?: InputMaybe<CountrySortInput>;
+  countryCode?: InputMaybe<SortEnumType>;
+  date?: InputMaybe<SortEnumType>;
+  dueDate?: InputMaybe<SortEnumType>;
+  state?: InputMaybe<SortEnumType>;
+  termYears?: InputMaybe<SortEnumType>;
+  totalPrice?: InputMaybe<SortEnumType>;
+};
+
+export enum ContractState {
+  Approved = 'APPROVED',
+  Canceled = 'CANCELED',
+  Pending = 'PENDING'
+}
+
+export type ContractStateOperationFilterInput = {
+  eq?: InputMaybe<ContractState>;
+  in?: InputMaybe<Array<ContractState>>;
+  neq?: InputMaybe<ContractState>;
+  nin?: InputMaybe<Array<ContractState>>;
+};
+
+/** A connection to a list of items. */
+export type ContractsConnection = {
+  __typename?: 'ContractsConnection';
+  /** A list of edges. */
+  edges?: Maybe<Array<ContractsEdge>>;
+  /** A flattened list of the nodes. */
+  nodes?: Maybe<Array<Contract>>;
+  /** Information to aid in pagination. */
+  pageInfo: PageInfo;
+  /** Identifies the total count of items in the connection. */
+  totalCount: Scalars['Int']['output'];
+};
+
+/** An edge in a connection. */
+export type ContractsEdge = {
+  __typename?: 'ContractsEdge';
+  /** A cursor for use in pagination. */
+  cursor: Scalars['String']['output'];
+  /** The item at the end of the edge. */
+  node: Contract;
 };
 
 export type Country = {
@@ -285,6 +433,13 @@ export type CountryFilterInput = {
   or?: InputMaybe<Array<CountryFilterInput>>;
   region?: InputMaybe<RegionFilterInput>;
   regionId?: InputMaybe<IntOperationFilterInput>;
+};
+
+export type CountrySortInput = {
+  countryCode?: InputMaybe<SortEnumType>;
+  name?: InputMaybe<SortEnumType>;
+  region?: InputMaybe<RegionSortInput>;
+  regionId?: InputMaybe<SortEnumType>;
 };
 
 export type DateTimeOperationFilterInput = {
@@ -342,6 +497,21 @@ export type DepartmentFilterInput = {
   or?: InputMaybe<Array<DepartmentFilterInput>>;
 };
 
+export type DepartmentSortInput = {
+  country?: InputMaybe<CountrySortInput>;
+  countryCode?: InputMaybe<SortEnumType>;
+  departmentId?: InputMaybe<SortEnumType>;
+  name?: InputMaybe<SortEnumType>;
+};
+
+export type EventCampaignService = BaseCampaignService & {
+  __typename?: 'EventCampaignService';
+  basePriceOverride: Scalars['Decimal']['output'];
+  campaign: Campaign;
+  date: Scalars['LocalDate']['output'];
+  pieces: Array<Piece>;
+};
+
 export type GoogleAuth = {
   __typename?: 'GoogleAuth';
   email?: Maybe<Scalars['String']['output']>;
@@ -378,6 +548,13 @@ export enum Interval {
   SixMonths = 'SIX_MONTHS',
   ThreeMonths = 'THREE_MONTHS'
 }
+
+export type IvrCampaignService = BaseCampaignService & {
+  __typename?: 'IvrCampaignService';
+  basePriceOverride: Scalars['Decimal']['output'];
+  campaign: Campaign;
+  pieces: Array<Piece>;
+};
 
 export type ListFilterInputTypeOfBaseCampaignServiceFilterInput = {
   all?: InputMaybe<BaseCampaignServiceFilterInput>;
@@ -542,6 +719,13 @@ export type MutationRegisterClientArgs = {
   input: RegisterClientInput;
 };
 
+export type NarrativeCampaignService = BaseCampaignService & {
+  __typename?: 'NarrativeCampaignService';
+  basePriceOverride: Scalars['Decimal']['output'];
+  campaign: Campaign;
+  pieces: Array<Piece>;
+};
+
 export type NotificationFilterInput = {
   and?: InputMaybe<Array<NotificationFilterInput>>;
   date?: InputMaybe<DateTimeOperationFilterInput>;
@@ -554,6 +738,26 @@ export type NotificationFilterInput = {
   userId?: InputMaybe<IntOperationFilterInput>;
 };
 
+export type OtherMediaCampaignService = BaseCampaignService & PeriodCampaignService & {
+  __typename?: 'OtherMediaCampaignService';
+  basePriceOverride: Scalars['Decimal']['output'];
+  campaign: Campaign;
+  pieces: Array<Piece>;
+};
+
+/** Information about pagination in a connection. */
+export type PageInfo = {
+  __typename?: 'PageInfo';
+  /** When paginating forwards, the cursor to continue. */
+  endCursor?: Maybe<Scalars['String']['output']>;
+  /** Indicates whether more edges exist following the set defined by the clients arguments. */
+  hasNextPage: Scalars['Boolean']['output'];
+  /** Indicates whether more edges exist prior the set defined by the clients arguments. */
+  hasPreviousPage: Scalars['Boolean']['output'];
+  /** When paginating backwards, the cursor to continue. */
+  startCursor?: Maybe<Scalars['String']['output']>;
+};
+
 export type Period = {
   __typename?: 'Period';
   basePrice: Scalars['Decimal']['output'];
@@ -562,6 +766,12 @@ export type Period = {
   interval: Interval;
   service: ServicePeriod;
   serviceId: Scalars['Int']['output'];
+};
+
+export type PeriodCampaignService = {
+  basePriceOverride: Scalars['Decimal']['output'];
+  campaign: Campaign;
+  pieces: Array<Piece>;
 };
 
 export type PeriodServiceSortInput = {
@@ -632,6 +842,7 @@ export type PriceBreakdown = {
 export type Query = {
   __typename?: 'Query';
   calculateContract: PriceBreakdown;
+  contracts?: Maybe<ContractsConnection>;
   countries: Array<Country>;
   departments: Array<Department>;
   /** Healthcheck */
@@ -646,6 +857,15 @@ export type QueryCalculateContractArgs = {
 };
 
 
+export type QueryContractsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  order?: InputMaybe<Array<ContractSortInput>>;
+};
+
+
 export type QueryDepartmentsArgs = {
   where?: InputMaybe<DepartmentFilterInput>;
 };
@@ -653,6 +873,13 @@ export type QueryDepartmentsArgs = {
 
 export type QueryServicesArgs = {
   order?: InputMaybe<Array<BaseServiceSortInput>>;
+};
+
+export type RadioCampaignService = BaseCampaignService & PeriodCampaignService & {
+  __typename?: 'RadioCampaignService';
+  basePriceOverride: Scalars['Decimal']['output'];
+  campaign: Campaign;
+  pieces: Array<Piece>;
 };
 
 export type RangeIvr = {
@@ -677,6 +904,11 @@ export type RegionFilterInput = {
   multiplier?: InputMaybe<DecimalOperationFilterInput>;
   or?: InputMaybe<Array<RegionFilterInput>>;
   regionId?: InputMaybe<IntOperationFilterInput>;
+};
+
+export type RegionSortInput = {
+  multiplier?: InputMaybe<SortEnumType>;
+  regionId?: InputMaybe<SortEnumType>;
 };
 
 export type RegisterBroadcasterInput = {
@@ -856,6 +1088,13 @@ export type StringOperationFilterInput = {
   nstartsWith?: InputMaybe<Scalars['String']['input']>;
   or?: InputMaybe<Array<StringOperationFilterInput>>;
   startsWith?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type TvCampaignService = BaseCampaignService & PeriodCampaignService & {
+  __typename?: 'TvCampaignService';
+  basePriceOverride: Scalars['Decimal']['output'];
+  campaign: Campaign;
+  pieces: Array<Piece>;
 };
 
 export type User = {

@@ -4,6 +4,7 @@
   import * as NavigationMenu from '$lib/components/ui/navigation-menu/index.js';
   import { navigationMenuTriggerStyle } from '$lib/components/ui/navigation-menu/navigation-menu-trigger.svelte';
   import { IsMobile } from '$lib/components/hooks/is-mobile.svelte.js';
+  import { Toaster } from '$lib/components/ui/sonner';
 
   let { children } = $props();
   let logoutFormRef: HTMLFormElement;
@@ -56,5 +57,7 @@
     </NavigationMenu.List>
   </NavigationMenu.Root>
 </div>
+
+<Toaster position="top-center" style="--normal-bg: #FADBD8;" />
 
 {@render children()}

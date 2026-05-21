@@ -30,7 +30,7 @@ export async function load({ cookies, url }) {
       );
     }
 
-    cookies.set('session_id', resultData.token, {
+    cookies.set('session_id', JSON.stringify(resultData), {
       path: '/',
       httpOnly: true,
       sameSite: 'lax',

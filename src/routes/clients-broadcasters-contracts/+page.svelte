@@ -1,13 +1,16 @@
 <script lang="ts">
- import DataTable from "./data-table.svelte";
- import { columns } from "./columns.js";
- import { Alert, AlertDescription, AlertTitle } from "$lib/components/ui/alert/index.js";
- import { setContext } from "svelte";
- import type { PageData } from "./$types";
+  import DataTable from './data-table.svelte';
+  import { columns } from './columns.js';
+  import {
+    Alert,
+    AlertDescription,
+    AlertTitle,
+  } from '$lib/components/ui/alert/index.js';
+  import { setContext } from 'svelte';
+  import type { PageData } from './$types';
 
- 
- let { data } : { data: PageData } = $props();
- setContext("token", data.token);
+  let { data }: { data: PageData } = $props();
+  setContext('token', data.token);
 </script>
 
 {#if data.error}
@@ -21,7 +24,9 @@
   <div class="p-4">
     <Alert>
       <AlertTitle>Sin contratos</AlertTitle>
-      <AlertDescription>No se encontraron contratos disponibles</AlertDescription>
+      <AlertDescription
+        >No se encontraron contratos disponibles</AlertDescription
+      >
     </Alert>
   </div>
 {:else}

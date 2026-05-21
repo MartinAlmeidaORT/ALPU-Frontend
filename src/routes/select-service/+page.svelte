@@ -7,12 +7,19 @@
     calculateServicePrice,
   } from '$lib/graphql/queries/service';
   import { onMount } from 'svelte';
-  import type { CampaignInput, CampaignServiceInput, PieceInput } from '$lib/graphql/schema';
-  import type { ServicesQuery, CalculateContractQuery } from '$lib/graphql/types/graphql';
+  import type {
+    CampaignInput,
+    CampaignServiceInput,
+    PieceInput,
+  } from '$lib/graphql/schema';
+  import type {
+    ServicesQuery,
+    CalculateContractQuery,
+  } from '$lib/graphql/types/graphql';
   import ServiceItem from '$lib/components/service-item.svelte';
   import ServiceSummary from '$lib/components/service-summary.svelte';
   import SearchClientBroadcaster from '$lib/components/search-client-broadcaster.svelte';
-  let { data }: {data:PageData} = $props();
+  let { data }: { data: PageData } = $props();
 
   type ServiceSelected = {
     service: NonNullable<ServicesQuery['services']>[number];
@@ -24,7 +31,9 @@
   let errorMessages = $state<string | null>(null);
   let nombrePieza = $state('');
   let totalServices = $state<CampaignServiceInput[]>([]);
-  let totalContrato = $state<CalculateContractQuery['calculateContract'] | null>(null);
+  let totalContrato = $state<
+    CalculateContractQuery['calculateContract'] | null
+  >(null);
   let isInterior = $state(false);
   let isPriceSuggested = $state(false);
   let priceSuggested = $state(null);
@@ -52,7 +61,7 @@
 
     // Buscar si ya existe un servicio con el mismo serviceId
     const existingServiceIndex = totalServices.findIndex(
-      (s) => s.serviceId === svc.serviceId
+      (s) => s.serviceId === svc.serviceId,
     );
 
     if (existingServiceIndex !== -1) {
@@ -106,7 +115,7 @@
 
   async function removeService(index: number) {
     totalServices = totalServices.filter((_, i) => i !== index);
-    
+
     if (totalServices.length === 0) {
       totalContrato = null;
       return;
@@ -116,7 +125,7 @@
       broadcasterId: 1,
       clientId: 2,
       inCash: true,
-      campaign: "Test",
+      campaign: 'Test',
       services: totalServices,
     };
 
@@ -129,9 +138,9 @@
 
   async function removePiece(serviceIndex: number, pieceIndex: number) {
     if (totalServices[serviceIndex].pieces) {
-      totalServices[serviceIndex].pieces = totalServices[serviceIndex].pieces!.filter(
-        (_, i) => i !== pieceIndex
-      );
+      totalServices[serviceIndex].pieces = totalServices[
+        serviceIndex
+      ].pieces!.filter((_, i) => i !== pieceIndex);
 
       // Si el servicio no tiene piezas, eliminar el servicio completo
       if (totalServices[serviceIndex].pieces!.length === 0) {
@@ -145,7 +154,7 @@
         broadcasterId: 1,
         clientId: 2,
         inCash: true,
-        campaign: "Test",
+        campaign: 'Test',
         services: totalServices,
       };
 
@@ -189,20 +198,22 @@
         {#each services as service (service.serviceId)}
           <ServiceItem
             {service}
-            onAddPiece={(pieceName, svc, options) => handleAddPiece(pieceName, svc, options)}
+            onAddPiece={(pieceName, svc, options) =>
+              handleAddPiece(pieceName, svc, options)}
           />
         {/each}
       </Accordion.Root>
     </div>
 
     <div class="flex-1 min-w-[300px] w-full">
-      <SearchClientBroadcaster user={data.user}/>
+      <SearchClientBroadcaster user={data.user} />
       <ServiceSummary
         {totalContrato}
         {errorMessages}
         onRemoveService={(i) => removeService(i)}
         onRemoveAllServices={() => removeAllServices()}
-        onRemovePiece={(serviceIndex, pieceIndex) => removePiece(serviceIndex, pieceIndex)}
+        onRemovePiece={(serviceIndex, pieceIndex) =>
+          removePiece(serviceIndex, pieceIndex)}
       />
     </div>
   </div>

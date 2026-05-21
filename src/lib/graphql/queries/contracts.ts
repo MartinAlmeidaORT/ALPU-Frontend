@@ -1,4 +1,3 @@
-
 import { graphql } from '../types';
 
 export const CONTRACTS_QUERY = graphql(`
@@ -33,7 +32,7 @@ export const CONTRACTS_QUERY = graphql(`
 `);
 
 export const UPDATE_CONTRACT_QUERY = graphql(`
-  mutation UpdateContractState($input: UpdateContractStateInput!){
+  mutation UpdateContractState($input: UpdateContractStateInput!) {
     updateContractState(input: $input) {
       contractId
       state
@@ -45,7 +44,6 @@ export const UPDATE_CONTRACT_QUERY = graphql(`
         firstName
         lastName
       }
-   }
+    }
   }
 `);
-

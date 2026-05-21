@@ -1,8 +1,10 @@
-import type { ColumnDef } from "@tanstack/table-core";
-import { createRawSnippet } from "svelte";
-import { renderSnippet } from "$lib/components/ui/data-table/index.js";
-import { renderComponent } from "$lib/components/ui/data-table/index.js";
-import DataTableActions from "./data-table-actions.svelte";
+import {
+  renderComponent,
+  renderSnippet,
+} from '$lib/components/ui/data-table/index.js';
+import type { ColumnDef } from '@tanstack/table-core';
+import { createRawSnippet } from 'svelte';
+import DataTableActions from './data-table-actions.svelte';
 
 export type TableContract = {
   contractId: number;
@@ -24,7 +26,7 @@ export type TableContract = {
 
 export const columns: ColumnDef<TableContract>[] = [
   {
-    accessorKey: "contractId",
+    accessorKey: 'contractId',
     header: () => {
       const contractHeaderSnippet = createRawSnippet(() => ({
         render: () => `<div class="text-start">ID Contrato</div>`,
@@ -36,7 +38,7 @@ export const columns: ColumnDef<TableContract>[] = [
     },
   },
   {
-    accessorKey: "broadcaster",
+    accessorKey: 'broadcaster',
     header: () => {
       const broadcasterHeaderSnippet = createRawSnippet(() => ({
         render: () => `<div class="text-start">Broadcaster</div>`,
@@ -47,16 +49,21 @@ export const columns: ColumnDef<TableContract>[] = [
       return `${row.original.broadcaster.firstName} ${row.original.broadcaster.lastName}`;
     },
     filterFn: (row, columnId, filterValue) => {
-      const broadcasterFullName = `${row.original.broadcaster.firstName} ${row.original.broadcaster.lastName}`.toLowerCase();
-      const clientFullName = `${row.original.client.firstName} ${row.original.client.lastName}`.toLowerCase();
+      const broadcasterFullName =
+        `${row.original.broadcaster.firstName} ${row.original.broadcaster.lastName}`.toLowerCase();
+      const clientFullName =
+        `${row.original.client.firstName} ${row.original.client.lastName}`.toLowerCase();
       const searchValue = (filterValue as string).toLowerCase();
-      
+
       // Devuelve true si coincide en broadcaster O client
-      return broadcasterFullName.includes(searchValue) || clientFullName.includes(searchValue);
+      return (
+        broadcasterFullName.includes(searchValue) ||
+        clientFullName.includes(searchValue)
+      );
     },
   },
   {
-    accessorKey: "client",
+    accessorKey: 'client',
     header: () => {
       const clientHeaderSnippet = createRawSnippet(() => ({
         render: () => `<div class="text-start">Cliente</div>`,
@@ -72,7 +79,7 @@ export const columns: ColumnDef<TableContract>[] = [
     },
   },
   {
-    accessorKey: "agency",
+    accessorKey: 'agency',
     header: () => {
       const agencyHeaderSnippet = createRawSnippet(() => ({
         render: () => `<div class="text-start">Agencia</div>`,
@@ -84,7 +91,7 @@ export const columns: ColumnDef<TableContract>[] = [
     },
   },
   {
-    accessorKey: "state",
+    accessorKey: 'state',
     header: () => {
       const stateHeaderSnippet = createRawSnippet(() => ({
         render: () => `<div class="text-start">Estado</div>`,
@@ -93,16 +100,16 @@ export const columns: ColumnDef<TableContract>[] = [
     },
     cell: ({ row }) => {
       const stateMap: Record<string, string> = {
-        "PENDING": "Pendiente",
-        "APPROVED": "Activo",
-        "COMPLETED": "Completado",
-        "CANCELED": "Cancelado"
+        PENDING: 'Pendiente',
+        APPROVED: 'Activo',
+        COMPLETED: 'Completado',
+        CANCELED: 'Cancelado',
       };
       return stateMap[row.original.state] || row.original.state;
     },
   },
   {
-    accessorKey: "date",
+    accessorKey: 'date',
     header: () => {
       const dateHeaderSnippet = createRawSnippet(() => ({
         render: () => `<div class="text-start">Fecha</div>`,
@@ -114,7 +121,7 @@ export const columns: ColumnDef<TableContract>[] = [
     },
   },
   {
-    accessorKey: "dueDate",
+    accessorKey: 'dueDate',
     header: () => {
       const dueDateHeaderSnippet = createRawSnippet(() => ({
         render: () => `<div class="text-start">Fecha Vencimiento</div>`,
@@ -125,8 +132,8 @@ export const columns: ColumnDef<TableContract>[] = [
       return new Date(row.original.dueDate).toLocaleDateString();
     },
   },
- {
-    id: "actions",
+  {
+    id: 'actions',
     cell: ({ row }) => {
       return renderComponent(DataTableActions, { contract: row.original });
     },

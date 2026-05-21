@@ -7,12 +7,16 @@
   import Label from '$lib/components/ui/label/label.svelte';
   import * as Select from '$lib/components/ui/select/index.js';
   import type { ServicesQuery } from '$lib/graphql/types/graphql';
-  import { toast } from "svelte-sonner";
+  import { toast } from 'svelte-sonner';
   type Service = NonNullable<ServicesQuery['services']>[number];
 
   // Props
   export let service: Service;
-  export let onAddPiece: (pieceName: string, svc: Service, options: any) => void = () => {};
+  export let onAddPiece: (
+    pieceName: string,
+    svc: Service,
+    options: any,
+  ) => void = () => {};
 
   // Local state
   let isInterior = false;
@@ -30,12 +34,11 @@
   let internalUse = false;
   let additionalIvrMessage = 0;
   let canIvrUpdate = false;
-  
-            
+
   function handleAddPiece() {
     if (!nombrePieza || nombrePieza.trim() === '') {
-      toast.error("Error al agregar un medio", {
-        description: "La pieza debe tener un nombre",
+      toast.error('Error al agregar un medio', {
+        description: 'La pieza debe tener un nombre',
       });
       return;
     }
@@ -134,9 +137,7 @@
   }
 
   function shouldShowForInteralUse(): boolean {
-    return (
-      service.type == 'CAMERA'
-    );
+    return service.type == 'CAMERA';
   }
 
   function shouldShowSubsiguiente(): boolean {
@@ -153,7 +154,8 @@
     <Accordion.Trigger
       class="grid grid-cols-[1fr_repeat(5,70px)] gap-2 min-h-16 px-2 items-center"
     >
-      <span class="truncate hover:underline cursor-pointer">{service.name}</span>
+      <span class="truncate hover:underline cursor-pointer">{service.name}</span
+      >
       {#each service.periods as servicePrice}
         <Button
           variant="outline"
@@ -186,14 +188,24 @@
       <div class="flex gap-3 px-2">
         {#if shouldShowInteriorDiscount()}
           <div class="flex items-center gap-2">
-            <Checkbox id="discInterior_{service.serviceId}" bind:checked={isInterior} />
-            <Label for="discInterior_{service.serviceId}">Descuento interior (-70%)</Label>
+            <Checkbox
+              id="discInterior_{service.serviceId}"
+              bind:checked={isInterior}
+            />
+            <Label for="discInterior_{service.serviceId}"
+              >Descuento interior (-70%)</Label
+            >
           </div>
         {/if}
         {#if shouldShowForInteralUse()}
           <div class="flex items-center gap-2">
-            <Checkbox id="forInternalUse_{service.serviceId}" bind:checked={internalUse} />
-            <Label for="forInternalUse_{service.serviceId}">Para uso interno</Label>
+            <Checkbox
+              id="forInternalUse_{service.serviceId}"
+              bind:checked={internalUse}
+            />
+            <Label for="forInternalUse_{service.serviceId}"
+              >Para uso interno</Label
+            >
           </div>
         {/if}
         <div class="flex items-center gap-2">
@@ -274,7 +286,9 @@
             id="ispriceSuggestion_{service.serviceId}"
             bind:checked={isPriceSuggested}
           />
-          <Label for="ispriceSuggestion_{service.serviceId}">Sugerir precio</Label>
+          <Label for="ispriceSuggestion_{service.serviceId}"
+            >Sugerir precio</Label
+          >
           {#if isPriceSuggested}
             <Input
               id="suggestedPrice_{service.serviceId}"
@@ -377,7 +391,9 @@
             id="ispriceSuggestion_{service.serviceId}"
             bind:checked={isPriceSuggested}
           />
-          <Label for="ispriceSuggestion_{service.serviceId}">Sugerir precio</Label>
+          <Label for="ispriceSuggestion_{service.serviceId}"
+            >Sugerir precio</Label
+          >
           {#if isPriceSuggested}
             <Input
               id="suggestedPrice_{service.serviceId}"
@@ -393,8 +409,8 @@
           variant="outline"
           bgColor="bg-[#22964F] text-white hover:bg-[#1a6d3b] hover:text-white"
           onclick={() => {
-            handleAddPiece()}
-          }
+            handleAddPiece();
+          }}
         >
           Agregar
         </Button>

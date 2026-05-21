@@ -1,9 +1,8 @@
 import { createUrqlClient } from '$lib/graphql/client';
 import type { OperationResult } from '@urql/core';
+import type { CampaignInput } from '../schema';
 import { graphql } from '../types';
-import type { CampaignInput, Service } from '../schema';
 import type { CalculateContractQuery, ServicesQuery } from '../types/graphql';
-
 
 const SERVICE_QUERY = graphql(`
   query services {
@@ -22,8 +21,7 @@ const SERVICE_QUERY = graphql(`
         additionalMessagePrice
       }
       ... on ServicePeriod {
-        periods(order: { basePrice: ASC}) 
-        {
+        periods(order: { basePrice: ASC }) {
           basePrice
           extraPrice
           firstExtraPrice

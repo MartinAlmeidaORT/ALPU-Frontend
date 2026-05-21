@@ -46,20 +46,16 @@ export const actions = {
           ],
         });
       }
-
       if (result.data) {
         const resultData = result.data[dataKey];
-
-        const token = resultData.token;
-
-        if (!token) {
+        if (!resultData?.token) {
           return fail(500, {
             data: null,
             messages: ['No token received'],
           });
         }
 
-        cookies.set('session_id', token, {
+        cookies.set('session_id', JSON.stringify(resultData), {
           path: '/',
           httpOnly: true,
           sameSite: 'strict',

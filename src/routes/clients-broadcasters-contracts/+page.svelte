@@ -2,8 +2,12 @@
  import DataTable from "./data-table.svelte";
  import { columns } from "./columns.js";
  import { Alert, AlertDescription, AlertTitle } from "$lib/components/ui/alert/index.js";
+ import { setContext } from "svelte";
+ import type { PageData } from "./$types";
+
  
- let { data } = $props();
+ let { data } : { data: PageData } = $props();
+ setContext("token", data.token);
 </script>
 
 {#if data.error}

@@ -1,9 +1,7 @@
-import { createUrqlClient } from '$lib/graphql/client';
-import type { OperationResult } from '@urql/core';
-import { graphql } from '../types';
-import type { ContractsQuery } from '../types/graphql';
 
-const CONTRACTS_QUERY = graphql(`
+import { graphql } from '../types';
+
+export const CONTRACTS_QUERY = graphql(`
   query contracts($first: Int, $after: String) {
     contracts(first: $first, after: $after) {
       nodes {
@@ -34,11 +32,20 @@ const CONTRACTS_QUERY = graphql(`
   }
 `);
 
-export async function fetchContracts(
-  first: number = 3,
-  after?: string,
-): Promise<OperationResult<ContractsQuery>> {
-  return await createUrqlClient()
-    .query(CONTRACTS_QUERY, { first, after })
-    .toPromise();
-}
+export const UPDATE_CONTRACT_QUERY = graphql(`
+  mutation UpdateContractState($input: UpdateContractStateInput!){
+    updateContractState(input: $input) {
+      contractId
+      state
+      broadcaster {
+        firstName
+        lastName
+      }
+      client {
+        firstName
+        lastName
+      }
+   }
+  }
+`);
+

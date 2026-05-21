@@ -64,6 +64,16 @@ export type AgencySortInput = {
   name?: InputMaybe<SortEnumType>;
 };
 
+/** Defines when a policy shall be executed. */
+export enum ApplyPolicy {
+  /** After the resolver was executed. */
+  AfterResolver = 'AFTER_RESOLVER',
+  /** Before the resolver was executed. */
+  BeforeResolver = 'BEFORE_RESOLVER',
+  /** The policy is applied in the validation step before the execution. */
+  Validation = 'VALIDATION'
+}
+
 export type AuthPayload = {
   __typename?: 'AuthPayload';
   token: Scalars['String']['output'];
@@ -687,6 +697,7 @@ export type Mutation = {
   login: AuthPayload;
   registerBroadcaster: AuthPayload;
   registerClient: AuthPayload;
+  updateContractState?: Maybe<Contract>;
 };
 
 
@@ -717,6 +728,11 @@ export type MutationRegisterBroadcasterArgs = {
 
 export type MutationRegisterClientArgs = {
   input: RegisterClientInput;
+};
+
+
+export type MutationUpdateContractStateArgs = {
+  input: UpdateContractStateInput;
 };
 
 export type NarrativeCampaignService = BaseCampaignService & {
@@ -1095,6 +1111,11 @@ export type TvCampaignService = BaseCampaignService & PeriodCampaignService & {
   basePriceOverride: Scalars['Decimal']['output'];
   campaign: Campaign;
   pieces: Array<Piece>;
+};
+
+export type UpdateContractStateInput = {
+  contractId: Scalars['Int']['input'];
+  newState: ContractState;
 };
 
 export type User = {

@@ -24,7 +24,6 @@
     <span>No ha seleccionado ningún servicio.</span>
   {:else}
     <div class="grid grid-cols-3 gap-2 max-h-96 overflow-y-auto">
-      <!-- Columna 1: Adjustments -->
       <div class="space-y-2 border border-[#cad8e4] rounded p-2 flex flex-col text-left">
         <span class="font-bold text-[#1e293b]">Descuentos del contrato</span>
         {#each totalContrato.adjustments as adjustment}
@@ -34,11 +33,9 @@
         {/each}
       </div>
 
-      <!-- Columnas 2-3: Servicios -->
       <div class="col-span-2 space-y-2">
         {#each totalContrato.services as service, i (i)}
           <div class="grid grid-cols-2 gap-2">
-            <!-- Piezas (Columna 2) -->
             <div class="flex flex-col gap-1 text-left bg-[#ffffff] rounded p-2 border border-[#cad8e4]">
               <span class="font-bold text-[#1e293b]">Medio</span>
               {#each service.pieces as piece, pieceIndex}
@@ -61,7 +58,6 @@
               <span class="text-sm text-[#1e293b]">Nombre del servicio: {service.serviceName}</span>
             </div>
 
-            <!-- Total (Columna 3) -->
             <div class="flex flex-col text-left gap-2 bg-[#ffffff] rounded p-2 border border-[#cad8e4]">
               {#if service.adjustments.length > 0}
                 <span class="font-bold text-[#1e293b]">Descuentos del medio</span>

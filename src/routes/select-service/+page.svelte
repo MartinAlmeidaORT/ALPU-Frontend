@@ -1,6 +1,7 @@
 <script lang="ts">
   import * as Accordion from '$lib/components/ui/accordion/index.js';
   import type { OperationResult } from '@urql/core';
+  import type { PageData } from './$types';
   import {
     fetchServices,
     calculateServicePrice,
@@ -10,6 +11,8 @@
   import type { ServicesQuery, CalculateContractQuery } from '$lib/graphql/types/graphql';
   import ServiceItem from '$lib/components/service-item.svelte';
   import ServiceSummary from '$lib/components/service-summary.svelte';
+  import SearchClientBroadcaster from '$lib/components/search-client-broadcaster.svelte';
+  let { data }: {data:PageData} = $props();
 
   type ServiceSelected = {
     service: NonNullable<ServicesQuery['services']>[number];
@@ -193,6 +196,7 @@
     </div>
 
     <div class="flex-1 min-w-[300px] w-full">
+      <SearchClientBroadcaster user={data.user}/>
       <ServiceSummary
         {totalContrato}
         {errorMessages}

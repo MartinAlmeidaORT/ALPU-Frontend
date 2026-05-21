@@ -96,7 +96,7 @@ export const columns: ColumnDef<TableContract>[] = [
         "PENDING": "Pendiente",
         "APPROVED": "Activo",
         "COMPLETED": "Completado",
-        "CANCELLED": "Cancelado"
+        "CANCELED": "Cancelado"
       };
       return stateMap[row.original.state] || row.original.state;
     },

@@ -39,6 +39,6 @@ export const actions = {
       return fail(500, { messages: ['An unexpected error occurred'] });
     }
 
-    throw redirect(302, '/contracts');
+    throw redirect(302, '/clients-broadcasters-contracts');
   },
 };

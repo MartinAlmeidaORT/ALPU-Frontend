@@ -74,7 +74,7 @@
   <div class="rounded-md border bg-white">
     <div class="flex items-center mx-1 py-4">
       <Input
-        placeholder="Buscar por cliente o broadcaster..."
+        placeholder="Filtrar por usuario"
         value={(table.getColumn('broadcaster')?.getFilterValue() as string) ??
           ''}
         onchange={(e) => {

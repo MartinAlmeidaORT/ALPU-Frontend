@@ -47,3 +47,15 @@ export const UPDATE_CONTRACT_QUERY = graphql(`
     }
   }
 `);
+
+export const GENERATE_CONTRACT_MUTATION = graphql(`
+  mutation GenerateContract($input: CampaignInput!) {
+    generateContract(input: $input) {
+      client {
+        firstName
+        lastName
+      }
+    }
+  }
+`);
+

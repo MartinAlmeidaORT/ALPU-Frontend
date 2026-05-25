@@ -6,11 +6,14 @@
     fetchServices,
     calculateServicePrice,
   } from '$lib/graphql/queries/service';
+  import { toast } from 'svelte-sonner';
   import { onMount } from 'svelte';
+  import { setContext } from 'svelte';
   import type {
     CampaignInput,
     CampaignServiceInput,
     PieceInput,
+    User,
   } from '$lib/graphql/schema';
   import type {
     ServicesQuery,
@@ -19,14 +22,21 @@
   import ServiceItem from '$lib/components/service-item.svelte';
   import ServiceSummary from '$lib/components/service-summary.svelte';
   import SearchClientBroadcaster from '$lib/components/search-client-broadcaster.svelte';
-  let { data }: { data: PageData } = $props();
-
+  let { 
+      data,
+      }: { 
+          data: PageData
+      } = $props();
+  setContext('token', data.token);
   type ServiceSelected = {
     service: NonNullable<ServicesQuery['services']>[number];
     selectedPrice?: number;
     selectedDurationId?: string;
   } | null;
 
+  let userSelectedId = $state<number | null>(null);
+  let paysCash = $state(false);
+  let campaignName = $state('Test');
   let serviceSelected: ServiceSelected = $state(null);
   let errorMessages = $state<string | null>(null);
   let nombrePieza = $state('');
@@ -50,6 +60,24 @@
     fetchServicesResult = await fetchServices();
   });
   let services = $derived(fetchServicesResult?.data?.services ?? []);
+
+  function validateCampaignInput(): boolean {
+    if (data.rol === 'Broadcaster' && (userSelectedId === null || userSelectedId === undefined)) {
+      toast.error('Selecciona un cliente', {
+        description: 'Debes seleccionar un cliente para continuar',
+      });
+      return false;
+    }
+
+    if (data.rol === 'Client' && (userSelectedId === null || userSelectedId === undefined)) {
+      toast.error('Selecciona un broadcaster', {
+        description: 'Debes seleccionar un broadcaster para continuar',
+      });
+      return false;
+    }
+
+    return true;
+  }
 
   async function handleAddPiece(pieceName: string, svc: any, options: any) {
     if (isPriceSuggested && priceSuggested != null) {
@@ -78,12 +106,17 @@
 
     totalServices = totalServices; // Trigger reactivity
 
+    if (!validateCampaignInput()) {
+      return;
+    }
+
     const input: CampaignInput = {
-      broadcasterId: 1,
-      clientId: 2,
-      inCash: true,
-      campaign: 'Test',
+      broadcasterId: data.rol === 'Broadcaster' ? data.user?.userId : userSelectedId,
+      clientId: data.rol === 'Client' ? data.user?.userId : userSelectedId,
+      inCash: paysCash,
+      campaign: campaignName,
       services: totalServices,
+      countryCode: 'UY', // Aquí podrías agregar lógica para determinar el país si es necesario
     };
 
     const result = await calculateServicePrice(input);
@@ -121,12 +154,17 @@
       return;
     }
 
+    if (!validateCampaignInput()) {
+      return;
+    }
+
     const input: CampaignInput = {
-      broadcasterId: 1,
-      clientId: 2,
-      inCash: true,
-      campaign: 'Test',
+      broadcasterId: data.rol === 'Broadcaster' ? data.user?.userId : userSelectedId,
+      clientId: data.rol === 'Client' ? data.user?.userId : userSelectedId,
+      inCash: paysCash,
+      campaign: campaignName,
       services: totalServices,
+      countryCode: 'UY',
     };
 
     const result = await calculateServicePrice(input);
@@ -150,12 +188,17 @@
 
       totalServices = totalServices; // Trigger reactivity
 
+      if (!validateCampaignInput()) {
+        return;
+      }
+
       const input: CampaignInput = {
-        broadcasterId: 1,
-        clientId: 2,
-        inCash: true,
-        campaign: 'Test',
+        broadcasterId: data.rol === 'Broadcaster' ? data.user?.userId : userSelectedId,
+        clientId: data.rol === 'Client' ? data.user?.userId : userSelectedId,
+        inCash: paysCash,
+        campaign: campaignName,
         services: totalServices,
+        countryCode: 'UY',
       };
 
       const result = await calculateServicePrice(input);
@@ -166,16 +209,21 @@
   }
 
   async function checkDurationErrors() {
-    let durationId = '';
-    totalServices.forEach((service) => {
-      if (service.options !== durationId && durationId !== '') {
-        errorMessages =
-          'Está agregando servicios con duraciones distintas. Esto queda a criterio del usuario y puede afectar el contrato';
-        return;
-      }
-      //durationId = service.options.durationId;
+    if (totalServices.length === 0) {
       errorMessages = null;
-    });
+      return;
+    }
+    const firstPeriod = totalServices[0].options?.period;
+    const allSamePeriod = totalServices.every(
+      (service) => service.options?.period === firstPeriod
+    );
+
+    if (!allSamePeriod) {
+      errorMessages =
+        'Está agregando servicios con duraciones distintas. Esto queda a criterio del usuario y puede afectar el contrato';
+    } else {
+      errorMessages = null;
+    }
   }
 </script>
 
@@ -206,8 +254,18 @@
     </div>
 
     <div class="flex-1 min-w-[300px] w-full">
-      <SearchClientBroadcaster user={data.user} />
+      <SearchClientBroadcaster  
+        rol={data.rol}
+        bind:valorId={userSelectedId} 
+        bind:paysCash={paysCash} 
+      />
       <ServiceSummary
+        rol={data.rol}
+        activeUserId={data.user?.userId}
+        bind:valorId={userSelectedId} 
+        bind:paysCash={paysCash} 
+        bind:campaignName={campaignName} 
+        bind:services={totalServices}
         {totalContrato}
         {errorMessages}
         onRemoveService={(i) => removeService(i)}

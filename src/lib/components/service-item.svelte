@@ -11,12 +11,13 @@
   type Service = NonNullable<ServicesQuery['services']>[number];
 
   // Props
-  export let service: Service;
-  export let onAddPiece: (
-    pieceName: string,
-    svc: Service,
-    options: any,
-  ) => void = () => {};
+  let {
+    service,
+    onAddPiece = () => {},
+  }: {
+    service: Service;
+    onAddPiece?: (pieceName: string, svc: Service, options: any) => void;
+  } = $props();
 
   // Local state
   let isInterior = false;

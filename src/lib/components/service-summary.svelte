@@ -2,17 +2,60 @@
   import { Button } from '$lib/components/ui/button/index.js';
   import * as Alert from '$lib/components/ui/alert/index.js';
   import type { CalculateContractQuery } from '$lib/graphql/types/graphql';
+  import type { CampaignInput, CampaignServiceInput } from '$lib/graphql/schema';
+  import { createUrqlClient } from '$lib/graphql/client';
+  import { getContext } from 'svelte';
+  import { invalidateAll } from '$app/navigation';
+  import { GENERATE_CONTRACT_MUTATION } from '$lib/graphql/queries/contracts';
+  let token = getContext('token') as string;
+  console.log('Token en service summary:', token);
+  const urqlClient = createUrqlClient(token);
 
   // Props
-  export let totalContrato: CalculateContractQuery['calculateContract'] | null =
-    null;
-  export let errorMessages: string | null = null;
-  export let onRemoveService: (index: number) => void = () => {};
-  export let onRemoveAllServices: () => void = () => {};
-  export let onRemovePiece: (
-    serviceIndex: number,
-    pieceIndex: number,
-  ) => void = () => {};
+  let {
+    totalContrato = null,
+    errorMessages = null,
+    onRemoveService = () => {},
+    onRemoveAllServices = () => {},
+    onRemovePiece = () => {},
+    rol,
+    activeUserId,
+    valorId = $bindable(),
+    paysCash = $bindable(false),
+    campaignName = $bindable('Test'),
+    services = $bindable([]),
+  } : {
+    rol: string | null | undefined;
+    activeUserId?: number | null | undefined;
+    totalContrato?: CalculateContractQuery['calculateContract'] | null;
+    errorMessages?: string | null;
+    onRemoveService?: (index: number) => void;
+    onRemoveAllServices?: () => void;
+    onRemovePiece?: (serviceIndex: number, pieceIndex: number) => void;
+    valorId?: string | number | null | undefined;
+    paysCash?: boolean;
+    campaignName?: string;
+    services?: CampaignServiceInput[];
+  } = $props();
+    let input = $derived<CampaignInput>({
+      broadcasterId: rol === 'Broadcaster' ? activeUserId : valorId,
+      clientId: rol === 'Client' ? activeUserId : valorId,
+      inCash: paysCash,
+      campaign: campaignName,
+      services: services,
+      countryCode: 'UY',
+    });
+
+  async function generateContract(input: CampaignInput) {
+    const result = await urqlClient
+      .mutation(GENERATE_CONTRACT_MUTATION, { input })
+      .toPromise();
+    if (result.error) {
+      errorMessages = 'Error al generar el contrato. Intenta nuevamente.';
+    } else {
+      await invalidateAll();
+    }
+  }
 </script>
 
 <div
@@ -121,8 +164,10 @@
         <div class="flex gap-2">
           <Button
             type="button"
-            bgColor="bg-[#22964F] text-white hover:bg-[#1a6d3b] hover:text-whit"
-            onclick={() => onRemoveAllServices()}
+            bgColor="bg-[#22964F] text-white hover:bg-[#1a6d3b] hover:text-white"
+            onclick={() => 
+              generateContract(input)
+            }
             class="mt-4 flex-1"
           >
             Generar contrato

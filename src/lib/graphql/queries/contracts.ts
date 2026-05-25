@@ -31,6 +31,37 @@ export const CONTRACTS_QUERY = graphql(`
   }
 `);
 
+export const CONTRACTS_FILTERED_QUERY = graphql(`
+  query contractsFiltered($first: Int, $after: String, $state: ContractState!) {
+    contracts(first: $first, after: $after, where: { state: { eq: $state } }) {
+      nodes {
+        contractId
+        broadcaster {
+          firstName
+          lastName
+        }
+        client {
+          firstName
+          lastName
+          agency {
+            name
+          }
+        }
+        state
+        date
+        dueDate
+      }
+      pageInfo {
+        hasNextPage
+        hasPreviousPage
+        startCursor
+        endCursor
+      }
+      totalCount
+    }
+  }
+`);
+
 export const UPDATE_CONTRACT_QUERY = graphql(`
   mutation UpdateContractState($input: UpdateContractStateInput!) {
     updateContractState(input: $input) {

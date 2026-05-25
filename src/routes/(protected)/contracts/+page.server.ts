@@ -1,11 +1,20 @@
-import { CONTRACTS_QUERY } from '$lib/graphql/queries/contracts';
+import { CONTRACTS_QUERY, CONTRACTS_FILTERED_QUERY } from '$lib/graphql/queries/contracts';
 import type { TableContract } from './columns.js';
 
-export async function load({ locals }: { locals: App.Locals }) {
+export async function load({ locals, url }: { locals: App.Locals; url: URL }) {
   try {
-    const result = await locals.urql
-      .query(CONTRACTS_QUERY, { first: 10 })
-      .toPromise();
+    const state = url.searchParams.get('state') || undefined;
+    let result;
+    
+    if (state) {
+      result = await locals.urql
+        .query(CONTRACTS_FILTERED_QUERY, { first: 5, after: null, state: state })
+        .toPromise();
+    } else {
+      result = await locals.urql
+        .query(CONTRACTS_QUERY, { first: 5, after: null })
+        .toPromise();
+    }
 
     if (result.error) {
       return {

@@ -422,8 +422,9 @@ export type ContractSortInput = {
 };
 
 export enum ContractState {
-  Approved = 'APPROVED',
+  Active = 'ACTIVE',
   Canceled = 'CANCELED',
+  Completed = 'COMPLETED',
   Pending = 'PENDING'
 }
 
@@ -723,6 +724,8 @@ export type MembershipStateOperationFilterInput = {
 
 export type Mutation = {
   __typename?: 'Mutation';
+  approveContract?: Maybe<Contract>;
+  approveUser?: Maybe<User>;
   completeGoogleSignUpBroadcaster: AuthPayload;
   completeGoogleSignUpClient: AuthPayload;
   generateContract: Contract;
@@ -731,6 +734,16 @@ export type Mutation = {
   registerBroadcaster: AuthPayload;
   registerClient: AuthPayload;
   updateContractState?: Maybe<Contract>;
+};
+
+
+export type MutationApproveContractArgs = {
+  contractId: Scalars['Int']['input'];
+};
+
+
+export type MutationApproveUserArgs = {
+  input: UpdateUserStateInput;
 };
 
 
@@ -936,6 +949,7 @@ export type QueryContractsArgs = {
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   order?: InputMaybe<Array<ContractSortInput>>;
+  where?: InputMaybe<ContractFilterInput>;
 };
 
 
@@ -1191,6 +1205,11 @@ export type TvCampaignService = BaseCampaignService & PeriodCampaignService & {
 export type UpdateContractStateInput = {
   contractId: Scalars['Int']['input'];
   newState: ContractState;
+};
+
+export type UpdateUserStateInput = {
+  newState: UserState;
+  userId: Scalars['Int']['input'];
 };
 
 export type User = {

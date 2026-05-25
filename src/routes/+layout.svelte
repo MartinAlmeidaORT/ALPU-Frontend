@@ -21,7 +21,6 @@
   function handleLogout() {
     logoutFormRef?.submit();
   }
-  console.log(data.rol);
 </script>
 
 <div class="w-full flex justify-center py-4">

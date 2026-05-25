@@ -16,15 +16,38 @@
   import * as Table from '$lib/components/ui/table/index.js';
   import { Button } from '$lib/components/ui/button/index.js';
   import { Input } from '$lib/components/ui/input/index.js';
+  import * as Select from '$lib/components/ui/select/index.js';
+  import { goto } from '$app/navigation';
+  import { page } from '$app/stores';
   type DataTableProps<TData, TValue> = {
     columns: ColumnDef<TData, TValue>[];
     data: TData[];
   };
 
   let { data, columns }: DataTableProps<TData, TValue> = $props();
-  let pagination = $state<PaginationState>({ pageIndex: 0, pageSize: 10 });
+  let pagination = $state<PaginationState>({ pageIndex: 0, pageSize: 5 });
   let sorting = $state<SortingState>([]);
   let columnFilters = $state<ColumnFiltersState>([]);
+  const initialState = $page.url.searchParams.get('state') ?? 'ALL';
+  let selectedState = $state<string>(initialState);
+
+  function handleStateChange() {
+    const url = new URL($page.url);
+    if (selectedState && selectedState !== 'ALL') {
+      url.searchParams.set('state', selectedState);
+    } else {
+      url.searchParams.delete('state');
+    }
+    goto(url.pathname + url.search);
+  }
+
+  $effect(() => {
+    // Escucha cambios en selectedState y actualiza la URL si es distinta
+    const currentParam = $page.url.searchParams.get('state') ?? 'ALL';
+    if (selectedState !== currentParam) {
+      handleStateChange();
+    }
+  });
 
   const table = createSvelteTable({
     get data() {
@@ -72,7 +95,7 @@
 
 <div class="mx-auto w-[80%] p-4">
   <div class="rounded-md border bg-white">
-    <div class="flex items-center mx-1 py-4">
+    <div class="flex items-center gap-4 mx-1 py-4">
       <Input
         placeholder="Filtrar por usuario"
         value={(table.getColumn('broadcaster')?.getFilterValue() as string) ??
@@ -87,6 +110,31 @@
         }}
         class="max-w-sm"
       />
+      <Select.Root 
+        type="single"
+        bind:value={selectedState}
+      >
+        <Select.Trigger class="w-[180px]">
+           {#if selectedState === 'PENDING'}
+              Pendiente
+            {:else if selectedState === 'COMPLETED'}
+              Completado
+            {:else if selectedState === 'ACTIVE'}
+              Activo
+            {:else if selectedState === 'CANCELED'}
+              Cancelado
+            {:else}
+              Todos los estados
+            {/if}
+        </Select.Trigger>
+        <Select.Content>
+          <Select.Item value="ALL" label="Todos los estados" />
+          <Select.Item value="PENDING" label="Pendiente" />
+          <Select.Item value="COMPLETED" label="Completado" />
+          <Select.Item value="ACTIVE" label="Activo" />
+          <Select.Item value="CANCELED" label="Cancelado" />
+        </Select.Content>
+      </Select.Root>
     </div>
     <div>
       <Table.Root>

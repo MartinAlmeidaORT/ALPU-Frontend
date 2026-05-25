@@ -8,7 +8,6 @@
   import { invalidateAll } from '$app/navigation';
   import { GENERATE_CONTRACT_MUTATION } from '$lib/graphql/queries/contracts';
   let token = getContext('token') as string;
-  console.log('Token en service summary:', token);
   const urqlClient = createUrqlClient(token);
 
   // Props

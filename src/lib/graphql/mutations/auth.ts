@@ -14,6 +14,7 @@ export const SIGNUP_BROADCASTER_MUTATION = graphql(`
     registerBroadcaster(input: $input) {
       token
       user {
+        __typename
         email
         firstName
         lastName
@@ -40,6 +41,7 @@ export const SIGNUP_CLIENT_MUTATION = graphql(`
     registerClient(input: $input) {
       token
       user {
+        __typename
         email
         firstName
         lastName
@@ -82,7 +84,7 @@ export const GOOGLE_AUTH_MUTATION = graphql(`
 export async function googleAuth(
   code: string,
 ): Promise<OperationResult<GoogleAuthMutation>> {
-  return createUrqlClient().mutation(GOOGLE_AUTH_MUTATION, { code });
+  return await createUrqlClient().mutation(GOOGLE_AUTH_MUTATION, { code }).toPromise();
 }
 
 export const LOGIN_MUTATION = graphql(`
@@ -116,6 +118,7 @@ export const COMPLETE_GOOGLE_SIGNUP_BROADCASTER_MUTATION = graphql(`
     completeGoogleSignUpBroadcaster(input: $input) {
       token
       user {
+        __typename
         email
         firstName
         lastName
@@ -140,10 +143,9 @@ export const COMPLETE_GOOGLE_SIGNUP_BROADCASTER_MUTATION = graphql(`
 export async function CompleteGoogleSignUpBroadcaster(): Promise<
   OperationResult<CompleteGoogleSignUpBroadcasterMutation>
 > {
-  return await createUrqlClient().mutation(
-    COMPLETE_GOOGLE_SIGNUP_BROADCASTER_MUTATION,
-    {},
-  );
+  return await createUrqlClient()
+    .mutation(COMPLETE_GOOGLE_SIGNUP_BROADCASTER_MUTATION, {})
+    .toPromise();
 }
 
 export const COMPLETE_GOOGLE_SIGNUP_CLIENT_MUTATION = graphql(`
@@ -153,6 +155,7 @@ export const COMPLETE_GOOGLE_SIGNUP_CLIENT_MUTATION = graphql(`
     completeGoogleSignUpClient(input: $input) {
       token
       user {
+        __typename
         email
         firstName
         lastName
@@ -182,8 +185,7 @@ export const COMPLETE_GOOGLE_SIGNUP_CLIENT_MUTATION = graphql(`
 export async function CompleteGoogleSignUpClient(): Promise<
   OperationResult<CompleteGoogleSignUpClientMutation>
 > {
-  return await createUrqlClient().mutation(
-    COMPLETE_GOOGLE_SIGNUP_CLIENT_MUTATION,
-    {},
-  );
+  return await createUrqlClient()
+    .mutation(COMPLETE_GOOGLE_SIGNUP_CLIENT_MUTATION, {})
+    .toPromise();
 }

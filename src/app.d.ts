@@ -8,6 +8,7 @@ declare global {
       urql: Client;
       user: User | null | undefined;
       token: string | null | undefined;
+      rol: string | null | undefined;
     }
     // interface Error {}
     // interface Locals {}

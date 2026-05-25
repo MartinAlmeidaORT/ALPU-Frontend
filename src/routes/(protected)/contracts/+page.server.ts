@@ -1,5 +1,5 @@
 import { CONTRACTS_QUERY } from '$lib/graphql/queries/contracts';
-import type { TableContract } from '../clients-broadcasters-contracts/columns';
+import type { TableContract } from './columns.js';
 
 export async function load({ locals }: { locals: App.Locals }) {
   try {

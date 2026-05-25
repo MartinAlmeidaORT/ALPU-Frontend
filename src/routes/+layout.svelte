@@ -5,8 +5,14 @@
   import { navigationMenuTriggerStyle } from '$lib/components/ui/navigation-menu/navigation-menu-trigger.svelte';
   import { IsMobile } from '$lib/components/hooks/is-mobile.svelte.js';
   import { Toaster } from '$lib/components/ui/sonner';
-
-  let { children } = $props();
+  import type { PageData } from './$types';
+  let { 
+      data,
+      children
+      }: { 
+          data: PageData,
+          children: any
+      } = $props();
   let logoutFormRef: HTMLFormElement;
 
   const isAuth = $derived(page.data.session);
@@ -15,6 +21,7 @@
   function handleLogout() {
     logoutFormRef?.submit();
   }
+  console.log(data.rol);
 </script>
 
 <div class="w-full flex justify-center py-4">
@@ -25,6 +32,18 @@
           <NavigationMenu.Link>
             {#snippet child()}
               <a href="/" class={navigationMenuTriggerStyle()}>Home</a>
+            {/snippet}
+          </NavigationMenu.Link>
+          {#if data.rol === 'Broadcaster' || data.rol === 'Client'}
+          <NavigationMenu.Link>
+            {#snippet child()}
+              <a href="/select-service" class={navigationMenuTriggerStyle()}>Servicios</a>
+            {/snippet}
+          </NavigationMenu.Link>
+          {/if}
+          <NavigationMenu.Link>
+            {#snippet child()}
+              <a href="/contracts" class={navigationMenuTriggerStyle()}>Contratos</a>
             {/snippet}
           </NavigationMenu.Link>
         </NavigationMenu.Item>
@@ -58,6 +77,6 @@
   </NavigationMenu.Root>
 </div>
 
-<Toaster position="top-center" style="--normal-bg: #FADBD8;" />
+<Toaster position="top-center" />
 
 {@render children()}

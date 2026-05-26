@@ -38,6 +38,8 @@
     } else {
       url.searchParams.delete('state');
     }
+    // Al cambiar filtros, reseteamos la paginación al principio
+    url.searchParams.delete('after');
     goto(url.pathname + url.search);
   }
 
@@ -49,13 +51,35 @@
     }
   });
 
+  // Extract pageInfo from SvelteKit's $page.data
+  const pageInfo = $derived($page.data.pageInfo);
+
+  function nextPage() {
+    if (pageInfo?.hasNextPage && pageInfo?.endCursor) {
+      const url = new URL($page.url);
+      url.searchParams.set('after', pageInfo.endCursor);
+      // Mantener la historia del navegador para poder volver con el botón "Atrás"
+      goto(url.pathname + url.search);
+    }
+  }
+
+  function previousPage() {
+    // Para simplificar, ir a la página anterior requiere navegar "hacia atrás" en el historial, 
+    // o se podría remover el 'after' para volver al inicio.
+    // Usamos window.history.back() asumiendo que hemos navegado secuencialmente, 
+    // o simplemente volvemos sin cursor para la primera página.
+    window.history.back();
+  }
+
   const table = createSvelteTable({
     get data() {
       return data;
     },
     columns,
     getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
+    // getPaginationRowModel no es necesario si paginas en el servidor, 
+    // pero si está lo deshabilitamos para usar los datos tal cual vienen
+    manualPagination: true,
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     onSortingChange: (updater) => {
@@ -169,7 +193,7 @@
           {:else}
             <Table.Row>
               <Table.Cell colspan={columns.length} class="h-24 text-center">
-                No results.
+                No hay contratos disponibles
               </Table.Cell>
             </Table.Row>
           {/each}
@@ -180,16 +204,16 @@
       <Button
         variant="outline"
         size="sm"
-        onclick={() => table.previousPage()}
-        disabled={!table.getCanPreviousPage()}
+        onclick={previousPage}
+        disabled={!$page.url.searchParams.has('after')}
       >
         Anterior
       </Button>
       <Button
         variant="outline"
         size="sm"
-        onclick={() => table.nextPage()}
-        disabled={!table.getCanNextPage()}
+        onclick={nextPage}
+        disabled={!pageInfo?.hasNextPage}
       >
         Siguiente
       </Button>

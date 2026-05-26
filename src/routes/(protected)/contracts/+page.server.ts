@@ -4,15 +4,16 @@ import type { TableContract } from './columns.js';
 export async function load({ locals, url }: { locals: App.Locals; url: URL }) {
   try {
     const state = url.searchParams.get('state') || undefined;
+    const after = url.searchParams.get('after') || null;
     let result;
     
     if (state) {
       result = await locals.urql
-        .query(CONTRACTS_FILTERED_QUERY, { first: 5, after: null, state: state })
+        .query(CONTRACTS_FILTERED_QUERY, { first: 5, after, state: state }, { requestPolicy: 'network-only' })
         .toPromise();
     } else {
       result = await locals.urql
-        .query(CONTRACTS_QUERY, { first: 5, after: null })
+        .query(CONTRACTS_QUERY, { first: 5, after }, { requestPolicy: 'network-only' })
         .toPromise();
     }
 
@@ -37,6 +38,7 @@ export async function load({ locals, url }: { locals: App.Locals; url: URL }) {
     return {
       token: locals.token,
       contracts,
+      pageInfo: result.data?.contracts?.pageInfo,
       totalCount: result.data?.contracts?.totalCount || 0,
     };
   } catch (error) {

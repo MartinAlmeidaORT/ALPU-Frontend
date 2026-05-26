@@ -86,6 +86,9 @@
         return;
       }
     }
+    if (!validateCampaignInput()) {
+      return;
+    }
 
     // Buscar si ya existe un servicio con el mismo serviceId
     const existingServiceIndex = totalServices.findIndex(
@@ -105,10 +108,6 @@
     }
 
     totalServices = totalServices; // Trigger reactivity
-
-    if (!validateCampaignInput()) {
-      return;
-    }
 
     const input: CampaignInput = {
       broadcasterId: data.rol === 'Broadcaster' ? data.user?.userId : userSelectedId,

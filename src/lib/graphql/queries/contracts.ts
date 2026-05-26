@@ -2,7 +2,7 @@ import { graphql } from '../types';
 
 export const CONTRACTS_QUERY = graphql(`
   query contracts($first: Int, $after: String) {
-    contracts(first: $first, after: $after) {
+    contracts(first: $first, after: $after, order: [{ contractId: DESC }]) {
       nodes {
         contractId
         broadcaster {
@@ -33,7 +33,7 @@ export const CONTRACTS_QUERY = graphql(`
 
 export const CONTRACTS_FILTERED_QUERY = graphql(`
   query contractsFiltered($first: Int, $after: String, $state: ContractState!) {
-    contracts(first: $first, after: $after, where: { state: { eq: $state } }) {
+    contracts(first: $first, after: $after, where: { state: { eq: $state } }, order: [{ contractId: DESC }]) {
       nodes {
         contractId
         broadcaster {

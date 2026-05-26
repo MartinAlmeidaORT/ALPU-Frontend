@@ -4,10 +4,10 @@
   import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
   import type { TableContract } from './columns';
   import { getContext } from 'svelte';
-  import { UPDATE_CONTRACT_QUERY } from '$lib/graphql/queries/contracts';
+  import { CANCEL_CONTRACT_QUERY, APPROVE_CONTRACT_QUERY } from '$lib/graphql/queries/contracts';
   import {
     ContractState,
-    type UpdateContractStateInput,
+    type UpdateContractStateInput
   } from '$lib/graphql/schema';
   import type { Client } from '@urql/svelte';
   import { createUrqlClient } from '$lib/graphql/client';
@@ -30,20 +30,31 @@
     }
   };
 
-  const handleAction = async (action: string) => {
-    const input: UpdateContractStateInput = {
-      contractId: contract.contractId,
-      newState:
-        action === 'approve' ? ContractState.Approved : ContractState.Canceled,
-    };
-    const urqlClient: Client = createUrqlClient(token);
-    const result = await urqlClient
-      .mutation(UPDATE_CONTRACT_QUERY, { input })
-      .toPromise();
-    if (result.error) {
-    } else {
-      await invalidateAll();
+  const handleAction = async (action: string, contractId: string) => {
+    if (action === 'cancel') {
+      const input: UpdateContractStateInput = {
+        contractId: Number(contractId),
+        newState: ContractState.Canceled,
+      };
+      const urqlClient: Client = createUrqlClient(token);
+      const result = await urqlClient
+        .mutation(CANCEL_CONTRACT_QUERY, { input })
+        .toPromise();
+      if (result.error) {
+      } else {
+        await invalidateAll();
+      }
+    } else if (action === 'approve') {
+      const urqlClient: Client = createUrqlClient(token);
+      const result = await urqlClient
+        .mutation(APPROVE_CONTRACT_QUERY, { contractId: Number(contractId) })
+        .toPromise();
+      if (result.error) {
+      } else {
+        await invalidateAll();
+      }
     }
+
   };
 </script>
 
@@ -65,7 +76,7 @@
     <DropdownMenu.Group>
       <DropdownMenu.Label>Acciones</DropdownMenu.Label>
       {#each getMenuItems(contract.state) as item (item.action)}
-        <DropdownMenu.Item onclick={() => handleAction(item.action)}>
+        <DropdownMenu.Item onclick={() => handleAction(item.action, String(contract.contractId))}>
           {item.label}
         </DropdownMenu.Item>
       {/each}

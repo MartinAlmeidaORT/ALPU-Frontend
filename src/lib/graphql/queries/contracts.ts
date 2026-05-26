@@ -62,7 +62,7 @@ export const CONTRACTS_FILTERED_QUERY = graphql(`
   }
 `);
 
-export const UPDATE_CONTRACT_QUERY = graphql(`
+export const CANCEL_CONTRACT_QUERY = graphql(`
   mutation UpdateContractState($input: UpdateContractStateInput!) {
     updateContractState(input: $input) {
       contractId
@@ -75,6 +75,16 @@ export const UPDATE_CONTRACT_QUERY = graphql(`
         firstName
         lastName
       }
+    }
+  }
+`);
+
+export const APPROVE_CONTRACT_QUERY = graphql(`
+  mutation approveContract($contractId: Int!) {
+    approveContract(contractId: $contractId) {
+      clientApproved
+      broadcasterApproved
+      state
     }
   }
 `);

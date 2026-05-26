@@ -101,7 +101,8 @@ export const columns: ColumnDef<TableContract>[] = [
     cell: ({ row }) => {
       const stateMap: Record<string, string> = {
         PENDING: 'Pendiente',
-        APPROVED: 'Activo',
+        APPROVED: 'Aprobado',
+        ACTIVE: 'Activo',
         COMPLETED: 'Completado',
         CANCELED: 'Cancelado',
       };

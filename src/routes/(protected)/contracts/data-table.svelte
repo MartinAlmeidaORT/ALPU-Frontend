@@ -64,9 +64,9 @@
   }
 
   function previousPage() {
-    // Para simplificar, ir a la página anterior requiere navegar "hacia atrás" en el historial, 
+    // Para simplificar, ir a la página anterior requiere navegar "hacia atrás" en el historial,
     // o se podría remover el 'after' para volver al inicio.
-    // Usamos window.history.back() asumiendo que hemos navegado secuencialmente, 
+    // Usamos window.history.back() asumiendo que hemos navegado secuencialmente,
     // o simplemente volvemos sin cursor para la primera página.
     window.history.back();
   }
@@ -77,7 +77,7 @@
     },
     columns,
     getCoreRowModel: getCoreRowModel(),
-    // getPaginationRowModel no es necesario si paginas en el servidor, 
+    // getPaginationRowModel no es necesario si paginas en el servidor,
     // pero si está lo deshabilitamos para usar los datos tal cual vienen
     manualPagination: true,
     getSortedRowModel: getSortedRowModel(),
@@ -134,22 +134,19 @@
         }}
         class="max-w-sm"
       />
-      <Select.Root 
-        type="single"
-        bind:value={selectedState}
-      >
+      <Select.Root type="single" bind:value={selectedState}>
         <Select.Trigger class="w-[180px]">
-           {#if selectedState === 'PENDING'}
-              Pendiente
-            {:else if selectedState === 'COMPLETED'}
-              Completado
-            {:else if selectedState === 'ACTIVE'}
-              Activo
-            {:else if selectedState === 'CANCELED'}
-              Cancelado
-            {:else}
-              Todos los estados
-            {/if}
+          {#if selectedState === 'PENDING'}
+            Pendiente
+          {:else if selectedState === 'COMPLETED'}
+            Completado
+          {:else if selectedState === 'ACTIVE'}
+            Activo
+          {:else if selectedState === 'CANCELED'}
+            Cancelado
+          {:else}
+            Todos los estados
+          {/if}
         </Select.Trigger>
         <Select.Content>
           <Select.Item value="ALL" label="Todos los estados" />

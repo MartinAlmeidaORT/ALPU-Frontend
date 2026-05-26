@@ -84,7 +84,9 @@ export const GOOGLE_AUTH_MUTATION = graphql(`
 export async function googleAuth(
   code: string,
 ): Promise<OperationResult<GoogleAuthMutation>> {
-  return await createUrqlClient().mutation(GOOGLE_AUTH_MUTATION, { code }).toPromise();
+  return await createUrqlClient()
+    .mutation(GOOGLE_AUTH_MUTATION, { code })
+    .toPromise();
 }
 
 export const LOGIN_MUTATION = graphql(`

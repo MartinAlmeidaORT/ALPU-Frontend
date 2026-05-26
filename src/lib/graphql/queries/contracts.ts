@@ -33,7 +33,12 @@ export const CONTRACTS_QUERY = graphql(`
 
 export const CONTRACTS_FILTERED_QUERY = graphql(`
   query contractsFiltered($first: Int, $after: String, $state: ContractState!) {
-    contracts(first: $first, after: $after, where: { state: { eq: $state } }, order: [{ contractId: DESC }]) {
+    contracts(
+      first: $first
+      after: $after
+      where: { state: { eq: $state } }
+      order: [{ contractId: DESC }]
+    ) {
       nodes {
         contractId
         broadcaster {
@@ -62,7 +67,7 @@ export const CONTRACTS_FILTERED_QUERY = graphql(`
   }
 `);
 
-export const UPDATE_CONTRACT_QUERY = graphql(`
+export const CANCEL_CONTRACT_QUERY = graphql(`
   mutation UpdateContractState($input: UpdateContractStateInput!) {
     updateContractState(input: $input) {
       contractId
@@ -79,6 +84,16 @@ export const UPDATE_CONTRACT_QUERY = graphql(`
   }
 `);
 
+export const APPROVE_CONTRACT_QUERY = graphql(`
+  mutation approveContract($contractId: Int!) {
+    approveContract(contractId: $contractId) {
+      clientApproved
+      broadcasterApproved
+      state
+    }
+  }
+`);
+
 export const GENERATE_CONTRACT_MUTATION = graphql(`
   mutation GenerateContract($input: CampaignInput!) {
     generateContract(input: $input) {
@@ -89,4 +104,3 @@ export const GENERATE_CONTRACT_MUTATION = graphql(`
     }
   }
 `);
-

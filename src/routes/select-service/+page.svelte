@@ -22,11 +22,11 @@
   import ServiceItem from '$lib/components/service-item.svelte';
   import ServiceSummary from '$lib/components/service-summary.svelte';
   import SearchClientBroadcaster from '$lib/components/search-client-broadcaster.svelte';
-  let { 
-      data,
-      }: { 
-          data: PageData
-      } = $props();
+  let {
+    data,
+  }: {
+    data: PageData;
+  } = $props();
   setContext('token', data.token);
   type ServiceSelected = {
     service: NonNullable<ServicesQuery['services']>[number];
@@ -62,14 +62,20 @@
   let services = $derived(fetchServicesResult?.data?.services ?? []);
 
   function validateCampaignInput(): boolean {
-    if (data.rol === 'Broadcaster' && (userSelectedId === null || userSelectedId === undefined)) {
+    if (
+      data.rol === 'Broadcaster' &&
+      (userSelectedId === null || userSelectedId === undefined)
+    ) {
       toast.error('Selecciona un cliente', {
         description: 'Debes seleccionar un cliente para continuar',
       });
       return false;
     }
 
-    if (data.rol === 'Client' && (userSelectedId === null || userSelectedId === undefined)) {
+    if (
+      data.rol === 'Client' &&
+      (userSelectedId === null || userSelectedId === undefined)
+    ) {
       toast.error('Selecciona un broadcaster', {
         description: 'Debes seleccionar un broadcaster para continuar',
       });
@@ -110,7 +116,8 @@
     totalServices = totalServices; // Trigger reactivity
 
     const input: CampaignInput = {
-      broadcasterId: data.rol === 'Broadcaster' ? data.user?.userId : userSelectedId,
+      broadcasterId:
+        data.rol === 'Broadcaster' ? data.user?.userId : userSelectedId,
       clientId: data.rol === 'Client' ? data.user?.userId : userSelectedId,
       inCash: paysCash,
       campaign: campaignName,
@@ -158,7 +165,8 @@
     }
 
     const input: CampaignInput = {
-      broadcasterId: data.rol === 'Broadcaster' ? data.user?.userId : userSelectedId,
+      broadcasterId:
+        data.rol === 'Broadcaster' ? data.user?.userId : userSelectedId,
       clientId: data.rol === 'Client' ? data.user?.userId : userSelectedId,
       inCash: paysCash,
       campaign: campaignName,
@@ -192,7 +200,8 @@
       }
 
       const input: CampaignInput = {
-        broadcasterId: data.rol === 'Broadcaster' ? data.user?.userId : userSelectedId,
+        broadcasterId:
+          data.rol === 'Broadcaster' ? data.user?.userId : userSelectedId,
         clientId: data.rol === 'Client' ? data.user?.userId : userSelectedId,
         inCash: paysCash,
         campaign: campaignName,
@@ -214,7 +223,7 @@
     }
     const firstPeriod = totalServices[0].options?.period;
     const allSamePeriod = totalServices.every(
-      (service) => service.options?.period === firstPeriod
+      (service) => service.options?.period === firstPeriod,
     );
 
     if (!allSamePeriod) {
@@ -253,17 +262,17 @@
     </div>
 
     <div class="flex-1 min-w-[300px] w-full">
-      <SearchClientBroadcaster  
+      <SearchClientBroadcaster
         rol={data.rol}
-        bind:valorId={userSelectedId} 
-        bind:paysCash={paysCash} 
+        bind:valorId={userSelectedId}
+        bind:paysCash
       />
       <ServiceSummary
         rol={data.rol}
         activeUserId={data.user?.userId}
-        bind:valorId={userSelectedId} 
-        bind:paysCash={paysCash} 
-        bind:campaignName={campaignName} 
+        bind:valorId={userSelectedId}
+        bind:paysCash
+        bind:campaignName
         bind:services={totalServices}
         {totalContrato}
         {errorMessages}

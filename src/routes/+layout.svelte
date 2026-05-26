@@ -6,13 +6,13 @@
   import { IsMobile } from '$lib/components/hooks/is-mobile.svelte.js';
   import { Toaster } from '$lib/components/ui/sonner';
   import type { PageData } from './$types';
-  let { 
-      data,
-      children
-      }: { 
-          data: PageData,
-          children: any
-      } = $props();
+  let {
+    data,
+    children,
+  }: {
+    data: PageData;
+    children: any;
+  } = $props();
   let logoutFormRef: HTMLFormElement;
 
   const isAuth = $derived(page.data.session);
@@ -34,15 +34,19 @@
             {/snippet}
           </NavigationMenu.Link>
           {#if data.rol === 'Broadcaster' || data.rol === 'Client'}
-          <NavigationMenu.Link>
-            {#snippet child()}
-              <a href="/select-service" class={navigationMenuTriggerStyle()}>Servicios</a>
-            {/snippet}
-          </NavigationMenu.Link>
+            <NavigationMenu.Link>
+              {#snippet child()}
+                <a href="/select-service" class={navigationMenuTriggerStyle()}
+                  >Servicios</a
+                >
+              {/snippet}
+            </NavigationMenu.Link>
           {/if}
           <NavigationMenu.Link>
             {#snippet child()}
-              <a href="/contracts" class={navigationMenuTriggerStyle()}>Contratos</a>
+              <a href="/contracts" class={navigationMenuTriggerStyle()}
+                >Contratos</a
+              >
             {/snippet}
           </NavigationMenu.Link>
         </NavigationMenu.Item>

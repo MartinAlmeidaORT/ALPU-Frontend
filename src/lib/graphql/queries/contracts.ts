@@ -33,7 +33,12 @@ export const CONTRACTS_QUERY = graphql(`
 
 export const CONTRACTS_FILTERED_QUERY = graphql(`
   query contractsFiltered($first: Int, $after: String, $state: ContractState!) {
-    contracts(first: $first, after: $after, where: { state: { eq: $state } }, order: [{ contractId: DESC }]) {
+    contracts(
+      first: $first
+      after: $after
+      where: { state: { eq: $state } }
+      order: [{ contractId: DESC }]
+    ) {
       nodes {
         contractId
         broadcaster {
@@ -99,4 +104,3 @@ export const GENERATE_CONTRACT_MUTATION = graphql(`
     }
   }
 `);
-

@@ -2,7 +2,10 @@
   import { Button } from '$lib/components/ui/button/index.js';
   import * as Alert from '$lib/components/ui/alert/index.js';
   import type { CalculateContractQuery } from '$lib/graphql/types/graphql';
-  import type { CampaignInput, CampaignServiceInput } from '$lib/graphql/schema';
+  import type {
+    CampaignInput,
+    CampaignServiceInput,
+  } from '$lib/graphql/schema';
   import { createUrqlClient } from '$lib/graphql/client';
   import { getContext } from 'svelte';
   import { invalidateAll } from '$app/navigation';
@@ -23,7 +26,7 @@
     paysCash = $bindable(false),
     campaignName = $bindable('Test'),
     services = $bindable([]),
-  } : {
+  }: {
     rol: string | null | undefined;
     activeUserId?: number | null | undefined;
     totalContrato?: CalculateContractQuery['calculateContract'] | null;
@@ -36,14 +39,14 @@
     campaignName?: string;
     services?: CampaignServiceInput[];
   } = $props();
-    let input = $derived<CampaignInput>({
-      broadcasterId: rol === 'Broadcaster' ? activeUserId : valorId,
-      clientId: rol === 'Client' ? activeUserId : valorId,
-      inCash: paysCash,
-      campaign: campaignName,
-      services: services,
-      countryCode: 'UY',
-    });
+  let input = $derived<CampaignInput>({
+    broadcasterId: rol === 'Broadcaster' ? activeUserId : valorId,
+    clientId: rol === 'Client' ? activeUserId : valorId,
+    inCash: paysCash,
+    campaign: campaignName,
+    services: services,
+    countryCode: 'UY',
+  });
 
   async function generateContract(input: CampaignInput) {
     const result = await urqlClient
@@ -164,9 +167,7 @@
           <Button
             type="button"
             bgColor="bg-[#22964F] text-white hover:bg-[#1a6d3b] hover:text-white"
-            onclick={() => 
-              generateContract(input)
-            }
+            onclick={() => generateContract(input)}
             class="mt-4 flex-1"
           >
             Generar contrato

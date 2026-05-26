@@ -4,10 +4,13 @@
   import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
   import type { TableContract } from './columns';
   import { getContext } from 'svelte';
-  import { CANCEL_CONTRACT_QUERY, APPROVE_CONTRACT_QUERY } from '$lib/graphql/queries/contracts';
+  import {
+    CANCEL_CONTRACT_QUERY,
+    APPROVE_CONTRACT_QUERY,
+  } from '$lib/graphql/queries/contracts';
   import {
     ContractState,
-    type UpdateContractStateInput
+    type UpdateContractStateInput,
   } from '$lib/graphql/schema';
   import type { Client } from '@urql/svelte';
   import { createUrqlClient } from '$lib/graphql/client';
@@ -54,7 +57,6 @@
         await invalidateAll();
       }
     }
-
   };
 </script>
 
@@ -76,7 +78,9 @@
     <DropdownMenu.Group>
       <DropdownMenu.Label>Acciones</DropdownMenu.Label>
       {#each getMenuItems(contract.state) as item (item.action)}
-        <DropdownMenu.Item onclick={() => handleAction(item.action, String(contract.contractId))}>
+        <DropdownMenu.Item
+          onclick={() => handleAction(item.action, String(contract.contractId))}
+        >
           {item.label}
         </DropdownMenu.Item>
       {/each}

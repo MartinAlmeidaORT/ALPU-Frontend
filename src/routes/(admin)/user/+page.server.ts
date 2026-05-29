@@ -1,6 +1,4 @@
-import {
-  USERS_FILTERED_QUERY
-} from '$lib/graphql/queries/user';
+import { USERS_FILTERED_QUERY } from '$lib/graphql/queries/user';
 import type { TableUser } from './columns.js';
 
 export async function load({ locals }: { locals: App.Locals }) {

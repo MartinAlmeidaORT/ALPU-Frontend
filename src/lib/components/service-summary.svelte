@@ -3,7 +3,7 @@
   import * as Alert from '$lib/components/ui/alert/index.js';
   import type { CalculateContractQuery } from '$lib/graphql/types/graphql';
   import {
-  UserState,
+    UserState,
     type CampaignInput,
     type CampaignServiceInput,
   } from '$lib/graphql/schema';
@@ -41,7 +41,7 @@
     campaignName?: string;
     services?: CampaignServiceInput[];
   } = $props();
-  
+
   let input = $derived<CampaignInput>({
     broadcasterId: rol === 'Broadcaster' ? activeUserId : valorId,
     clientId: rol === 'Client' ? activeUserId : valorId,
@@ -61,7 +61,10 @@
       await invalidateAll();
       const pdfUrl = result.data?.generateContract?.pdfAmazonS3Url;
       sessionStorage.setItem('contractPreview', JSON.stringify({ pdfUrl }));
-      sessionStorage.setItem('contractId', result.data?.generateContract?.contract?.contractId);
+      sessionStorage.setItem(
+        'contractId',
+        result.data?.generateContract?.contract?.contractId,
+      );
       goto('/contract-preview');
     }
   }

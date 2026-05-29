@@ -25,14 +25,14 @@
         return [
           { label: 'Aprobar', action: 'approve' },
           { label: 'Cancelar', action: 'cancel' },
-          { label: 'Ver', action: 'ver' }
+          { label: 'Ver', action: 'ver' },
         ];
       case 'APPROVED':
         return [{ label: 'Ver', action: 'ver' }];
       case 'ACTIVE':
         return [
           { label: 'Cancelar', action: 'cancel' },
-          { label: 'Ver', action: 'ver' }
+          { label: 'Ver', action: 'ver' },
         ];
 
       case 'CANCELED':
@@ -72,7 +72,12 @@
         .toPromise();
       if (result.error) {
       } else {
-        sessionStorage.setItem('contractPreview', JSON.stringify({ pdfUrl: result.data.contractPdfDownloadUrl.pdfAmazonS3Url }));
+        sessionStorage.setItem(
+          'contractPreview',
+          JSON.stringify({
+            pdfUrl: result.data.contractPdfDownloadUrl.pdfAmazonS3Url,
+          }),
+        );
         sessionStorage.setItem('contractId', contractId);
         window.open('/contract-preview', '_blank');
       }

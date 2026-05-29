@@ -112,7 +112,7 @@ export const GENERATE_CONTRACT_MUTATION = graphql(`
         }
         contractId
       }
-    pdfAmazonS3Url    
+      pdfAmazonS3Url
     }
   }
 `);

@@ -128,7 +128,9 @@
       </Table.Root>
     </div>
     <div class="flex items-center justify-end space-x-2 py-4 px-4">
-      <div class="flex w-[100px] items-center justify-center text-sm font-medium">
+      <div
+        class="flex w-[100px] items-center justify-center text-sm font-medium"
+      >
         Página {table.getState().pagination.pageIndex + 1} de
         {table.getPageCount() || 1}
       </div>

@@ -40,7 +40,8 @@ export const columns: ColumnDef<TableUser>[] = [
       return `${row.original.firstName} ${row.original.lastName}`;
     },
     filterFn: (row, columnId, filterValue) => {
-      const fullName = `${row.original.firstName} ${row.original.lastName}`.toLowerCase();
+      const fullName =
+        `${row.original.firstName} ${row.original.lastName}`.toLowerCase();
       const searchValue = (filterValue as string).toLowerCase();
       return fullName.includes(searchValue);
     },

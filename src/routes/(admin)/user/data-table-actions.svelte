@@ -9,7 +9,7 @@
   import type { Client } from '@urql/svelte';
   import { createUrqlClient } from '$lib/graphql/client';
   import { invalidateAll } from '$app/navigation';
-  
+
   let token = getContext('token') as string;
   let { user }: { user: TableUser } = $props();
 
@@ -60,7 +60,9 @@
       <DropdownMenu.Group>
         <DropdownMenu.Label>Acciones</DropdownMenu.Label>
         {#each menuItems as item (item.action)}
-          <DropdownMenu.Item onclick={() => handleAction(item.action, String(user.userId))}>
+          <DropdownMenu.Item
+            onclick={() => handleAction(item.action, String(user.userId))}
+          >
             {item.label}
           </DropdownMenu.Item>
         {/each}

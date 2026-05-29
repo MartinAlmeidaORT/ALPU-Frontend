@@ -2,15 +2,17 @@
   import { Button } from '$lib/components/ui/button/index.js';
   import * as Alert from '$lib/components/ui/alert/index.js';
   import type { CalculateContractQuery } from '$lib/graphql/types/graphql';
-  import type {
-    CampaignInput,
-    CampaignServiceInput,
+  import {
+  UserState,
+    type CampaignInput,
+    type CampaignServiceInput,
   } from '$lib/graphql/schema';
   import { createUrqlClient } from '$lib/graphql/client';
   import { getContext } from 'svelte';
-  import { invalidateAll } from '$app/navigation';
+  import { goto, invalidateAll } from '$app/navigation';
   import { GENERATE_CONTRACT_MUTATION } from '$lib/graphql/queries/contracts';
   let token = getContext('token') as string;
+  let userState = getContext('userState') as string;
   const urqlClient = createUrqlClient(token);
 
   // Props
@@ -39,6 +41,7 @@
     campaignName?: string;
     services?: CampaignServiceInput[];
   } = $props();
+  
   let input = $derived<CampaignInput>({
     broadcasterId: rol === 'Broadcaster' ? activeUserId : valorId,
     clientId: rol === 'Client' ? activeUserId : valorId,
@@ -56,6 +59,10 @@
       errorMessages = 'Error al generar el contrato. Intenta nuevamente.';
     } else {
       await invalidateAll();
+      const pdfUrl = result.data?.generateContract?.pdfAmazonS3Url;
+      sessionStorage.setItem('contractPreview', JSON.stringify({ pdfUrl }));
+      sessionStorage.setItem('contractId', result.data?.generateContract?.contract?.contractId);
+      goto('/contract-preview');
     }
   }
 </script>
@@ -169,6 +176,7 @@
             bgColor="bg-[#22964F] text-white hover:bg-[#1a6d3b] hover:text-white"
             onclick={() => generateContract(input)}
             class="mt-4 flex-1"
+            disabled={userState !== UserState.Enabled}
           >
             Generar contrato
           </Button>

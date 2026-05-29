@@ -28,6 +28,7 @@
     data: PageData;
   } = $props();
   setContext('token', data.token);
+  setContext('userState', data.userState);
   type ServiceSelected = {
     service: NonNullable<ServicesQuery['services']>[number];
     selectedPrice?: number;

@@ -20,21 +20,21 @@
   } = $props();
 
   // Local state
-  let isInterior = false;
-  let isPriceSuggested = false;
-  let priceSuggested: number | null = null;
-  let nombrePieza = '';
-  let nonCommercialContent = false;
-  let internetBroadcast = false;
-  let lipSync = false;
-  let narrativeRoles = '0';
-  let narrativeMinutes = '';
-  let ivrMessage = '';
-  let broadcastInMassMedia = false;
-  let selectedPeriod = '';
-  let internalUse = false;
-  let additionalIvrMessage = 0;
-  let canIvrUpdate = false;
+  let isInterior = $state(false);
+  let isPriceSuggested = $state(false);
+  let priceSuggested: number | null = $state(null);
+  let nombrePieza = $state('');
+  let nonCommercialContent = $state(false);
+  let internetBroadcast = $state(false);
+  let lipSync = $state(false);
+  let narrativeRoles = $state('0');
+  let narrativeMinutes = $state('');
+  let ivrMessage = $state('');
+  let broadcastInMassMedia = $state(false);
+  let selectedPeriod = $state('');
+  let internalUse = $state(false);
+  let additionalIvrMessage = $state(0);
+  let canIvrUpdate = $state(false);
 
   function handleAddPiece() {
     if (!nombrePieza || nombrePieza.trim() === '') {

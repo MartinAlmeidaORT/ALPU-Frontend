@@ -401,6 +401,7 @@ export type ContractFilterInput = {
   date?: InputMaybe<LocalDateOperationFilterInput>;
   dueDate?: InputMaybe<LocalDateOperationFilterInput>;
   or?: InputMaybe<Array<ContractFilterInput>>;
+  pdfAmazonS3Key?: InputMaybe<StringOperationFilterInput>;
   state?: InputMaybe<ContractStateOperationFilterInput>;
   termYears?: InputMaybe<IntOperationFilterInput>;
   totalPrice?: InputMaybe<DecimalOperationFilterInput>;
@@ -418,6 +419,7 @@ export type ContractSortInput = {
   countryCode?: InputMaybe<SortEnumType>;
   date?: InputMaybe<SortEnumType>;
   dueDate?: InputMaybe<SortEnumType>;
+  pdfAmazonS3Key?: InputMaybe<SortEnumType>;
   state?: InputMaybe<SortEnumType>;
   termYears?: InputMaybe<SortEnumType>;
   totalPrice?: InputMaybe<SortEnumType>;
@@ -435,6 +437,11 @@ export type ContractStateOperationFilterInput = {
   in?: InputMaybe<Array<ContractState>>;
   neq?: InputMaybe<ContractState>;
   nin?: InputMaybe<Array<ContractState>>;
+};
+
+export type ContractUrlPayload = {
+  __typename?: 'ContractUrlPayload';
+  pdfAmazonS3Url: Scalars['String']['output'];
 };
 
 /** A connection to a list of items. */
@@ -554,6 +561,12 @@ export type EventCampaignService = BaseCampaignService & {
   date: Scalars['LocalDate']['output'];
   pieces: Array<Piece>;
   service: Service;
+};
+
+export type GenerateContractPayload = {
+  __typename?: 'GenerateContractPayload';
+  contract: Contract;
+  pdfAmazonS3Url: Scalars['String']['output'];
 };
 
 export type GoogleAuth = {
@@ -730,7 +743,7 @@ export type Mutation = {
   approveUser?: Maybe<User>;
   completeGoogleSignUpBroadcaster: AuthPayload;
   completeGoogleSignUpClient: AuthPayload;
-  generateContract: Contract;
+  generateContract: GenerateContractPayload;
   googleAuth: GoogleAuth;
   login: AuthPayload;
   registerBroadcaster: AuthPayload;
@@ -911,6 +924,7 @@ export type Query = {
   broadcasters: Array<Broadcaster>;
   calculateContract: PriceBreakdown;
   clients: Array<Client>;
+  contractPdfDownloadUrl: ContractUrlPayload;
   contracts?: Maybe<ContractsConnection>;
   countries: Array<Country>;
   departments: Array<Department>;
@@ -930,6 +944,10 @@ export type QueryCalculateContractArgs = {
 
 export type QueryClientsArgs = {
   where?: InputMaybe<ClientFilterInput>;
+};
+
+export type QueryContractPdfDownloadUrlArgs = {
+  contractId: Scalars['Int']['input'];
 };
 
 export type QueryContractsArgs = {

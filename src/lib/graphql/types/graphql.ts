@@ -111,10 +111,17 @@ export type UpdateContractStateInput = {
   newState: ContractState;
 };
 
+export type UpdateUserStateInput = {
+  newState: UserState;
+  userId: number;
+};
+
 export type UserLoginInput = {
   email: string;
   password: string;
 };
+
+export type UserState = 'ENABLED' | 'PENALIZED' | 'PENDING';
 
 export type RegisterBroadcasterMutationVariables = Exact<{
   input: RegisterBroadcasterInput;
@@ -126,6 +133,8 @@ export type RegisterBroadcasterMutation = {
     user:
       | {
           __typename: 'Accountant';
+          userId: number;
+          userState: UserState;
           email: string;
           firstName: string;
           lastName: string;
@@ -139,6 +148,8 @@ export type RegisterBroadcasterMutation = {
         }
       | {
           __typename: 'Administrator';
+          userId: number;
+          userState: UserState;
           email: string;
           firstName: string;
           lastName: string;
@@ -152,6 +163,8 @@ export type RegisterBroadcasterMutation = {
         }
       | {
           __typename: 'Broadcaster';
+          userId: number;
+          userState: UserState;
           email: string;
           firstName: string;
           lastName: string;
@@ -165,6 +178,8 @@ export type RegisterBroadcasterMutation = {
         }
       | {
           __typename: 'Client';
+          userId: number;
+          userState: UserState;
           email: string;
           firstName: string;
           lastName: string;
@@ -178,6 +193,8 @@ export type RegisterBroadcasterMutation = {
         }
       | {
           __typename: 'Supervisor';
+          userId: number;
+          userState: UserState;
           email: string;
           firstName: string;
           lastName: string;
@@ -203,6 +220,8 @@ export type RegisterClientMutation = {
     user:
       | {
           __typename: 'Accountant';
+          userId: number;
+          userState: UserState;
           email: string;
           firstName: string;
           lastName: string;
@@ -216,6 +235,8 @@ export type RegisterClientMutation = {
         }
       | {
           __typename: 'Administrator';
+          userId: number;
+          userState: UserState;
           email: string;
           firstName: string;
           lastName: string;
@@ -229,6 +250,8 @@ export type RegisterClientMutation = {
         }
       | {
           __typename: 'Broadcaster';
+          userId: number;
+          userState: UserState;
           email: string;
           firstName: string;
           lastName: string;
@@ -242,6 +265,8 @@ export type RegisterClientMutation = {
         }
       | {
           __typename: 'Client';
+          userId: number;
+          userState: UserState;
           email: string;
           firstName: string;
           lastName: string;
@@ -256,6 +281,8 @@ export type RegisterClientMutation = {
         }
       | {
           __typename: 'Supervisor';
+          userId: number;
+          userState: UserState;
           email: string;
           firstName: string;
           lastName: string;
@@ -296,6 +323,7 @@ export type LoginMutation = {
     user:
       | {
           __typename: 'Accountant';
+          userState: UserState;
           userId: number;
           email: string;
           firstName: string;
@@ -303,6 +331,7 @@ export type LoginMutation = {
         }
       | {
           __typename: 'Administrator';
+          userState: UserState;
           userId: number;
           email: string;
           firstName: string;
@@ -310,6 +339,7 @@ export type LoginMutation = {
         }
       | {
           __typename: 'Broadcaster';
+          userState: UserState;
           userId: number;
           email: string;
           firstName: string;
@@ -317,6 +347,7 @@ export type LoginMutation = {
         }
       | {
           __typename: 'Client';
+          userState: UserState;
           userId: number;
           email: string;
           firstName: string;
@@ -324,6 +355,7 @@ export type LoginMutation = {
         }
       | {
           __typename: 'Supervisor';
+          userState: UserState;
           userId: number;
           email: string;
           firstName: string;
@@ -343,6 +375,7 @@ export type CompleteGoogleSignUpBroadcasterMutation = {
     user:
       | {
           __typename: 'Accountant';
+          userState: UserState;
           email: string;
           firstName: string;
           lastName: string;
@@ -356,6 +389,7 @@ export type CompleteGoogleSignUpBroadcasterMutation = {
         }
       | {
           __typename: 'Administrator';
+          userState: UserState;
           email: string;
           firstName: string;
           lastName: string;
@@ -369,6 +403,7 @@ export type CompleteGoogleSignUpBroadcasterMutation = {
         }
       | {
           __typename: 'Broadcaster';
+          userState: UserState;
           email: string;
           firstName: string;
           lastName: string;
@@ -382,6 +417,7 @@ export type CompleteGoogleSignUpBroadcasterMutation = {
         }
       | {
           __typename: 'Client';
+          userState: UserState;
           email: string;
           firstName: string;
           lastName: string;
@@ -395,6 +431,7 @@ export type CompleteGoogleSignUpBroadcasterMutation = {
         }
       | {
           __typename: 'Supervisor';
+          userState: UserState;
           email: string;
           firstName: string;
           lastName: string;
@@ -420,6 +457,7 @@ export type CompleteGoogleSignUpClientMutation = {
     user:
       | {
           __typename: 'Accountant';
+          userState: UserState;
           email: string;
           firstName: string;
           lastName: string;
@@ -433,6 +471,7 @@ export type CompleteGoogleSignUpClientMutation = {
         }
       | {
           __typename: 'Administrator';
+          userState: UserState;
           email: string;
           firstName: string;
           lastName: string;
@@ -446,6 +485,7 @@ export type CompleteGoogleSignUpClientMutation = {
         }
       | {
           __typename: 'Broadcaster';
+          userState: UserState;
           email: string;
           firstName: string;
           lastName: string;
@@ -459,6 +499,7 @@ export type CompleteGoogleSignUpClientMutation = {
         }
       | {
           __typename: 'Client';
+          userState: UserState;
           email: string;
           firstName: string;
           lastName: string;
@@ -473,6 +514,7 @@ export type CompleteGoogleSignUpClientMutation = {
         }
       | {
           __typename: 'Supervisor';
+          userState: UserState;
           email: string;
           firstName: string;
           lastName: string;
@@ -572,12 +614,26 @@ export type ApproveContractMutation = {
   } | null;
 };
 
+export type ContractPdfDownloadUrlQueryVariables = Exact<{
+  contractId: number;
+}>;
+
+export type ContractPdfDownloadUrlQuery = {
+  contractPdfDownloadUrl: { pdfAmazonS3Url: string };
+};
+
 export type GenerateContractMutationVariables = Exact<{
   input: CampaignInput;
 }>;
 
 export type GenerateContractMutation = {
-  generateContract: { client: { firstName: string; lastName: string } };
+  generateContract: {
+    pdfAmazonS3Url: string;
+    contract: {
+      contractId: number;
+      client: { firstName: string; lastName: string };
+    };
+  };
 };
 
 export type CountriesQueryVariables = Exact<{ [key: string]: never }>;
@@ -696,6 +752,69 @@ export type BroadcastersQuery = {
   broadcasters: Array<{ userId: number; firstName: string; lastName: string }>;
 };
 
+export type UsersQueryVariables = Exact<{
+  state: UserState;
+}>;
+
+export type UsersQuery = {
+  users: Array<
+    | {
+        userId: number;
+        firstName: string;
+        lastName: string;
+        email: string;
+        rut: string;
+        userState: UserState;
+      }
+    | {
+        userId: number;
+        firstName: string;
+        lastName: string;
+        email: string;
+        rut: string;
+        userState: UserState;
+      }
+    | {
+        userId: number;
+        firstName: string;
+        lastName: string;
+        email: string;
+        rut: string;
+        userState: UserState;
+      }
+    | {
+        userId: number;
+        firstName: string;
+        lastName: string;
+        email: string;
+        rut: string;
+        userState: UserState;
+      }
+    | {
+        userId: number;
+        firstName: string;
+        lastName: string;
+        email: string;
+        rut: string;
+        userState: UserState;
+      }
+  >;
+};
+
+export type ApproveUserMutationVariables = Exact<{
+  input: UpdateUserStateInput;
+}>;
+
+export type ApproveUserMutation = {
+  approveUser:
+    | { userId: number; userState: UserState }
+    | { userId: number; userState: UserState }
+    | { userId: number; userState: UserState }
+    | { userId: number; userState: UserState }
+    | { userId: number; userState: UserState }
+    | null;
+};
+
 export const RegisterBroadcasterDocument = {
   kind: 'Document',
   definitions: [
@@ -745,6 +864,14 @@ export const RegisterBroadcasterDocument = {
                   selectionSet: {
                     kind: 'SelectionSet',
                     selections: [
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'userId' },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'userState' },
+                      },
                       {
                         kind: 'Field',
                         name: { kind: 'Name', value: '__typename' },
@@ -879,6 +1006,14 @@ export const RegisterClientDocument = {
                   selectionSet: {
                     kind: 'SelectionSet',
                     selections: [
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'userId' },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'userState' },
+                      },
                       {
                         kind: 'Field',
                         name: { kind: 'Name', value: '__typename' },
@@ -1105,6 +1240,10 @@ export const LoginDocument = {
                     selections: [
                       {
                         kind: 'Field',
+                        name: { kind: 'Name', value: 'userState' },
+                      },
+                      {
+                        kind: 'Field',
                         name: { kind: 'Name', value: 'userId' },
                       },
                       { kind: 'Field', name: { kind: 'Name', value: 'email' } },
@@ -1183,6 +1322,10 @@ export const CompleteGoogleSignUpBroadcasterDocument = {
                   selectionSet: {
                     kind: 'SelectionSet',
                     selections: [
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'userState' },
+                      },
                       {
                         kind: 'Field',
                         name: { kind: 'Name', value: '__typename' },
@@ -1317,6 +1460,10 @@ export const CompleteGoogleSignUpClientDocument = {
                   selectionSet: {
                     kind: 'SelectionSet',
                     selections: [
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'userState' },
+                      },
                       {
                         kind: 'Field',
                         name: { kind: 'Name', value: '__typename' },
@@ -1907,7 +2054,7 @@ export const ApproveContractDocument = {
     {
       kind: 'OperationDefinition',
       operation: 'mutation',
-      name: { kind: 'Name', value: 'approveContract' },
+      name: { kind: 'Name', value: 'ApproveContract' },
       variableDefinitions: [
         {
           kind: 'VariableDefinition',
@@ -1960,6 +2107,60 @@ export const ApproveContractDocument = {
   ApproveContractMutation,
   ApproveContractMutationVariables
 >;
+export const ContractPdfDownloadUrlDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'query',
+      name: { kind: 'Name', value: 'ContractPdfDownloadUrl' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: {
+            kind: 'Variable',
+            name: { kind: 'Name', value: 'contractId' },
+          },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'Int' } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'contractPdfDownloadUrl' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'contractId' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'contractId' },
+                },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'pdfAmazonS3Url' },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<
+  ContractPdfDownloadUrlQuery,
+  ContractPdfDownloadUrlQueryVariables
+>;
 export const GenerateContractDocument = {
   kind: 'Document',
   definitions: [
@@ -2004,20 +2205,37 @@ export const GenerateContractDocument = {
               selections: [
                 {
                   kind: 'Field',
-                  name: { kind: 'Name', value: 'client' },
+                  name: { kind: 'Name', value: 'contract' },
                   selectionSet: {
                     kind: 'SelectionSet',
                     selections: [
                       {
                         kind: 'Field',
-                        name: { kind: 'Name', value: 'firstName' },
+                        name: { kind: 'Name', value: 'client' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'firstName' },
+                            },
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'lastName' },
+                            },
+                          ],
+                        },
                       },
                       {
                         kind: 'Field',
-                        name: { kind: 'Name', value: 'lastName' },
+                        name: { kind: 'Name', value: 'contractId' },
                       },
                     ],
                   },
+                },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'pdfAmazonS3Url' },
                 },
               ],
             },
@@ -2605,3 +2823,129 @@ export const BroadcastersDocument = {
     },
   ],
 } as unknown as DocumentNode<BroadcastersQuery, BroadcastersQueryVariables>;
+export const UsersDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'query',
+      name: { kind: 'Name', value: 'users' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: {
+            kind: 'Variable',
+            name: { kind: 'Name', value: 'state' },
+          },
+          type: {
+            kind: 'NonNullType',
+            type: {
+              kind: 'NamedType',
+              name: { kind: 'Name', value: 'UserState' },
+            },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'users' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'where' },
+                value: {
+                  kind: 'ObjectValue',
+                  fields: [
+                    {
+                      kind: 'ObjectField',
+                      name: { kind: 'Name', value: 'userState' },
+                      value: {
+                        kind: 'ObjectValue',
+                        fields: [
+                          {
+                            kind: 'ObjectField',
+                            name: { kind: 'Name', value: 'eq' },
+                            value: {
+                              kind: 'Variable',
+                              name: { kind: 'Name', value: 'state' },
+                            },
+                          },
+                        ],
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'userId' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'firstName' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'lastName' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'email' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'rut' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'userState' } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<UsersQuery, UsersQueryVariables>;
+export const ApproveUserDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'approveUser' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: {
+            kind: 'Variable',
+            name: { kind: 'Name', value: 'input' },
+          },
+          type: {
+            kind: 'NonNullType',
+            type: {
+              kind: 'NamedType',
+              name: { kind: 'Name', value: 'UpdateUserStateInput' },
+            },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'approveUser' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'input' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'input' },
+                },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'userId' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'userState' } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<ApproveUserMutation, ApproveUserMutationVariables>;

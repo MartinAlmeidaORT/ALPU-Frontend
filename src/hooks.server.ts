@@ -22,11 +22,13 @@ export const handle: Handle = async ({ event, resolve }) => {
       event.locals.urql = createUrqlClient(sessionData.token);
       event.locals.token = sessionData.token;
       event.locals.rol = sessionData.user.__typename;
+      event.locals.userState = sessionData.user.userState;
     } catch (error) {
       console.error('Error parsing session data:', error);
     }
   } else {
     event.locals.user = null;
+    event.locals.userState = null;
     event.locals.rol = null;
     event.locals.token = null;
     event.locals.urql = createUrqlClient();

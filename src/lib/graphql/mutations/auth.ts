@@ -14,6 +14,8 @@ export const SIGNUP_BROADCASTER_MUTATION = graphql(`
     registerBroadcaster(input: $input) {
       token
       user {
+        userId
+        userState
         __typename
         email
         firstName
@@ -41,6 +43,8 @@ export const SIGNUP_CLIENT_MUTATION = graphql(`
     registerClient(input: $input) {
       token
       user {
+        userId
+        userState
         __typename
         email
         firstName
@@ -94,6 +98,7 @@ export const LOGIN_MUTATION = graphql(`
     login(input: $input) {
       token
       user {
+        userState
         userId
         email
         firstName
@@ -120,6 +125,7 @@ export const COMPLETE_GOOGLE_SIGNUP_BROADCASTER_MUTATION = graphql(`
     completeGoogleSignUpBroadcaster(input: $input) {
       token
       user {
+        userState
         __typename
         email
         firstName
@@ -157,6 +163,7 @@ export const COMPLETE_GOOGLE_SIGNUP_CLIENT_MUTATION = graphql(`
     completeGoogleSignUpClient(input: $input) {
       token
       user {
+        userState
         __typename
         email
         firstName

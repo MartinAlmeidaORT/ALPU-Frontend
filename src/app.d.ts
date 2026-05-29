@@ -9,6 +9,7 @@ declare global {
       user: User | null | undefined;
       token: string | null | undefined;
       rol: string | null | undefined;
+      userState: string | null | undefined;
     }
     // interface Error {}
     // interface Locals {}

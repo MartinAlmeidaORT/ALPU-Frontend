@@ -27,6 +27,28 @@ const BROADCASTER_QUERY = graphql(`
   }
 `);
 
+export const USERS_FILTERED_QUERY = graphql(`
+  query users($state: UserState!) {
+    users(where: { userState: { eq: $state } }) {
+      userId
+      firstName
+      lastName
+      email
+      rut
+      userState
+    }
+  }
+`);
+
+export const APPROVE_USER_MUTATION = graphql(`
+  mutation approveUser($input: UpdateUserStateInput!) {
+    approveUser(input: $input) {
+      userId
+      userState
+    }
+  }
+`);
+
 export async function fetchClient(input: {
   firstName: string;
   lastName: string;

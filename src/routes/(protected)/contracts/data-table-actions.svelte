@@ -7,6 +7,7 @@
   import {
     CANCEL_CONTRACT_QUERY,
     APPROVE_CONTRACT_QUERY,
+    GET_CONTRACT_URL_QUERY,
   } from '$lib/graphql/queries/contracts';
   import {
     ContractState,
@@ -24,10 +25,18 @@
         return [
           { label: 'Aprobar', action: 'approve' },
           { label: 'Cancelar', action: 'cancel' },
+          { label: 'Ver', action: 'ver' },
         ];
       case 'APPROVED':
+        return [{ label: 'Ver', action: 'ver' }];
       case 'ACTIVE':
-        return [{ label: 'Cancelar', action: 'cancel' }];
+        return [
+          { label: 'Cancelar', action: 'cancel' },
+          { label: 'Ver', action: 'ver' },
+        ];
+
+      case 'CANCELED':
+        return [{ label: 'Ver', action: 'ver' }];
       default:
         return [];
     }
@@ -55,6 +64,22 @@
       if (result.error) {
       } else {
         await invalidateAll();
+      }
+    } else if (action === 'ver') {
+      const urqlClient: Client = createUrqlClient(token);
+      const result = await urqlClient
+        .query(GET_CONTRACT_URL_QUERY, { contractId: Number(contractId) })
+        .toPromise();
+      if (result.error) {
+      } else {
+        sessionStorage.setItem(
+          'contractPreview',
+          JSON.stringify({
+            pdfUrl: result.data.contractPdfDownloadUrl.pdfAmazonS3Url,
+          }),
+        );
+        sessionStorage.setItem('contractId', contractId);
+        window.open('/contract-preview', '_blank');
       }
     }
   };

@@ -85,7 +85,7 @@ export const CANCEL_CONTRACT_QUERY = graphql(`
 `);
 
 export const APPROVE_CONTRACT_QUERY = graphql(`
-  mutation approveContract($contractId: Int!) {
+  mutation ApproveContract($contractId: Int!) {
     approveContract(contractId: $contractId) {
       clientApproved
       broadcasterApproved
@@ -94,13 +94,25 @@ export const APPROVE_CONTRACT_QUERY = graphql(`
   }
 `);
 
+export const GET_CONTRACT_URL_QUERY = graphql(`
+  query ContractPdfDownloadUrl($contractId: Int!) {
+    contractPdfDownloadUrl(contractId: $contractId) {
+      pdfAmazonS3Url
+    }
+  }
+`);
+
 export const GENERATE_CONTRACT_MUTATION = graphql(`
   mutation GenerateContract($input: CampaignInput!) {
     generateContract(input: $input) {
-      client {
-        firstName
-        lastName
+      contract {
+        client {
+          firstName
+          lastName
+        }
+        contractId
       }
+      pdfAmazonS3Url
     }
   }
 `);

@@ -14,12 +14,12 @@
 </script>
 
 {#if data.error}
-<div class="p-4">
+  <div class="p-4">
     <Alert>
-    <AlertTitle>Error al cargar gastos e ingresos</AlertTitle>
-    <AlertDescription>{data.error}</AlertDescription>
+      <AlertTitle>Error al cargar gastos e ingresos</AlertTitle>
+      <AlertDescription>{data.error}</AlertDescription>
     </Alert>
-</div>
+  </div>
 {:else}
-<DataTable data={data.bills} {columns} />
+  <DataTable data={data.bills} {columns} />
 {/if}

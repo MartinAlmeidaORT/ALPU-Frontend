@@ -23,7 +23,7 @@ export const BILLS_QUERY = graphql(`
 export const GENERATE_BILL_MUTATION = graphql(`
   mutation registerBill($input: BillInput!) {
     registerBill(input: $input) {
-        amazonS3Url
+      amazonS3Url
     }
   }
 `);
@@ -44,8 +44,6 @@ export const GET_BILL_URL_QUERY = graphql(`
   }
 `);
 
-export async function fetchBills(): Promise<
-  OperationResult<BillsQuery>
-> {
+export async function fetchBills(): Promise<OperationResult<BillsQuery>> {
   return await createUrqlClient().query(BILLS_QUERY, {}).toPromise();
 }

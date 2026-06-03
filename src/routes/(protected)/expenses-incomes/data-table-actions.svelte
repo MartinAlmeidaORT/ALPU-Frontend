@@ -5,19 +5,21 @@
   import type { TableBill } from './columns';
   import { getContext } from 'svelte';
   import { goto, invalidateAll } from '$app/navigation';
-  import { GET_BILL_URL_QUERY, DELETE_BILL_MUTATION } from '$lib/graphql/queries/bills';
+  import {
+    GET_BILL_URL_QUERY,
+    DELETE_BILL_MUTATION,
+  } from '$lib/graphql/queries/bills';
   import type { Client } from '@urql/svelte';
   import { createUrqlClient } from '$lib/graphql/client';
   import { toast } from 'svelte-sonner';
-  
+
   let token = getContext('token') as string;
   let { bill }: { bill: TableBill } = $props();
 
   const getMenuItems = () => {
     return [
       { label: 'Ver comprobante', action: 'ver' },
-      { label: 'Borrar comprobante', action: 'borrar' }
-
+      { label: 'Borrar comprobante', action: 'borrar' },
     ];
   };
 
@@ -32,7 +34,9 @@
       } else {
         sessionStorage.setItem(
           'billPreview',
-          JSON.stringify({ proofFileUrl: result.data.billProofDownloadUrl.amazonS3Url })
+          JSON.stringify({
+            proofFileUrl: result.data.billProofDownloadUrl.amazonS3Url,
+          }),
         );
         window.open('/expenses-incomes-preview', '_blank');
       }

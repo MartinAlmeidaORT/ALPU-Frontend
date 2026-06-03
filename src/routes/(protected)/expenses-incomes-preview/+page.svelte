@@ -29,7 +29,9 @@
 <div class="h-full w-full p-4 flex flex-col items-center gap-4">
   {#if proofFileUrl}
     <h1 class="text-2xl font-bold text-center">Preview del Comprobante</h1>
-    <div class="preview-container w-full max-w-6xl flex justify-center bg-gray-100 p-4 rounded-lg">
+    <div
+      class="preview-container w-full max-w-6xl flex justify-center bg-gray-100 p-4 rounded-lg"
+    >
       {#if isImage(proofFileUrl)}
         <img
           src={proofFileUrl}

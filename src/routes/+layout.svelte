@@ -28,16 +28,20 @@
     <NavigationMenu.List class="flex-wrap align-items-center">
       {#if isAuth}
         <NavigationMenu.Item>
-          <NavigationMenu.Link>
-            {#snippet child()}
-              <a href="/" class={navigationMenuTriggerStyle()}>Home</a>
-            {/snippet}
-          </NavigationMenu.Link>
           {#if data.rol === 'Broadcaster' || data.rol === 'Client'}
             <NavigationMenu.Link>
               {#snippet child()}
                 <a href="/select-service" class={navigationMenuTriggerStyle()}
                   >Servicios</a
+                >
+              {/snippet}
+            </NavigationMenu.Link>
+          {/if}
+          {#if data.rol === 'Contador' || data.rol === 'Supervisor'}
+            <NavigationMenu.Link>
+              {#snippet child()}
+                <a href="/expenses-incomes" class={navigationMenuTriggerStyle()}
+                  >Finanzas</a
                 >
               {/snippet}
             </NavigationMenu.Link>

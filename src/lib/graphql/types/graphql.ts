@@ -8,6 +8,18 @@ export type Incremental<T> =
       [P in keyof T]?: P extends ' $fragmentName' | '__typename' ? T[P] : never;
     };
 import type { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/core';
+export type BillInput = {
+  amount: unknown;
+  contractId?: number | null | undefined;
+  date: unknown;
+  description: string;
+  fileName: string;
+  title: string;
+  type: BillType;
+};
+
+export type BillType = 'EXPENSE' | 'INCOME';
+
 export type CampaignInput = {
   broadcasterId: number;
   campaign: string;
@@ -528,6 +540,43 @@ export type CompleteGoogleSignUpClientMutation = {
         }
       | null;
   };
+};
+
+export type BillsQueryVariables = Exact<{ [key: string]: never }>;
+
+export type BillsQuery = {
+  bills: {
+    nodes: Array<{
+      billId: number;
+      title: string;
+      date: unknown;
+      amount: unknown;
+      description: string;
+      contract: { contractId: number } | null;
+    }> | null;
+  } | null;
+};
+
+export type RegisterBillMutationVariables = Exact<{
+  input: BillInput;
+}>;
+
+export type RegisterBillMutation = {
+  registerBill: { amazonS3Url: string } | null;
+};
+
+export type DeleteBillMutationVariables = Exact<{
+  billId: number;
+}>;
+
+export type DeleteBillMutation = { deleteBill: { title: string } | null };
+
+export type BillProofDownloadUrlQueryVariables = Exact<{
+  billId: number;
+}>;
+
+export type BillProofDownloadUrlQuery = {
+  billProofDownloadUrl: { amazonS3Url: string };
 };
 
 export type ContractsQueryVariables = Exact<{
@@ -1573,6 +1622,219 @@ export const CompleteGoogleSignUpClientDocument = {
 } as unknown as DocumentNode<
   CompleteGoogleSignUpClientMutation,
   CompleteGoogleSignUpClientMutationVariables
+>;
+export const BillsDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'query',
+      name: { kind: 'Name', value: 'bills' },
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'bills' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'nodes' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'billId' },
+                      },
+                      { kind: 'Field', name: { kind: 'Name', value: 'title' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'date' } },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'amount' },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'description' },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'contract' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'contractId' },
+                            },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<BillsQuery, BillsQueryVariables>;
+export const RegisterBillDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'registerBill' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: {
+            kind: 'Variable',
+            name: { kind: 'Name', value: 'input' },
+          },
+          type: {
+            kind: 'NonNullType',
+            type: {
+              kind: 'NamedType',
+              name: { kind: 'Name', value: 'BillInput' },
+            },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'registerBill' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'input' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'input' },
+                },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'amazonS3Url' } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<
+  RegisterBillMutation,
+  RegisterBillMutationVariables
+>;
+export const DeleteBillDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'deleteBill' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: {
+            kind: 'Variable',
+            name: { kind: 'Name', value: 'billId' },
+          },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'Int' } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'deleteBill' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'billId' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'billId' },
+                },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'title' } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<DeleteBillMutation, DeleteBillMutationVariables>;
+export const BillProofDownloadUrlDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'query',
+      name: { kind: 'Name', value: 'BillProofDownloadUrl' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: {
+            kind: 'Variable',
+            name: { kind: 'Name', value: 'billId' },
+          },
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'Int' } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'billProofDownloadUrl' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'billId' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'billId' },
+                },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'amazonS3Url' } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<
+  BillProofDownloadUrlQuery,
+  BillProofDownloadUrlQueryVariables
 >;
 export const ContractsDocument = {
   kind: 'Document',

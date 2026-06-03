@@ -20,12 +20,16 @@ type Documents = {
   '\n  mutation login($input: UserLoginInput!) {\n    login(input: $input) {\n      token\n      user {\n        userState\n        userId\n        email\n        firstName\n        lastName\n        __typename\n      }\n    }\n  }\n': typeof types.LoginDocument;
   '\n  mutation completeGoogleSignUpBroadcaster(\n    $input: CompleteGoogleSignUpBroadcasterInput!\n  ) {\n    completeGoogleSignUpBroadcaster(input: $input) {\n      token\n      user {\n        userState\n        __typename\n        email\n        firstName\n        lastName\n        rut\n        address {\n          country {\n            countryCode\n            name\n          }\n          department {\n            departmentId\n            name\n          }\n          street\n          city\n        }\n      }\n    }\n  }\n': typeof types.CompleteGoogleSignUpBroadcasterDocument;
   '\n  mutation completeGoogleSignUpClient(\n    $input: CompleteGoogleSignUpClientInput!\n  ) {\n    completeGoogleSignUpClient(input: $input) {\n      token\n      user {\n        userState\n        __typename\n        email\n        firstName\n        lastName\n        rut\n        address {\n          country {\n            countryCode\n            name\n          }\n          department {\n            departmentId\n            name\n          }\n          street\n          city\n        }\n        ... on Client {\n          agency {\n            name\n          }\n        }\n      }\n    }\n  }\n': typeof types.CompleteGoogleSignUpClientDocument;
+  '\n  query bills {\n    bills {\n      nodes {\n        billId\n        title\n        date\n        amount\n        description\n        contract {\n          contractId\n        }\n      }\n    }\n  }\n': typeof types.BillsDocument;
+  '\n  mutation registerBill($input: BillInput!) {\n    registerBill(input: $input) {\n        amazonS3Url\n    }\n  }\n': typeof types.RegisterBillDocument;
+  '\n  mutation deleteBill($billId: Int!) {\n    deleteBill(billId: $billId) {\n      title\n    }\n  }\n': typeof types.DeleteBillDocument;
+  '\n  query BillProofDownloadUrl($billId: Int!) {\n    billProofDownloadUrl(billId: $billId) {\n      amazonS3Url\n    }\n  }\n': typeof types.BillProofDownloadUrlDocument;
   '\n  query contracts($first: Int, $after: String) {\n    contracts(first: $first, after: $after, order: [{ contractId: DESC }]) {\n      nodes {\n        contractId\n        broadcaster {\n          firstName\n          lastName\n        }\n        client {\n          firstName\n          lastName\n          agency {\n            name\n          }\n        }\n        state\n        date\n        dueDate\n      }\n      pageInfo {\n        hasNextPage\n        hasPreviousPage\n        startCursor\n        endCursor\n      }\n      totalCount\n    }\n  }\n': typeof types.ContractsDocument;
   '\n  query contractsFiltered($first: Int, $after: String, $state: ContractState!) {\n    contracts(\n      first: $first\n      after: $after\n      where: { state: { eq: $state } }\n      order: [{ contractId: DESC }]\n    ) {\n      nodes {\n        contractId\n        broadcaster {\n          firstName\n          lastName\n        }\n        client {\n          firstName\n          lastName\n          agency {\n            name\n          }\n        }\n        state\n        date\n        dueDate\n      }\n      pageInfo {\n        hasNextPage\n        hasPreviousPage\n        startCursor\n        endCursor\n      }\n      totalCount\n    }\n  }\n': typeof types.ContractsFilteredDocument;
   '\n  mutation UpdateContractState($input: UpdateContractStateInput!) {\n    updateContractState(input: $input) {\n      contractId\n      state\n      broadcaster {\n        firstName\n        lastName\n      }\n      client {\n        firstName\n        lastName\n      }\n    }\n  }\n': typeof types.UpdateContractStateDocument;
   '\n  mutation ApproveContract($contractId: Int!) {\n    approveContract(contractId: $contractId) {\n      clientApproved\n      broadcasterApproved\n      state\n    }\n  }\n': typeof types.ApproveContractDocument;
   '\n  query ContractPdfDownloadUrl($contractId: Int!) {\n    contractPdfDownloadUrl(contractId: $contractId) {\n      pdfAmazonS3Url\n    }\n  }\n': typeof types.ContractPdfDownloadUrlDocument;
-  '\n  mutation GenerateContract($input: CampaignInput!) {\n    generateContract(input: $input) {\n      contract {\n        client {\n          firstName\n          lastName\n        }\n        contractId\n      }\n    pdfAmazonS3Url    \n    }\n  }\n': typeof types.GenerateContractDocument;
+  '\n  mutation GenerateContract($input: CampaignInput!) {\n    generateContract(input: $input) {\n      contract {\n        client {\n          firstName\n          lastName\n        }\n        contractId\n      }\n      pdfAmazonS3Url\n    }\n  }\n': typeof types.GenerateContractDocument;
   '\n  query countries {\n    countries {\n      countryCode\n      name\n    }\n  }\n': typeof types.CountriesDocument;
   '\n  query departments($countryCode: String!) {\n    departments(where: { countryCode: { eq: $countryCode } }) {\n      departmentId\n      name\n    }\n  }\n': typeof types.DepartmentsDocument;
   '\n  query services {\n    services {\n      type\n      name\n      serviceId\n      basePrice\n      extraPrice\n      firstExtraPrice\n      __typename\n      ... on ServiceNarrative {\n        rolePrice\n      }\n      ... on ServiceIvr {\n        additionalMessagePrice\n      }\n      ... on ServicePeriod {\n        periods(order: { basePrice: ASC }) {\n          basePrice\n          extraPrice\n          firstExtraPrice\n          interval\n        }\n      }\n    }\n  }\n': typeof types.ServicesDocument;
@@ -48,6 +52,14 @@ const documents: Documents = {
     types.CompleteGoogleSignUpBroadcasterDocument,
   '\n  mutation completeGoogleSignUpClient(\n    $input: CompleteGoogleSignUpClientInput!\n  ) {\n    completeGoogleSignUpClient(input: $input) {\n      token\n      user {\n        userState\n        __typename\n        email\n        firstName\n        lastName\n        rut\n        address {\n          country {\n            countryCode\n            name\n          }\n          department {\n            departmentId\n            name\n          }\n          street\n          city\n        }\n        ... on Client {\n          agency {\n            name\n          }\n        }\n      }\n    }\n  }\n':
     types.CompleteGoogleSignUpClientDocument,
+  '\n  query bills {\n    bills {\n      nodes {\n        billId\n        title\n        date\n        amount\n        description\n        contract {\n          contractId\n        }\n      }\n    }\n  }\n':
+    types.BillsDocument,
+  '\n  mutation registerBill($input: BillInput!) {\n    registerBill(input: $input) {\n        amazonS3Url\n    }\n  }\n':
+    types.RegisterBillDocument,
+  '\n  mutation deleteBill($billId: Int!) {\n    deleteBill(billId: $billId) {\n      title\n    }\n  }\n':
+    types.DeleteBillDocument,
+  '\n  query BillProofDownloadUrl($billId: Int!) {\n    billProofDownloadUrl(billId: $billId) {\n      amazonS3Url\n    }\n  }\n':
+    types.BillProofDownloadUrlDocument,
   '\n  query contracts($first: Int, $after: String) {\n    contracts(first: $first, after: $after, order: [{ contractId: DESC }]) {\n      nodes {\n        contractId\n        broadcaster {\n          firstName\n          lastName\n        }\n        client {\n          firstName\n          lastName\n          agency {\n            name\n          }\n        }\n        state\n        date\n        dueDate\n      }\n      pageInfo {\n        hasNextPage\n        hasPreviousPage\n        startCursor\n        endCursor\n      }\n      totalCount\n    }\n  }\n':
     types.ContractsDocument,
   '\n  query contractsFiltered($first: Int, $after: String, $state: ContractState!) {\n    contracts(\n      first: $first\n      after: $after\n      where: { state: { eq: $state } }\n      order: [{ contractId: DESC }]\n    ) {\n      nodes {\n        contractId\n        broadcaster {\n          firstName\n          lastName\n        }\n        client {\n          firstName\n          lastName\n          agency {\n            name\n          }\n        }\n        state\n        date\n        dueDate\n      }\n      pageInfo {\n        hasNextPage\n        hasPreviousPage\n        startCursor\n        endCursor\n      }\n      totalCount\n    }\n  }\n':
@@ -58,7 +70,7 @@ const documents: Documents = {
     types.ApproveContractDocument,
   '\n  query ContractPdfDownloadUrl($contractId: Int!) {\n    contractPdfDownloadUrl(contractId: $contractId) {\n      pdfAmazonS3Url\n    }\n  }\n':
     types.ContractPdfDownloadUrlDocument,
-  '\n  mutation GenerateContract($input: CampaignInput!) {\n    generateContract(input: $input) {\n      contract {\n        client {\n          firstName\n          lastName\n        }\n        contractId\n      }\n    pdfAmazonS3Url    \n    }\n  }\n':
+  '\n  mutation GenerateContract($input: CampaignInput!) {\n    generateContract(input: $input) {\n      contract {\n        client {\n          firstName\n          lastName\n        }\n        contractId\n      }\n      pdfAmazonS3Url\n    }\n  }\n':
     types.GenerateContractDocument,
   '\n  query countries {\n    countries {\n      countryCode\n      name\n    }\n  }\n':
     types.CountriesDocument,
@@ -132,6 +144,30 @@ export function graphql(
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(
+  source: '\n  query bills {\n    bills {\n      nodes {\n        billId\n        title\n        date\n        amount\n        description\n        contract {\n          contractId\n        }\n      }\n    }\n  }\n',
+): (typeof documents)['\n  query bills {\n    bills {\n      nodes {\n        billId\n        title\n        date\n        amount\n        description\n        contract {\n          contractId\n        }\n      }\n    }\n  }\n'];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(
+  source: '\n  mutation registerBill($input: BillInput!) {\n    registerBill(input: $input) {\n        amazonS3Url\n    }\n  }\n',
+): (typeof documents)['\n  mutation registerBill($input: BillInput!) {\n    registerBill(input: $input) {\n        amazonS3Url\n    }\n  }\n'];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(
+  source: '\n  mutation deleteBill($billId: Int!) {\n    deleteBill(billId: $billId) {\n      title\n    }\n  }\n',
+): (typeof documents)['\n  mutation deleteBill($billId: Int!) {\n    deleteBill(billId: $billId) {\n      title\n    }\n  }\n'];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(
+  source: '\n  query BillProofDownloadUrl($billId: Int!) {\n    billProofDownloadUrl(billId: $billId) {\n      amazonS3Url\n    }\n  }\n',
+): (typeof documents)['\n  query BillProofDownloadUrl($billId: Int!) {\n    billProofDownloadUrl(billId: $billId) {\n      amazonS3Url\n    }\n  }\n'];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(
   source: '\n  query contracts($first: Int, $after: String) {\n    contracts(first: $first, after: $after, order: [{ contractId: DESC }]) {\n      nodes {\n        contractId\n        broadcaster {\n          firstName\n          lastName\n        }\n        client {\n          firstName\n          lastName\n          agency {\n            name\n          }\n        }\n        state\n        date\n        dueDate\n      }\n      pageInfo {\n        hasNextPage\n        hasPreviousPage\n        startCursor\n        endCursor\n      }\n      totalCount\n    }\n  }\n',
 ): (typeof documents)['\n  query contracts($first: Int, $after: String) {\n    contracts(first: $first, after: $after, order: [{ contractId: DESC }]) {\n      nodes {\n        contractId\n        broadcaster {\n          firstName\n          lastName\n        }\n        client {\n          firstName\n          lastName\n          agency {\n            name\n          }\n        }\n        state\n        date\n        dueDate\n      }\n      pageInfo {\n        hasNextPage\n        hasPreviousPage\n        startCursor\n        endCursor\n      }\n      totalCount\n    }\n  }\n'];
 /**
@@ -162,8 +198,8 @@ export function graphql(
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(
-  source: '\n  mutation GenerateContract($input: CampaignInput!) {\n    generateContract(input: $input) {\n      contract {\n        client {\n          firstName\n          lastName\n        }\n        contractId\n      }\n    pdfAmazonS3Url    \n    }\n  }\n',
-): (typeof documents)['\n  mutation GenerateContract($input: CampaignInput!) {\n    generateContract(input: $input) {\n      contract {\n        client {\n          firstName\n          lastName\n        }\n        contractId\n      }\n    pdfAmazonS3Url    \n    }\n  }\n'];
+  source: '\n  mutation GenerateContract($input: CampaignInput!) {\n    generateContract(input: $input) {\n      contract {\n        client {\n          firstName\n          lastName\n        }\n        contractId\n      }\n      pdfAmazonS3Url\n    }\n  }\n',
+): (typeof documents)['\n  mutation GenerateContract($input: CampaignInput!) {\n    generateContract(input: $input) {\n      contract {\n        client {\n          firstName\n          lastName\n        }\n        contractId\n      }\n      pdfAmazonS3Url\n    }\n  }\n'];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

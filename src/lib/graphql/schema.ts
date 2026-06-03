@@ -143,6 +143,18 @@ export type BaseServiceSortInput = {
   type?: InputMaybe<SortEnumType>;
 };
 
+export type Bill = {
+  __typename?: 'Bill';
+  amount: Scalars['Decimal']['output'];
+  billId: Scalars['Int']['output'];
+  contract?: Maybe<Contract>;
+  date: Scalars['LocalDate']['output'];
+  description: Scalars['String']['output'];
+  proofFile: Scalars['String']['output'];
+  title: Scalars['String']['output'];
+  type: BillType;
+};
+
 export type BillFilterInput = {
   amount?: InputMaybe<DecimalOperationFilterInput>;
   and?: InputMaybe<Array<BillFilterInput>>;
@@ -153,8 +165,30 @@ export type BillFilterInput = {
   description?: InputMaybe<StringOperationFilterInput>;
   or?: InputMaybe<Array<BillFilterInput>>;
   proofFile?: InputMaybe<StringOperationFilterInput>;
-  state?: InputMaybe<BillTypeOperationFilterInput>;
   title?: InputMaybe<StringOperationFilterInput>;
+  type?: InputMaybe<BillTypeOperationFilterInput>;
+};
+
+export type BillInput = {
+  amount: Scalars['Decimal']['input'];
+  contractId?: InputMaybe<Scalars['Int']['input']>;
+  date: Scalars['LocalDate']['input'];
+  description: Scalars['String']['input'];
+  fileName: Scalars['String']['input'];
+  title: Scalars['String']['input'];
+  type: BillType;
+};
+
+export type BillSortInput = {
+  amount?: InputMaybe<SortEnumType>;
+  billId?: InputMaybe<SortEnumType>;
+  contract?: InputMaybe<ContractSortInput>;
+  contractId?: InputMaybe<SortEnumType>;
+  date?: InputMaybe<SortEnumType>;
+  description?: InputMaybe<SortEnumType>;
+  proofFile?: InputMaybe<SortEnumType>;
+  title?: InputMaybe<SortEnumType>;
+  type?: InputMaybe<SortEnumType>;
 };
 
 export enum BillType {
@@ -167,6 +201,33 @@ export type BillTypeOperationFilterInput = {
   in?: InputMaybe<Array<BillType>>;
   neq?: InputMaybe<BillType>;
   nin?: InputMaybe<Array<BillType>>;
+};
+
+export type BillUrlPayload = {
+  __typename?: 'BillUrlPayload';
+  amazonS3Url: Scalars['String']['output'];
+};
+
+/** A connection to a list of items. */
+export type BillsConnection = {
+  __typename?: 'BillsConnection';
+  /** A list of edges. */
+  edges?: Maybe<Array<BillsEdge>>;
+  /** A flattened list of the nodes. */
+  nodes?: Maybe<Array<Bill>>;
+  /** Information to aid in pagination. */
+  pageInfo: PageInfo;
+  /** Identifies the total count of items in the connection. */
+  totalCount: Scalars['Int']['output'];
+};
+
+/** An edge in a connection. */
+export type BillsEdge = {
+  __typename?: 'BillsEdge';
+  /** A cursor for use in pagination. */
+  cursor: Scalars['String']['output'];
+  /** The item at the end of the edge. */
+  node: Bill;
 };
 
 export type BooleanOperationFilterInput = {
@@ -577,6 +638,7 @@ export type GoogleAuth = {
   requiresRegistration: Scalars['Boolean']['output'];
   subject?: Maybe<Scalars['String']['output']>;
   token?: Maybe<Scalars['String']['output']>;
+  user?: Maybe<User>;
 };
 
 export type GoogleAuthInput = {
@@ -743,9 +805,11 @@ export type Mutation = {
   approveUser?: Maybe<User>;
   completeGoogleSignUpBroadcaster: AuthPayload;
   completeGoogleSignUpClient: AuthPayload;
+  deleteBill?: Maybe<Bill>;
   generateContract: GenerateContractPayload;
   googleAuth: GoogleAuth;
   login: AuthPayload;
+  registerBill?: Maybe<RegisterBillPayload>;
   registerBroadcaster: AuthPayload;
   registerClient: AuthPayload;
   updateContractState?: Maybe<Contract>;
@@ -767,6 +831,10 @@ export type MutationCompleteGoogleSignUpClientArgs = {
   input: CompleteGoogleSignUpClientInput;
 };
 
+export type MutationDeleteBillArgs = {
+  billId: Scalars['Int']['input'];
+};
+
 export type MutationGenerateContractArgs = {
   input: CampaignInput;
 };
@@ -777,6 +845,10 @@ export type MutationGoogleAuthArgs = {
 
 export type MutationLoginArgs = {
   input: UserLoginInput;
+};
+
+export type MutationRegisterBillArgs = {
+  input: BillInput;
 };
 
 export type MutationRegisterBroadcasterArgs = {
@@ -921,6 +993,8 @@ export type PriceBreakdown = {
 
 export type Query = {
   __typename?: 'Query';
+  billProofDownloadUrl: BillUrlPayload;
+  bills?: Maybe<BillsConnection>;
   broadcasters: Array<Broadcaster>;
   calculateContract: PriceBreakdown;
   clients: Array<Client>;
@@ -932,6 +1006,19 @@ export type Query = {
   ping: Scalars['String']['output'];
   services: Array<Service>;
   users: Array<User>;
+};
+
+export type QueryBillProofDownloadUrlArgs = {
+  billId: Scalars['Int']['input'];
+};
+
+export type QueryBillsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  order?: InputMaybe<Array<BillSortInput>>;
+  where?: InputMaybe<BillFilterInput>;
 };
 
 export type QueryBroadcastersArgs = {
@@ -1007,6 +1094,12 @@ export type RegionFilterInput = {
 export type RegionSortInput = {
   multiplier?: InputMaybe<SortEnumType>;
   regionId?: InputMaybe<SortEnumType>;
+};
+
+export type RegisterBillPayload = {
+  __typename?: 'RegisterBillPayload';
+  amazonS3Url: Scalars['String']['output'];
+  bill: Bill;
 };
 
 export type RegisterBroadcasterInput = {

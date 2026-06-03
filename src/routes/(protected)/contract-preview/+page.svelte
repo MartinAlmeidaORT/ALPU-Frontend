@@ -29,7 +29,6 @@
   });
 
   const approveContract = async () => {
-    console.log('Token en approveContract:', data.token);
     const urqlClient: Client = createUrqlClient(data.token);
     const result = await urqlClient
       .mutation(APPROVE_CONTRACT_QUERY, { contractId: Number(contractId) })

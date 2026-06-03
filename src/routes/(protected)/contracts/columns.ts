@@ -54,8 +54,6 @@ export const columns: ColumnDef<TableContract>[] = [
       const clientFullName =
         `${row.original.client.firstName} ${row.original.client.lastName}`.toLowerCase();
       const searchValue = (filterValue as string).toLowerCase();
-
-      // Devuelve true si coincide en broadcaster O client
       return (
         broadcasterFullName.includes(searchValue) ||
         clientFullName.includes(searchValue)

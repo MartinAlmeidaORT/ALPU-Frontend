@@ -167,7 +167,7 @@
 
     const input: CampaignInput = {
       broadcasterId:
-        data.rol === 'Broadcaster' ? data.user?.userId : userSelectedId,
+      data.rol === 'Broadcaster' ? data.user?.userId : userSelectedId,
       clientId: data.rol === 'Client' ? data.user?.userId : userSelectedId,
       inCash: paysCash,
       campaign: campaignName,
@@ -202,7 +202,7 @@
 
       const input: CampaignInput = {
         broadcasterId:
-          data.rol === 'Broadcaster' ? data.user?.userId : userSelectedId,
+        data.rol === 'Broadcaster' ? data.user?.userId : userSelectedId,
         clientId: data.rol === 'Client' ? data.user?.userId : userSelectedId,
         inCash: paysCash,
         campaign: campaignName,

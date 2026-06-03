@@ -26,7 +26,7 @@ export async function load({ cookies, url }) {
           firstName: resultData.firstName,
           lastName: resultData.lastName,
         }),
-        { path: '/', httpOnly: true, maxAge: 600 },
+        { path: '/', httpOnly: true, maxAge: 600, sameSite: 'lax' },
       );
     }
 

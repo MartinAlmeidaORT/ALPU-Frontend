@@ -13,6 +13,7 @@ export type TableUser = {
   email: string;
   rut: string;
   userState: string;
+  __typename: string;
 };
 
 export const columns: ColumnDef<TableUser>[] = [
@@ -68,6 +69,25 @@ export const columns: ColumnDef<TableUser>[] = [
     },
     cell: ({ row }) => {
       return row.original.rut;
+    },
+  },
+  {
+    accessorKey: '__typename',
+    header: () => {
+      const stateHeaderSnippet = createRawSnippet(() => ({
+        render: () => `<div class="text-start">Tipo de Usuario</div>`,
+      }));
+      return renderSnippet(stateHeaderSnippet);
+    },
+    cell: ({ row }) => {
+      const stateMap: Record<string, string> = {
+        Client: 'Cliente',
+        Broadcaster: 'Locutor',
+        Administrator: 'Administrador',
+        Supervisor: 'Supervisor',
+        Accountant: 'Contador',
+      };
+      return stateMap[row.original.__typename] || row.original.__typename;
     },
   },
   {

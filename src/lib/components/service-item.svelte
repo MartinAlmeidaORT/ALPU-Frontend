@@ -29,13 +29,14 @@
   let lipSync = $state(false);
   let narrativeRoles = $state('0');
   let narrativeMinutes = $state('');
-  let ivrMessage = $state('');
   let broadcastInMassMedia = $state(false);
   let selectedPeriod = $state('');
   let internalUse = $state(false);
   let additionalIvrMessage = $state(0);
   let canIvrUpdate = $state(false);
-
+  let canIvrGetMoreMessages = $state(false);
+  let ivrMessage = $state('');
+  let ivrUpdates = $state(0);
   function handleAddPiece() {
     if (!nombrePieza || nombrePieza.trim() === '') {
       toast.error('Error al agregar un medio', {
@@ -95,9 +96,9 @@
       case 'IVR':
         options.messageText = ivrMessage;
         options.additionalMessages = additionalIvrMessage;
-        options.canUpdate = canIvrUpdate;
         options.isInterior = isInterior;
         options.priceOverride = priceSuggested;
+        options.updates = ivrUpdates;
         break;
       case 'EVENT':
         options.forMassBroadcast = broadcastInMassMedia;
@@ -126,6 +127,7 @@
     narrativeRoles = '0';
     narrativeMinutes = '';
     ivrMessage = '';
+    ivrUpdates = 0;
     broadcastInMassMedia = false;
   }
 
@@ -292,10 +294,10 @@
           >
           {#if isPriceSuggested}
             <Input
+              class="w-25"
               id="suggestedPrice_{service.serviceId}"
               bind:value={priceSuggested}
               type="number"
-              placeholder="Precio sugerido"
             />
           {/if}
           <Checkbox
@@ -303,6 +305,27 @@
             bind:checked={canIvrUpdate}
           />
           <Label for="canIvrUpdate{service.serviceId}">Actualizar IVR</Label>
+          {#if canIvrUpdate}
+            <Input
+              class="w-20"
+              id="Updates{service.serviceId}"
+              bind:value={ivrUpdates}
+              type="number"
+            />
+          {/if}
+          <Checkbox
+            id="canIvrGetMoreMessages{service.serviceId}"
+            bind:checked={canIvrGetMoreMessages}
+          />
+          <Label for="canIvrGetMoreMessages{service.serviceId}">Mensajes adicionales</Label>
+          {#if canIvrGetMoreMessages}
+            <Input
+              class="w-20"
+              id="additionalIvrMessages{service.serviceId}"
+              bind:value={additionalIvrMessage}
+              type="number"
+            />
+          {/if}
         </div>
         <div class="flex items-center gap-2">
           <Label for="nombrePieza_{service.serviceId}">Nombre</Label>

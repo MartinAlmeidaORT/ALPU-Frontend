@@ -54,6 +54,8 @@
   let narrativeRoles = $state('0');
   let narrativeMinutes = $state('');
   let ivrMessage = $state('');
+  let ivrUpdates = $state(0);
+  let additionalIvrMessage = $state(0);
   let broadcastInMassMedia = $state(false);
   let fetchServicesResult = $state<OperationResult<ServicesQuery> | null>(null);
 
@@ -118,7 +120,7 @@
 
     const input: CampaignInput = {
       broadcasterId:
-        data.rol === 'Broadcaster' ? data.user?.userId : userSelectedId,
+      data.rol === 'Broadcaster' ? data.user?.userId : userSelectedId,
       clientId: data.rol === 'Client' ? data.user?.userId : userSelectedId,
       inCash: paysCash,
       campaign: campaignName,
@@ -142,6 +144,8 @@
     narrativeRoles = '0';
     narrativeMinutes = '';
     ivrMessage = '';
+    ivrUpdates = 0;
+    additionalIvrMessage = 0;
     broadcastInMassMedia = false;
     checkDurationErrors();
   }
@@ -167,7 +171,7 @@
 
     const input: CampaignInput = {
       broadcasterId:
-        data.rol === 'Broadcaster' ? data.user?.userId : userSelectedId,
+      data.rol === 'Broadcaster' ? data.user?.userId : userSelectedId,
       clientId: data.rol === 'Client' ? data.user?.userId : userSelectedId,
       inCash: paysCash,
       campaign: campaignName,
@@ -202,7 +206,7 @@
 
       const input: CampaignInput = {
         broadcasterId:
-          data.rol === 'Broadcaster' ? data.user?.userId : userSelectedId,
+        data.rol === 'Broadcaster' ? data.user?.userId : userSelectedId,
         clientId: data.rol === 'Client' ? data.user?.userId : userSelectedId,
         inCash: paysCash,
         campaign: campaignName,

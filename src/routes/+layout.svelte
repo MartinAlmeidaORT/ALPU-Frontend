@@ -37,11 +37,20 @@
               {/snippet}
             </NavigationMenu.Link>
           {/if}
-          {#if data.rol === 'Contador' || data.rol === 'Supervisor'}
+          {#if data.rol === 'Accountant' || data.rol === 'Supervisor'}
             <NavigationMenu.Link>
               {#snippet child()}
                 <a href="/expenses-incomes" class={navigationMenuTriggerStyle()}
                   >Finanzas</a
+                >
+              {/snippet}
+            </NavigationMenu.Link>
+          {/if}
+          {#if data.rol === 'Administrator' || data.rol === 'Supervisor'}
+            <NavigationMenu.Link>
+              {#snippet child()}
+                <a href="/user" class={navigationMenuTriggerStyle()}
+                  >Usuarios</a
                 >
               {/snippet}
             </NavigationMenu.Link>

@@ -5,6 +5,7 @@ import {
 } from '$lib/graphql/mutations/auth';
 import { fail, redirect } from '@sveltejs/kit';
 
+
 export const actions = {
   default: async ({ request, cookies }) => {
     try {
@@ -54,13 +55,6 @@ export const actions = {
             messages: ['No token received'],
           });
         }
-
-        cookies.set('session_id', JSON.stringify(resultData), {
-          path: '/',
-          httpOnly: true,
-          sameSite: 'strict',
-          maxAge: 60 * 60 * 24, // 1 day
-        });
       }
     } catch (err) {
       console.error(err);
@@ -69,7 +63,6 @@ export const actions = {
         messages: ['An unexpected error occurred'],
       });
     }
-
-    throw redirect(302, '/contracts');
+    return fail(400, { pendingState: true, messages: null });
   },
 };

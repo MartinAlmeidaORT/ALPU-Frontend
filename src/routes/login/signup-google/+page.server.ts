@@ -68,12 +68,6 @@ export const actions = {
             messages: ['No token received'],
           });
         }
-        cookies.set('session_id', JSON.stringify(resultData), {
-          path: '/',
-          httpOnly: true,
-          sameSite: 'strict',
-          maxAge: 60 * 60 * 24, // 1 day
-        });
         cookies.delete('pending_signup', { path: '/' });
       }
     } catch (err) {
@@ -82,7 +76,6 @@ export const actions = {
         messages: ['An unexpected error occurred'],
       });
     }
-
-    throw redirect(302, '/contracts');
+    return fail(400, { pendingState: true, messages: null });
   },
 };

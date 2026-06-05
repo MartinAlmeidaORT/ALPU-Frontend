@@ -6,20 +6,30 @@
   import { Input } from '$lib/components/ui/input/index.js';
   import { enhance } from '$app/forms';
   import { redirectToGoogle } from '$lib/auth/google';
+  import { toast } from 'svelte-sonner';
 
   let { form }: { form: ActionData } = $props();
   let messages: string[] | null = $state(null);
+  let pendingState: boolean = $state(false);
 
   $effect(() => {
     if (form?.messages) messages = form.messages;
   });
 
+  $effect(() => {
+    if (pendingState) {
+      toast.error('Tu cuenta aún no ha sido aprobada. Espera a que un administrador confirme tu aprobación.', {
+        duration: 5000,
+      });
+    }
+  });
+
   function handleSubmit() {
     return async ({ result, update }: any) => {
       messages = null;
-
       if (result.type === 'failure') {
-        messages = result.data?.messages || ['An unexpected error occurred'];
+        messages = result.data?.messages || ['Ocurrió un error inesperado. Inténtalo de nuevo.'];
+        pendingState = result.data?.pendingState;
       }
       await update();
     };
@@ -69,7 +79,7 @@
           </Button>
         </Field.Field>
       </Field.Group>
-      {#if messages}
+      {#if messages && pendingState != true}
         {#each messages as msg}
           <p class="text-sm font-medium text-destructive">
             {msg}

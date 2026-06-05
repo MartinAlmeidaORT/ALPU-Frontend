@@ -25,7 +25,7 @@
   };
 
   let { data, columns }: DataTableProps<TData, TValue> = $props();
-  let pagination = $state<PaginationState>({ pageIndex: 0, pageSize: 5 });
+  let pagination = $state<PaginationState>({ pageIndex: 0, pageSize: 15 });
   let sorting = $state<SortingState>([]);
   let columnFilters = $state<ColumnFiltersState>([]);
   const initialState = $page.url.searchParams.get('state') ?? 'ALL';

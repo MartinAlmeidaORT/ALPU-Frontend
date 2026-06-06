@@ -317,7 +317,9 @@
             id="canIvrGetMoreMessages{service.serviceId}"
             bind:checked={canIvrGetMoreMessages}
           />
-          <Label for="canIvrGetMoreMessages{service.serviceId}">Mensajes adicionales</Label>
+          <Label for="canIvrGetMoreMessages{service.serviceId}"
+            >Mensajes adicionales</Label
+          >
           {#if canIvrGetMoreMessages}
             <Input
               class="w-20"

@@ -1,12 +1,11 @@
 import { createUrqlClient } from '$lib/graphql/client';
 import { GOOGLE_AUTH_MUTATION } from '$lib/graphql/mutations/auth';
-import { redirect, fail } from '@sveltejs/kit';
 import { UserState } from '$lib/graphql/schema';
-import { toast } from 'svelte-sonner';
+import { fail, redirect } from '@sveltejs/kit';
 
 export async function load({ cookies, url }) {
   let requiresRegistration: boolean | null = null;
-  let userPending : UserState | null = null;
+  let userPending: UserState | null = null;
   let resultData;
   try {
     const code = url.searchParams.get('code');
@@ -17,7 +16,7 @@ export async function load({ cookies, url }) {
       .mutation(GOOGLE_AUTH_MUTATION, { code })
       .toPromise();
 
-     resultData = result.data.googleAuth;
+    resultData = result.data.googleAuth;
 
     requiresRegistration = resultData.requiresRegistration;
 

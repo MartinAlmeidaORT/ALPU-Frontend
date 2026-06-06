@@ -57,11 +57,7 @@ export const USERS_FILTERED_QUERY = graphql(`
 
 export const USERS_QUERY = graphql(`
   query users($first: Int, $after: String) {
-    users(
-      first: $first
-      after: $after
-      order: [{ userId: ASC }]
-    ) {
+    users(first: $first, after: $after, order: [{ userId: ASC }]) {
       nodes {
         userId
         firstName

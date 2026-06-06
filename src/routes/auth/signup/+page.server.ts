@@ -3,8 +3,7 @@ import {
   SIGNUP_BROADCASTER_MUTATION,
   SIGNUP_CLIENT_MUTATION,
 } from '$lib/graphql/mutations/auth';
-import { fail, redirect } from '@sveltejs/kit';
-
+import { fail } from '@sveltejs/kit';
 
 export const actions = {
   default: async ({ request, cookies }) => {

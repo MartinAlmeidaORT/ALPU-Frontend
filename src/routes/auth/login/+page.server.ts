@@ -2,11 +2,10 @@ import { createUrqlClient } from '$lib/graphql/client.js';
 import { LOGIN_MUTATION } from '$lib/graphql/mutations/auth';
 import { UserState } from '$lib/graphql/schema';
 import { fail, redirect } from '@sveltejs/kit';
-import { toast } from 'svelte-sonner';
 
 export const actions = {
   default: async ({ request, cookies, locals }) => {
-    let userPending : UserState | null = null;
+    let userPending: UserState | null = null;
     let resultData;
     try {
       const formData = await request.formData();

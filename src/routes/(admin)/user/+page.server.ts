@@ -1,5 +1,4 @@
-import { USERS_FILTERED_QUERY, USERS_QUERY} from '$lib/graphql/queries/user';
-import { UserState } from '$lib/graphql/schema.js';
+import { USERS_FILTERED_QUERY, USERS_QUERY } from '$lib/graphql/queries/user';
 import type { TableUser } from './columns.js';
 
 export async function load({ locals, url }: { locals: App.Locals; url: URL }) {
@@ -10,12 +9,12 @@ export async function load({ locals, url }: { locals: App.Locals; url: URL }) {
 
     if (state && state !== 'ALL') {
       result = await locals.urql
-      .query(
-        USERS_FILTERED_QUERY,
-        { first: 15, after, state},
-        { requestPolicy: 'network-only' },
-      )
-      .toPromise();
+        .query(
+          USERS_FILTERED_QUERY,
+          { first: 15, after, state },
+          { requestPolicy: 'network-only' },
+        )
+        .toPromise();
     } else {
       result = await locals.urql
         .query(
@@ -25,7 +24,7 @@ export async function load({ locals, url }: { locals: App.Locals; url: URL }) {
         )
         .toPromise();
     }
-      
+
     if (result.error) {
       return {
         token: locals.token,

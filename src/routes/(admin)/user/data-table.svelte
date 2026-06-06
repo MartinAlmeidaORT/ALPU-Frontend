@@ -70,7 +70,7 @@
     // o simplemente volvemos sin cursor para la primera página.
     window.history.back();
   }
-  
+
   const table = createSvelteTable({
     get data() {
       return data;
@@ -114,7 +114,6 @@
       },
     },
   });
-
 </script>
 
 <div class="mx-auto w-[80%] p-4">

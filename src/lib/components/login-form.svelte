@@ -18,9 +18,12 @@
 
   $effect(() => {
     if (pendingState) {
-      toast.error('Tu cuenta aún no ha sido aprobada. Espera a que un administrador confirme tu aprobación.', {
-        duration: 5000,
-      });
+      toast.error(
+        'Tu cuenta aún no ha sido aprobada. Espera a que un administrador confirme tu aprobación.',
+        {
+          duration: 5000,
+        },
+      );
     }
   });
 
@@ -28,7 +31,9 @@
     return async ({ result, update }: any) => {
       messages = null;
       if (result.type === 'failure') {
-        messages = result.data?.messages || ['Ocurrió un error inesperado. Inténtalo de nuevo.'];
+        messages = result.data?.messages || [
+          'Ocurrió un error inesperado. Inténtalo de nuevo.',
+        ];
         pendingState = result.data?.pendingState;
       }
       await update();

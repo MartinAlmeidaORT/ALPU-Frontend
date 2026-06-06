@@ -119,7 +119,7 @@
 
     const input: CampaignInput = {
       broadcasterId:
-      data.rol === 'Broadcaster' ? data.user?.userId : userSelectedId,
+        data.rol === 'Broadcaster' ? data.user?.userId : userSelectedId,
       clientId: data.rol === 'Client' ? data.user?.userId : userSelectedId,
       campaign: campaignName,
       services: totalServices,
@@ -169,7 +169,7 @@
 
     const input: CampaignInput = {
       broadcasterId:
-      data.rol === 'Broadcaster' ? data.user?.userId : userSelectedId,
+        data.rol === 'Broadcaster' ? data.user?.userId : userSelectedId,
       clientId: data.rol === 'Client' ? data.user?.userId : userSelectedId,
       campaign: campaignName,
       services: totalServices,
@@ -203,7 +203,7 @@
 
       const input: CampaignInput = {
         broadcasterId:
-        data.rol === 'Broadcaster' ? data.user?.userId : userSelectedId,
+          data.rol === 'Broadcaster' ? data.user?.userId : userSelectedId,
         clientId: data.rol === 'Client' ? data.user?.userId : userSelectedId,
         campaign: campaignName,
         services: totalServices,
@@ -263,10 +263,7 @@
     </div>
 
     <div class="flex-1 min-w-[300px] w-full">
-      <SearchClientBroadcaster
-        rol={data.rol}
-        bind:valorId={userSelectedId}
-      />
+      <SearchClientBroadcaster rol={data.rol} bind:valorId={userSelectedId} />
       <ServiceSummary
         rol={data.rol}
         activeUserId={data.user?.userId}

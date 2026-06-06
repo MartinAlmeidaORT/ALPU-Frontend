@@ -116,7 +116,7 @@ export const columns: ColumnDef<TableContract>[] = [
       return renderSnippet(dateHeaderSnippet);
     },
     cell: ({ row }) => {
-      return new Date(row.original.date).toLocaleDateString();
+      return new Date(row.original.date).toISOString().split('T')[0];
     },
   },
   {
@@ -128,7 +128,7 @@ export const columns: ColumnDef<TableContract>[] = [
       return renderSnippet(dueDateHeaderSnippet);
     },
     cell: ({ row }) => {
-      return new Date(row.original.dueDate).toLocaleDateString();
+      return new Date(row.original.dueDate).toISOString().split('T')[0];
     },
   },
   {

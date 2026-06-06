@@ -801,53 +801,133 @@ export type BroadcastersQuery = {
   broadcasters: Array<{ userId: number; firstName: string; lastName: string }>;
 };
 
-export type UsersQueryVariables = Exact<{
+export type UsersFilteredQueryVariables = Exact<{
+  first?: number | null | undefined;
+  after?: string | null | undefined;
   state: UserState;
 }>;
 
+export type UsersFilteredQuery = {
+  users: {
+    totalCount: number;
+    nodes: Array<
+      | {
+          __typename: 'Accountant';
+          userId: number;
+          firstName: string;
+          lastName: string;
+          email: string;
+          rut: string;
+          userState: UserState;
+        }
+      | {
+          __typename: 'Administrator';
+          userId: number;
+          firstName: string;
+          lastName: string;
+          email: string;
+          rut: string;
+          userState: UserState;
+        }
+      | {
+          __typename: 'Broadcaster';
+          userId: number;
+          firstName: string;
+          lastName: string;
+          email: string;
+          rut: string;
+          userState: UserState;
+        }
+      | {
+          __typename: 'Client';
+          userId: number;
+          firstName: string;
+          lastName: string;
+          email: string;
+          rut: string;
+          userState: UserState;
+        }
+      | {
+          __typename: 'Supervisor';
+          userId: number;
+          firstName: string;
+          lastName: string;
+          email: string;
+          rut: string;
+          userState: UserState;
+        }
+    > | null;
+    pageInfo: {
+      hasNextPage: boolean;
+      hasPreviousPage: boolean;
+      startCursor: string | null;
+      endCursor: string | null;
+    };
+  } | null;
+};
+
+export type UsersQueryVariables = Exact<{
+  first?: number | null | undefined;
+  after?: string | null | undefined;
+}>;
+
 export type UsersQuery = {
-  users: Array<
-    | {
-        userId: number;
-        firstName: string;
-        lastName: string;
-        email: string;
-        rut: string;
-        userState: UserState;
-      }
-    | {
-        userId: number;
-        firstName: string;
-        lastName: string;
-        email: string;
-        rut: string;
-        userState: UserState;
-      }
-    | {
-        userId: number;
-        firstName: string;
-        lastName: string;
-        email: string;
-        rut: string;
-        userState: UserState;
-      }
-    | {
-        userId: number;
-        firstName: string;
-        lastName: string;
-        email: string;
-        rut: string;
-        userState: UserState;
-      }
-    | {
-        userId: number;
-        firstName: string;
-        lastName: string;
-        email: string;
-        rut: string;
-        userState: UserState;
-      }
-  >;
+  users: {
+    totalCount: number;
+    nodes: Array<
+      | {
+          __typename: 'Accountant';
+          userId: number;
+          firstName: string;
+          lastName: string;
+          email: string;
+          rut: string;
+          userState: UserState;
+        }
+      | {
+          __typename: 'Administrator';
+          userId: number;
+          firstName: string;
+          lastName: string;
+          email: string;
+          rut: string;
+          userState: UserState;
+        }
+      | {
+          __typename: 'Broadcaster';
+          userId: number;
+          firstName: string;
+          lastName: string;
+          email: string;
+          rut: string;
+          userState: UserState;
+        }
+      | {
+          __typename: 'Client';
+          userId: number;
+          firstName: string;
+          lastName: string;
+          email: string;
+          rut: string;
+          userState: UserState;
+        }
+      | {
+          __typename: 'Supervisor';
+          userId: number;
+          firstName: string;
+          lastName: string;
+          email: string;
+          rut: string;
+          userState: UserState;
+        }
+    > | null;
+    pageInfo: {
+      hasNextPage: boolean;
+      hasPreviousPage: boolean;
+      startCursor: string | null;
+      endCursor: string | null;
+    };
+  } | null;
 };
 
 export type ApproveUserMutationVariables = Exact<{
@@ -3085,14 +3165,30 @@ export const BroadcastersDocument = {
     },
   ],
 } as unknown as DocumentNode<BroadcastersQuery, BroadcastersQueryVariables>;
-export const UsersDocument = {
+export const UsersFilteredDocument = {
   kind: 'Document',
   definitions: [
     {
       kind: 'OperationDefinition',
       operation: 'query',
-      name: { kind: 'Name', value: 'users' },
+      name: { kind: 'Name', value: 'usersFiltered' },
       variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: {
+            kind: 'Variable',
+            name: { kind: 'Name', value: 'first' },
+          },
+          type: { kind: 'NamedType', name: { kind: 'Name', value: 'Int' } },
+        },
+        {
+          kind: 'VariableDefinition',
+          variable: {
+            kind: 'Variable',
+            name: { kind: 'Name', value: 'after' },
+          },
+          type: { kind: 'NamedType', name: { kind: 'Name', value: 'String' } },
+        },
         {
           kind: 'VariableDefinition',
           variable: {
@@ -3115,6 +3211,22 @@ export const UsersDocument = {
             kind: 'Field',
             name: { kind: 'Name', value: 'users' },
             arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'first' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'first' },
+                },
+              },
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'after' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'after' },
+                },
+              },
               {
                 kind: 'Argument',
                 name: { kind: 'Name', value: 'where' },
@@ -3141,16 +3253,222 @@ export const UsersDocument = {
                   ],
                 },
               },
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'order' },
+                value: {
+                  kind: 'ListValue',
+                  values: [
+                    {
+                      kind: 'ObjectValue',
+                      fields: [
+                        {
+                          kind: 'ObjectField',
+                          name: { kind: 'Name', value: 'userId' },
+                          value: { kind: 'EnumValue', value: 'ASC' },
+                        },
+                      ],
+                    },
+                  ],
+                },
+              },
             ],
             selectionSet: {
               kind: 'SelectionSet',
               selections: [
-                { kind: 'Field', name: { kind: 'Name', value: 'userId' } },
-                { kind: 'Field', name: { kind: 'Name', value: 'firstName' } },
-                { kind: 'Field', name: { kind: 'Name', value: 'lastName' } },
-                { kind: 'Field', name: { kind: 'Name', value: 'email' } },
-                { kind: 'Field', name: { kind: 'Name', value: 'rut' } },
-                { kind: 'Field', name: { kind: 'Name', value: 'userState' } },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'nodes' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'userId' },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'firstName' },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'lastName' },
+                      },
+                      { kind: 'Field', name: { kind: 'Name', value: 'email' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'rut' } },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'userState' },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: '__typename' },
+                      },
+                    ],
+                  },
+                },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'pageInfo' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'hasNextPage' },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'hasPreviousPage' },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'startCursor' },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'endCursor' },
+                      },
+                    ],
+                  },
+                },
+                { kind: 'Field', name: { kind: 'Name', value: 'totalCount' } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<UsersFilteredQuery, UsersFilteredQueryVariables>;
+export const UsersDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'query',
+      name: { kind: 'Name', value: 'users' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: {
+            kind: 'Variable',
+            name: { kind: 'Name', value: 'first' },
+          },
+          type: { kind: 'NamedType', name: { kind: 'Name', value: 'Int' } },
+        },
+        {
+          kind: 'VariableDefinition',
+          variable: {
+            kind: 'Variable',
+            name: { kind: 'Name', value: 'after' },
+          },
+          type: { kind: 'NamedType', name: { kind: 'Name', value: 'String' } },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'users' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'first' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'first' },
+                },
+              },
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'after' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'after' },
+                },
+              },
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'order' },
+                value: {
+                  kind: 'ListValue',
+                  values: [
+                    {
+                      kind: 'ObjectValue',
+                      fields: [
+                        {
+                          kind: 'ObjectField',
+                          name: { kind: 'Name', value: 'userId' },
+                          value: { kind: 'EnumValue', value: 'ASC' },
+                        },
+                      ],
+                    },
+                  ],
+                },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'nodes' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'userId' },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'firstName' },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'lastName' },
+                      },
+                      { kind: 'Field', name: { kind: 'Name', value: 'email' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'rut' } },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'userState' },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: '__typename' },
+                      },
+                    ],
+                  },
+                },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'pageInfo' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'hasNextPage' },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'hasPreviousPage' },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'startCursor' },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'endCursor' },
+                      },
+                    ],
+                  },
+                },
+                { kind: 'Field', name: { kind: 'Name', value: 'totalCount' } },
               ],
             },
           },

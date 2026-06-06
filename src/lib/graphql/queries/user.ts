@@ -28,14 +28,52 @@ const BROADCASTER_QUERY = graphql(`
 `);
 
 export const USERS_FILTERED_QUERY = graphql(`
-  query users($state: UserState!) {
-    users(where: { userState: { eq: $state } }) {
-      userId
-      firstName
-      lastName
-      email
-      rut
-      userState
+  query usersFiltered($first: Int, $after: String, $state: UserState!) {
+    users(
+      first: $first
+      after: $after
+      where: { userState: { eq: $state } }
+      order: [{ userId: ASC }]
+    ) {
+      nodes {
+        userId
+        firstName
+        lastName
+        email
+        rut
+        userState
+        __typename
+      }
+      pageInfo {
+        hasNextPage
+        hasPreviousPage
+        startCursor
+        endCursor
+      }
+      totalCount
+    }
+  }
+`);
+
+export const USERS_QUERY = graphql(`
+  query users($first: Int, $after: String) {
+    users(first: $first, after: $after, order: [{ userId: ASC }]) {
+      nodes {
+        userId
+        firstName
+        lastName
+        email
+        rut
+        userState
+        __typename
+      }
+      pageInfo {
+        hasNextPage
+        hasPreviousPage
+        startCursor
+        endCursor
+      }
+      totalCount
     }
   }
 `);

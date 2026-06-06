@@ -1005,7 +1005,7 @@ export type Query = {
   /** Healthcheck */
   ping: Scalars['String']['output'];
   services: Array<Service>;
-  users: Array<User>;
+  users?: Maybe<UsersConnection>;
 };
 
 export type QueryBillProofDownloadUrlArgs = {
@@ -1055,6 +1055,11 @@ export type QueryServicesArgs = {
 };
 
 export type QueryUsersArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  order?: InputMaybe<Array<UserSortInput>>;
   where?: InputMaybe<UserFilterInput>;
 };
 
@@ -1342,6 +1347,20 @@ export type UserLoginInput = {
   password: Scalars['String']['input'];
 };
 
+export type UserSortInput = {
+  address?: InputMaybe<AddressSortInput>;
+  addressId?: InputMaybe<SortEnumType>;
+  email?: InputMaybe<SortEnumType>;
+  firstName?: InputMaybe<SortEnumType>;
+  fullName?: InputMaybe<SortEnumType>;
+  googleId?: InputMaybe<SortEnumType>;
+  lastName?: InputMaybe<SortEnumType>;
+  password?: InputMaybe<SortEnumType>;
+  rut?: InputMaybe<SortEnumType>;
+  userId?: InputMaybe<SortEnumType>;
+  userState?: InputMaybe<SortEnumType>;
+};
+
 export enum UserState {
   Enabled = 'ENABLED',
   Penalized = 'PENALIZED',
@@ -1353,4 +1372,26 @@ export type UserStateOperationFilterInput = {
   in?: InputMaybe<Array<UserState>>;
   neq?: InputMaybe<UserState>;
   nin?: InputMaybe<Array<UserState>>;
+};
+
+/** A connection to a list of items. */
+export type UsersConnection = {
+  __typename?: 'UsersConnection';
+  /** A list of edges. */
+  edges?: Maybe<Array<UsersEdge>>;
+  /** A flattened list of the nodes. */
+  nodes?: Maybe<Array<User>>;
+  /** Information to aid in pagination. */
+  pageInfo: PageInfo;
+  /** Identifies the total count of items in the connection. */
+  totalCount: Scalars['Int']['output'];
+};
+
+/** An edge in a connection. */
+export type UsersEdge = {
+  __typename?: 'UsersEdge';
+  /** A cursor for use in pagination. */
+  cursor: Scalars['String']['output'];
+  /** The item at the end of the edge. */
+  node: User;
 };

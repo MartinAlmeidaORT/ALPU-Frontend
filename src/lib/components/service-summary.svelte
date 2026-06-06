@@ -25,7 +25,6 @@
     rol,
     activeUserId,
     valorId = $bindable(),
-    paysCash = $bindable(false),
     campaignName = $bindable('Test'),
     services = $bindable([]),
   }: {
@@ -37,7 +36,6 @@
     onRemoveAllServices?: () => void;
     onRemovePiece?: (serviceIndex: number, pieceIndex: number) => void;
     valorId?: string | number | null | undefined;
-    paysCash?: boolean;
     campaignName?: string;
     services?: CampaignServiceInput[];
   } = $props();
@@ -45,7 +43,6 @@
   let input = $derived<CampaignInput>({
     broadcasterId: rol === 'Broadcaster' ? activeUserId : valorId,
     clientId: rol === 'Client' ? activeUserId : valorId,
-    inCash: paysCash,
     campaign: campaignName,
     services: services,
     countryCode: 'UY',

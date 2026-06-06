@@ -15,16 +15,61 @@
   } from '$lib/components/ui/data-table/index.js';
   import * as Table from '$lib/components/ui/table/index.js';
   import { Input } from '$lib/components/ui/input/index.js';
-
+  import * as Select from '$lib/components/ui/select/index.js';
+  import { page } from '$app/stores';
+  import { goto } from '$app/navigation';
+  import Button from '$lib/components/ui/button/button.svelte';
   type DataTableProps<TData, TValue> = {
     columns: ColumnDef<TData, TValue>[];
     data: TData[];
   };
 
   let { data, columns }: DataTableProps<TData, TValue> = $props();
-  let pagination = $state<PaginationState>({ pageIndex: 0, pageSize: 5 });
+  let pagination = $state<PaginationState>({ pageIndex: 0, pageSize: 15 });
   let sorting = $state<SortingState>([]);
   let columnFilters = $state<ColumnFiltersState>([]);
+  const initialState = $page.url.searchParams.get('state') ?? 'ALL';
+  let selectedState = $state<string>(initialState);
+
+  function handleStateChange() {
+    const url = new URL($page.url);
+    if (selectedState && selectedState !== 'ALL') {
+      url.searchParams.set('state', selectedState);
+    } else {
+      url.searchParams.delete('state');
+    }
+    // Al cambiar filtros, reseteamos la paginación al principio
+    url.searchParams.delete('after');
+    goto(url.pathname + url.search);
+  }
+
+  $effect(() => {
+    // Escucha cambios en selectedState y actualiza la URL si es distinta
+    const currentParam = $page.url.searchParams.get('state') ?? 'ALL';
+    if (selectedState !== currentParam) {
+      handleStateChange();
+    }
+  });
+
+  // Extract pageInfo from SvelteKit's $page.data
+  const pageInfo = $derived($page.data.pageInfo);
+
+  function nextPage() {
+    if (pageInfo?.hasNextPage && pageInfo?.endCursor) {
+      const url = new URL($page.url);
+      url.searchParams.set('after', pageInfo.endCursor);
+      // Mantener la historia del navegador para poder volver con el botón "Atrás"
+      goto(url.pathname + url.search);
+    }
+  }
+
+  function previousPage() {
+    // Para simplificar, ir a la página anterior requiere navegar "hacia atrás" en el historial,
+    // o se podría remover el 'after' para volver al inicio.
+    // Usamos window.history.back() asumiendo que hemos navegado secuencialmente,
+    // o simplemente volvemos sin cursor para la primera página.
+    window.history.back();
+  }
 
   const table = createSvelteTable({
     get data() {
@@ -32,8 +77,9 @@
     },
     columns,
     getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    getSortedRowModel: getSortedRowModel(),
+    //getPaginationRowModel: getPaginationRowModel(),
+    //getSortedRowModel: getSortedRowModel(),
+    manualPagination: true,
     getFilteredRowModel: getFilteredRowModel(),
     onSortingChange: (updater) => {
       if (typeof updater === 'function') {
@@ -86,6 +132,25 @@
         }}
         class="max-w-sm"
       />
+      <Select.Root type="single" bind:value={selectedState}>
+        <Select.Trigger class="w-[180px]">
+          {#if selectedState === 'PENDING'}
+            Pendiente
+          {:else if selectedState === 'ENABLED'}
+            Habilitado
+          {:else if selectedState === 'PENALIZED'}
+            Penalizado
+          {:else}
+            Todos los estados
+          {/if}
+        </Select.Trigger>
+        <Select.Content>
+          <Select.Item value="ALL" label="Todos los estados" />
+          <Select.Item value="PENDING" label="Pendiente" />
+          <Select.Item value="ENABLED" label="Habilitado" />
+          <Select.Item value="PENALIZED" label="Penalizado" />
+        </Select.Content>
+      </Select.Root>
     </div>
     <div>
       <Table.Root>
@@ -127,27 +192,23 @@
         </Table.Body>
       </Table.Root>
     </div>
-    <div class="flex items-center justify-end space-x-2 py-4 px-4">
-      <div
-        class="flex w-[100px] items-center justify-center text-sm font-medium"
-      >
-        Página {table.getState().pagination.pageIndex + 1} de
-        {table.getPageCount() || 1}
-      </div>
-      <button
-        class="inline-flex h-8 items-center justify-center rounded-md border border-input bg-transparent px-2.5 text-sm font-medium ring-offset-background transition-colors hover:bg-muted hover:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
-        onclick={() => table.previousPage()}
-        disabled={!table.getCanPreviousPage()}
+    <div class="flex items-center justify-center space-x-2 py-4">
+      <Button
+        variant="outline"
+        size="sm"
+        onclick={previousPage}
+        disabled={!$page.url.searchParams.has('after')}
       >
         Anterior
-      </button>
-      <button
-        class="inline-flex h-8 items-center justify-center rounded-md border border-input bg-transparent px-2.5 text-sm font-medium ring-offset-background transition-colors hover:bg-muted hover:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
-        onclick={() => table.nextPage()}
-        disabled={!table.getCanNextPage()}
+      </Button>
+      <Button
+        variant="outline"
+        size="sm"
+        onclick={nextPage}
+        disabled={!pageInfo?.hasNextPage}
       >
         Siguiente
-      </button>
+      </Button>
     </div>
   </div>
 </div>

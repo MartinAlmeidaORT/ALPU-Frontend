@@ -1,15 +1,29 @@
-import { USERS_FILTERED_QUERY } from '$lib/graphql/queries/user';
+import { USERS_FILTERED_QUERY, USERS_QUERY } from '$lib/graphql/queries/user';
 import type { TableUser } from './columns.js';
 
-export async function load({ locals }: { locals: App.Locals }) {
+export async function load({ locals, url }: { locals: App.Locals; url: URL }) {
   try {
-    const result = await locals.urql
-      .query(
-        USERS_FILTERED_QUERY,
-        { state: 'PENDING' },
-        { requestPolicy: 'network-only' },
-      )
-      .toPromise();
+    const state = url.searchParams.get('state') || undefined;
+    const after = url.searchParams.get('after') || null;
+    let result;
+
+    if (state && state !== 'ALL') {
+      result = await locals.urql
+        .query(
+          USERS_FILTERED_QUERY,
+          { first: 15, after, state },
+          { requestPolicy: 'network-only' },
+        )
+        .toPromise();
+    } else {
+      result = await locals.urql
+        .query(
+          USERS_QUERY,
+          { first: 15, after },
+          { requestPolicy: 'network-only' },
+        )
+        .toPromise();
+    }
 
     if (result.error) {
       return {
@@ -27,10 +41,12 @@ export async function load({ locals }: { locals: App.Locals }) {
       };
     }
 
-    const users = (result.data?.users || []) as TableUser[];
+    const users = (result.data?.users?.nodes || []) as TableUser[];
     return {
       token: locals.token,
       users,
+      pageInfo: result.data?.users?.pageInfo,
+      totalCount: result.data?.users?.totalCount || 0,
     };
   } catch (error) {
     return {

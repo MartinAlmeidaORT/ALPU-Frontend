@@ -155,6 +155,7 @@
           method="POST"
           enctype="multipart/form-data"
           use:enhance={handleSubmit}
+          action="/expenses-incomes"
         >
           <Dialog.Header>
             <Dialog.Title class="text-lg font-semibold">Agregar</Dialog.Title>

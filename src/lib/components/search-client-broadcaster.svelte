@@ -7,16 +7,13 @@
     BroadcastersQuery,
     ClientsQuery,
   } from '$lib/graphql/types/graphql';
-  import Checkbox from './ui/checkbox/checkbox.svelte';
   import { toast } from 'svelte-sonner';
   let {
     rol,
     valorId = $bindable(),
-    paysCash = $bindable(false),
   }: {
     rol: string | null | undefined;
     valorId?: string | number | null | undefined;
-    paysCash?: boolean;
   } = $props();
   let nombre = $state('');
   let apellido = $state('');
@@ -99,10 +96,6 @@
           Escoger
         </Button>
       {/each}
-    </div>
-    <div class="flex items-center gap-2">
-      <Checkbox id="paysCash" bind:checked={paysCash} />
-      <Label for="paysCash" class="text-bold">Pagar en efectivo</Label>
     </div>
   {/if}
 </div>

@@ -1,7 +1,7 @@
 <script lang="ts">
   import LoginForm from '$lib/components/login-form.svelte';
   import SignupForm from '$lib/components/signup-form.svelte';
-
+  import { Toaster } from 'svelte-sonner';
   let form = $props();
 </script>
 
@@ -15,3 +15,5 @@
     </div>
   </div>
 </div>
+
+<Toaster position="top-center" />

@@ -69,4 +69,6 @@
       </DropdownMenu.Group>
     </DropdownMenu.Content>
   </DropdownMenu.Root>
+{:else}
+  <div class="size-8"></div>
 {/if}

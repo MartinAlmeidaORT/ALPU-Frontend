@@ -1,5 +1,7 @@
-node_modules
+src/lib/graphql/types
+src/lib/graphql/schema.ts
 
+node_modules
 # Output
 .output
 .vercel
@@ -7,6 +9,7 @@ node_modules
 .wrangler
 /.svelte-kit
 /build
+
 
 # OS
 .DS_Store

@@ -36,11 +36,20 @@ export const handle: Handle = async ({ event, resolve }) => {
     event.locals.urql = createUrqlClient();
   }
 
-  if (isAdminProtected && (event.locals.rol !== 'Admininistrator' && event.locals.rol !== 'Supervisor' && event.locals.rol !== 'Accountant')) {
+  if (
+    isAdminProtected &&
+    event.locals.rol !== 'Admininistrator' &&
+    event.locals.rol !== 'Supervisor' &&
+    event.locals.rol !== 'Accountant'
+  ) {
     throw redirect(303, '/contracts');
   }
 
-  if (isUserProtected && (event.locals.rol !== 'Client' && event.locals.rol !== 'Broadcaster')) {
+  if (
+    isUserProtected &&
+    event.locals.rol !== 'Client' &&
+    event.locals.rol !== 'Broadcaster'
+  ) {
     throw redirect(303, '/contracts');
   }
 

@@ -4,7 +4,7 @@ import type { TableUser } from './columns.js';
 
 export async function load({ locals, url }: { locals: App.Locals; url: URL }) {
   if (locals.rol === 'Accountant') {
-    throw redirect (303, '/expenses-incomes');
+    throw redirect(303, '/expenses-incomes');
   }
   try {
     const state = url.searchParams.get('state') || undefined;

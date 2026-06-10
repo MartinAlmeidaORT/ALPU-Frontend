@@ -167,14 +167,14 @@
     </Table.Root>
   </div>
   <div class="flex items-center justify-center space-x-2 py-4">
-      <Button
-        variant="outline"
-        size="sm"
-        onclick={previousPage}
-        disabled={!$page.url.searchParams.has('after')}
-      >
-        Anterior
-      </Button>
+    <Button
+      variant="outline"
+      size="sm"
+      onclick={previousPage}
+      disabled={!$page.url.searchParams.has('after')}
+    >
+      Anterior
+    </Button>
     <Dialog.Root>
       <Dialog.Trigger
         type="button"
@@ -296,13 +296,13 @@
         </form>
       </Dialog.Content>
     </Dialog.Root>
-      <Button
-        variant="outline"
-        size="sm"
-        onclick={nextPage}
-        disabled={!pageInfo?.hasNextPage}
-      >
-        Siguiente
-      </Button>
+    <Button
+      variant="outline"
+      size="sm"
+      onclick={nextPage}
+      disabled={!pageInfo?.hasNextPage}
+    >
+      Siguiente
+    </Button>
   </div>
 </div>

@@ -4,7 +4,7 @@ import { graphql } from '../types';
 import type { BillsQuery } from '../types/graphql';
 
 export const BILLS_QUERY = graphql(`
-  query bills ($first: Int, $after: String) {
+  query bills($first: Int, $after: String) {
     bills(first: $first, after: $after) {
       nodes {
         billId
@@ -14,7 +14,7 @@ export const BILLS_QUERY = graphql(`
         description
         contract {
           contractId
-        }          
+        }
       }
       pageInfo {
         hasNextPage

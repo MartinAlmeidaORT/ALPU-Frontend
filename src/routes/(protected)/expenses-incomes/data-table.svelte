@@ -73,7 +73,6 @@
   });
 
   function handleSubmit() {
-    console.log('Form submitted');
     return async ({ result, update }: any) => {
       if (result.type === 'failure') {
         toast.error('Hubo un error al agregar el comprobante.');

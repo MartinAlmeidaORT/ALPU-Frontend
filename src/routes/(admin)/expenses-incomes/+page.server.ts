@@ -11,7 +11,7 @@ export async function load({ locals, url }: { locals: App.Locals; url: URL }) {
     let result = await locals.urql
       .query(
         BILLS_QUERY,
-        { first: 5, after },
+        { first: 15, after },
         { requestPolicy: 'network-only' },
       )
       .toPromise();
@@ -54,26 +54,22 @@ export const actions = {
     try {
       const formData = await request.formData();
       const file = formData.get('receiptImage') as File | null;
-
       const billData = {
         title: formData.get('name') as string,
         description: formData.get('description') as string,
         amount: parseFloat(formData.get('amount') as string),
         type: (formData.get('type') as string).toUpperCase(),
-        date: new Date().toISOString().split('T')[0], // yyyy-mm-dd format for LocalDate
+        date: new Date().toISOString().split('T')[0],
         fileName: file ? file.name : '',
         contractId: formData.get('contractId')
           ? parseInt(formData.get('contractId') as string)
           : null,
       };
-
       const result = await createUrqlClient(locals.token)
         .mutation(GENERATE_BILL_MUTATION, {
           input: billData,
         })
         .toPromise();
-
-      // Handle GraphQL-specific errors
       if (result.error) {
         return { error: result.error.message };
       }

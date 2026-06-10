@@ -2,6 +2,7 @@
   import {
     type ColumnDef,
     type ColumnFiltersState,
+    type PaginationState,
     type SortingState,
     getCoreRowModel,
     getFilteredRowModel,
@@ -22,6 +23,8 @@
   import { enhance } from '$app/forms';
   import { BillType } from '$lib/graphql/schema';
   import { toast } from 'svelte-sonner';
+  import { page } from '$app/stores';
+  import { goto } from '$app/navigation';
   type TData = any;
   type TValue = any;
 
@@ -35,9 +38,28 @@
 
   let sorting = $state<SortingState>([]);
   let columnFilters = $state<ColumnFiltersState>([]);
-
+  let pagination = $state<PaginationState>({ pageIndex: 0, pageSize: 15 });
   let isContract = $state(false);
   let selectedType = $state<string>('');
+
+  const pageInfo = $derived($page.data.pageInfo);
+
+  function nextPage() {
+    if (pageInfo?.hasNextPage && pageInfo?.endCursor) {
+      const url = new URL($page.url);
+      url.searchParams.set('after', pageInfo.endCursor);
+      // Mantener la historia del navegador para poder volver con el botón "Atrás"
+      goto(url.pathname + url.search);
+    }
+  }
+
+  function previousPage() {
+    // Para simplificar, ir a la página anterior requiere navegar "hacia atrás" en el historial,
+    // o se podría remover el 'after' para volver al inicio.
+    // Usamos window.history.back() asumiendo que hemos navegado secuencialmente,
+    // o simplemente volvemos sin cursor para la primera página.
+    window.history.back();
+  }
 
   const table = createSvelteTable({
     get data() {
@@ -45,6 +67,7 @@
     },
     columns,
     getCoreRowModel: getCoreRowModel(),
+    manualPagination: true,
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
@@ -62,7 +85,17 @@
         columnFilters = updater;
       }
     },
+    onPaginationChange: (updater) => {
+      if (typeof updater === 'function') {
+        pagination = updater(pagination);
+      } else {
+        pagination = updater;
+      }
+    },
     state: {
+      get pagination() {
+        return pagination;
+      },
       get sorting() {
         return sorting;
       },
@@ -134,14 +167,14 @@
     </Table.Root>
   </div>
   <div class="flex items-center justify-center space-x-2 py-4">
-    <Button
-      type="button"
-      class="bg-[#1f5bb8] text-white hover:bg-[#1a6d3b] hover:text-white px-4 py-2 rounded-md font-medium text-sm transition-colors"
-      onclick={() => table.previousPage()}
-      disabled={!table.getCanPreviousPage()}
-    >
-      Anterior
-    </Button>
+      <Button
+        variant="outline"
+        size="sm"
+        onclick={previousPage}
+        disabled={!$page.url.searchParams.has('after')}
+      >
+        Anterior
+      </Button>
     <Dialog.Root>
       <Dialog.Trigger
         type="button"
@@ -263,13 +296,13 @@
         </form>
       </Dialog.Content>
     </Dialog.Root>
-    <Button
-      type="button"
-      class="bg-[#1f5bb8] text-white hover:bg-[#1a6d3b] hover:text-white px-4 py-2 rounded-md font-medium text-sm transition-colors"
-      onclick={() => table.nextPage()}
-      disabled={!table.getCanNextPage()}
-    >
-      Siguiente
-    </Button>
+      <Button
+        variant="outline"
+        size="sm"
+        onclick={nextPage}
+        disabled={!pageInfo?.hasNextPage}
+      >
+        Siguiente
+      </Button>
   </div>
 </div>

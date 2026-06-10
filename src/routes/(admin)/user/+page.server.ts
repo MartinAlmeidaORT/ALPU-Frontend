@@ -1,7 +1,11 @@
 import { USERS_FILTERED_QUERY, USERS_QUERY } from '$lib/graphql/queries/user';
+import { redirect } from '@sveltejs/kit';
 import type { TableUser } from './columns.js';
 
 export async function load({ locals, url }: { locals: App.Locals; url: URL }) {
+  if (locals.rol === 'Accountant') {
+    throw redirect (303, '/expenses-incomes');
+  }
   try {
     const state = url.searchParams.get('state') || undefined;
     const after = url.searchParams.get('after') || null;

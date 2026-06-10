@@ -6,13 +6,15 @@ export const handle: Handle = async ({ event, resolve }) => {
 
   const isLoginPage = event.route.id?.includes('login');
   const isProtected = event.route.id?.includes('(protected)');
+  const isAdminProtected = event.route.id?.includes('(admin)');
+  const isUserProtected = event.route.id?.includes('(user)');
 
-  if (isProtected && !session) {
-    throw redirect(303, '/');
+  if ((isProtected || isAdminProtected || isUserProtected) && !session) {
+    throw redirect(303, '/login');
   }
 
   if (isLoginPage && session === null) {
-    throw redirect(303, '/');
+    throw redirect(303, '/logout');
   }
 
   if (session) {
@@ -32,6 +34,23 @@ export const handle: Handle = async ({ event, resolve }) => {
     event.locals.rol = null;
     event.locals.token = null;
     event.locals.urql = createUrqlClient();
+  }
+
+  if (
+    isAdminProtected &&
+    event.locals.rol !== 'Admininistrator' &&
+    event.locals.rol !== 'Supervisor' &&
+    event.locals.rol !== 'Accountant'
+  ) {
+    throw redirect(303, '/contracts');
+  }
+
+  if (
+    isUserProtected &&
+    event.locals.rol !== 'Client' &&
+    event.locals.rol !== 'Broadcaster'
+  ) {
+    throw redirect(303, '/contracts');
   }
 
   return await resolve(event);

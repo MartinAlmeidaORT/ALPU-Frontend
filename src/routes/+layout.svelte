@@ -78,6 +78,14 @@
                     >
                   {/snippet}
                 </NavigationMenu.Link>
+                <NavigationMenu.Link>
+                  {#snippet child()}
+                    <a
+                      href="/statistics-dashboard"
+                      class={navigationMenuTriggerStyle()}>Panel estadístico</a
+                    >
+                  {/snippet}
+                </NavigationMenu.Link>
               {/if}
               {#if data.rol === 'Administrator' || data.rol === 'Supervisor'}
                 <NavigationMenu.Link>

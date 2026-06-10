@@ -6,7 +6,6 @@ import type { ColumnDef } from '@tanstack/table-core';
 import { createRawSnippet } from 'svelte';
 import DataTableActions from './data-table-actions.svelte';
 
-// Tipo provisorio, reemplazar por el de GraphQL cuando exista el query de Bills en la respuesta de nodes.
 export type TableBill = {
   billId: number;
   title: string;

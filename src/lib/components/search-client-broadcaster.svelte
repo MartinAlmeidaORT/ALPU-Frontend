@@ -53,7 +53,7 @@
             firstName: nombre,
             lastName: apellido,
           });
-          if (result.data?.clients) {
+          if (result.data?.clients.length > 0) {
             user = result.data.clients;
           } else {
             toast.error(
@@ -65,7 +65,7 @@
             firstName: nombre,
             lastName: apellido,
           });
-          if (result.data?.broadcasters) {
+          if (result.data?.broadcasters.length > 0) {
             user = result.data.broadcasters;
           } else {
             toast.error(

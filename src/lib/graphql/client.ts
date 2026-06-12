@@ -5,15 +5,17 @@ import {
   subscriptionExchange,
   type Client,
 } from '@urql/svelte';
-import { createClient as createWsClient, type SubscribePayload } from 'graphql-ws';
-
+import {
+  createClient as createWsClient,
+  type SubscribePayload,
+} from 'graphql-ws';
 
 export const createUrqlClient = (token?: string): Client => {
   const wsClient = createWsClient({
     url: import.meta.env.VITE_WS_URL,
     connectionParams: () => ({
-      Authorization: token ? `Bearer ${token}` : ''
-    })
+      Authorization: token ? `Bearer ${token}` : '',
+    }),
   });
 
   return createClient({
@@ -23,11 +25,11 @@ export const createUrqlClient = (token?: string): Client => {
       fetchExchange,
       subscriptionExchange({
         forwardSubscription: (request) => ({
-            subscribe: (sink) => ({
-                unsubscribe: wsClient.subscribe(request as SubscribePayload, sink)
-            })
-        })
-      })
+          subscribe: (sink) => ({
+            unsubscribe: wsClient.subscribe(request as SubscribePayload, sink),
+          }),
+        }),
+      }),
     ],
     fetchOptions: () => {
       const headers: Record<string, string> = {};

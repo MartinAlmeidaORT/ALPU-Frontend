@@ -13,17 +13,17 @@ export const NOTIFICATIONS_QUERY = graphql(`
   }
 `);
 
-export const NOTIFICATION_SUB = graphql(` 
-    subscription OnNotificationAdded {
-      onNotificationAdded {
-        notificationId
-        userId
-        title
-        description
-        date
-        isRead
-      }
+export const NOTIFICATION_SUB = graphql(`
+  subscription OnNotificationAdded {
+    onNotificationAdded {
+      notificationId
+      userId
+      title
+      description
+      date
+      isRead
     }
+  }
 `);
 
 export const DELETE_NOTIFICATION_MUTATION = graphql(`

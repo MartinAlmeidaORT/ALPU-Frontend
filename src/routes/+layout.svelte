@@ -11,7 +11,10 @@
   import { onDestroy, onMount } from 'svelte';
   import type { Client } from '@urql/svelte';
   import { createUrqlClient } from '$lib/graphql/client';
-  import { NOTIFICATIONS_QUERY, NOTIFICATION_SUB } from '$lib/graphql/queries/notifications';
+  import { NOTIFICATIONS_QUERY, NOTIFICATION_SUB, DELETE_NOTIFICATION_MUTATION, DELETE_ALL_NOTIFICATIONS_MUTATION } from '$lib/graphql/queries/notifications';
+  import { ScrollArea } from "$lib/components/ui/scroll-area/index.js";
+  import { Separator } from "$lib/components/ui/separator/index.js";
+  import { invalidateAll } from '$app/navigation';
 
   let {
     data,
@@ -30,23 +33,48 @@
   const isMobile = new IsMobile();
 
   let sub: any;
-  const urqlClient: Client = createUrqlClient(data.token);
-
-  onMount(() => {
-      sub = urqlClient.subscription(NOTIFICATION_SUB, {}).subscribe((result) => {
-          if (result.data) {
-              notifications = [...notifications, result.data.onNotificationAdded];
-          }
-      });
-
+    const urqlClient = $derived(createUrqlClient(data.token));
+    $effect(() => {
+      if (!isAuth || !data.token) {
+        notifications = [];
+        return;
+      }
       urqlClient.query(NOTIFICATIONS_QUERY, {}).toPromise().then((response) => {
-          if (response.data?.notifications) {
-              notifications = response.data.notifications;
-          }
+        if (response.data?.notifications) {
+          notifications = response.data.notifications;
+        }
       });
-  });
+
+      const sub = urqlClient.subscription(NOTIFICATION_SUB, {}).subscribe((result) => {
+        if (result.data) {
+          notifications = [...notifications, result.data.onNotificationAdded];
+        }
+      });
+
+      return () => {
+        sub.unsubscribe();
+      };
+    });
 
   onDestroy(() => sub?.unsubscribe());
+
+  async function borrarNotificaciones(notificationId?: string) {
+    try {
+      let result;
+      if (notificationId) {
+        result = await urqlClient.mutation(DELETE_NOTIFICATION_MUTATION, { notificationId });
+        notifications = notifications.filter(n => n.notificationId !== notificationId);
+      } else {
+        result = await urqlClient.mutation(DELETE_ALL_NOTIFICATIONS_MUTATION, {});
+        notifications = [];
+      }
+    } catch (error) {
+      return {
+        token: data.token,
+        error: error instanceof Error ? error.message : 'Unknown error',
+      };
+    }
+  }
 
   function handleLogout() {
     logoutFormRef?.submit();
@@ -68,6 +96,7 @@
         return data.rol;
     }
   });
+
 </script>
 
 <nav
@@ -198,46 +227,54 @@
         {/if}
         </Button>
       </AlertDialog.Trigger>
-      <AlertDialog.Content>
-          <AlertDialog.Header>
-            <AlertDialog.Title>Panel de notificaciones</AlertDialog.Title>
-            <AlertDialog.Description>
-              {#if notifications.length === 0}
-                <p class="text-sm text-muted-foreground">No tienes notificaciones.</p>
-              {:else}
-              <div>
-                {#each notifications as notification}
-                  <div class="flex items-center justify-between gap-4 border-b border-border/50 py-3 last:border-0">
-                    <div class="flex-1 min-w-0">
-                      <p class="font-semibold">{notification.title}</p>
-                      <p class="text-sm text-muted-foreground">{notification.description}</p>
-                    </div>
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      onclick={() => borrarNotificacion(notification.notificationId)}
-                    >
-                      Borrar
-                    </Button>
+      <AlertDialog.Content class="sm:max-w-md">
+        <AlertDialog.Header>
+          <AlertDialog.Title>
+            Panel de notificaciones
+          </AlertDialog.Title>
+        </AlertDialog.Header>
+
+        <ScrollArea class="max-h-80 pr-4">
+          {#if notifications.length === 0}
+            <p class="text-sm text-muted-foreground">
+              No tienes notificaciones.
+            </p>
+          {:else}
+            <div class="space-y-2">
+              {#each notifications as notification}
+                <div class="flex items-start justify-between gap-3 rounded-md border p-3">
+                  <div class="flex-1">
+                    <p class="font-semibold">{notification.title}</p>
+                    <p class="text-sm text-muted-foreground break-words">
+                      {notification.description}
+                    </p>
                   </div>
-                {/each}
-              </div>
-              {/if}
-            </AlertDialog.Description>
-          </AlertDialog.Header>
-          <AlertDialog.Footer>
-            <AlertDialog.Cancel>Volver</AlertDialog.Cancel>
-            <AlertDialog.Action
-            onclick={() => borrarNotificacion()}
-            >Borrar todas</AlertDialog.Action>
-          </AlertDialog.Footer>
-        </AlertDialog.Content>
+
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    class="shrink-0"
+                    onclick={() => borrarNotificaciones(notification.notificationId)}
+                  >
+                    Borrar
+                  </Button>
+                </div>
+              {/each}
+            </div>
+          {/if}
+        </ScrollArea>
+
+        <AlertDialog.Footer class="mt-4">
+          <AlertDialog.Cancel>Volver</AlertDialog.Cancel>
+          <AlertDialog.Action onclick={() => borrarNotificaciones()}>
+            Borrar todas
+          </AlertDialog.Action>
+        </AlertDialog.Footer>
+      </AlertDialog.Content>
     </AlertDialog.Root>
-      
-    
 
     <!-- Separador -->
-    <div class="h-4 w-px bg-border/60"></div>
+    <Separator orientation="vertical" class="h-4 w-px bg-border/90" />
 
     <!-- Botón logout -->
     <Button

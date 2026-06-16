@@ -2,28 +2,28 @@ import type { CodegenConfig } from '@graphql-codegen/cli';
 
 const config: CodegenConfig = {
   overwrite: true,
-  schema: "http://localhost:5116/graphql",
-  documents: ["src/**/*.svelte", 'src/**/*.ts'],
+  schema: process.env.VITE_API_URL ?? 'http://localhost:5116/graphql',
+  documents: ['src/**/*.svelte', 'src/**/*.ts'],
   generates: {
     './src/lib/graphql/schema.ts': {
       config: {
-        banner: '/* eslint-disable */\n// @ts-nocheck'
+        banner: '/* eslint-disable */\n// @ts-nocheck',
       },
-      plugins: ['typescript']
+      plugins: ['typescript'],
     },
-    "./src/lib/graphql/types/": {
+    './src/lib/graphql/types/': {
       config: {
         banner: '/* eslint-disable */\n// @ts-nocheck',
         useTypeImports: true,
       },
-      preset: "client",
+      preset: 'client',
       presetConfig: {
-        fragmentMasking: false
+        fragmentMasking: false,
       },
-      plugins: []
-    }
+      plugins: [],
+    },
   },
-  ignoreNoDocuments: true
+  ignoreNoDocuments: true,
 };
 
 export default config;

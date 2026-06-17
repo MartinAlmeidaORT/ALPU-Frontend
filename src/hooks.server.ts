@@ -38,7 +38,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 
   if (
     isAdminProtected &&
-    event.locals.rol !== 'Admininistrator' &&
+    event.locals.rol !== 'Administrator' &&
     event.locals.rol !== 'Supervisor' &&
     event.locals.rol !== 'Accountant'
   ) {

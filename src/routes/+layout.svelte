@@ -36,7 +36,6 @@
 
   const isAuth = $derived(page.data.session);
   const isMobile = new IsMobile();
-
   let sub: any;
   const urqlClient = $derived(createUrqlClient(data.token));
   $effect(() => {

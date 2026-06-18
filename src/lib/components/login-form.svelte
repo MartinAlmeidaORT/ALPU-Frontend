@@ -65,9 +65,6 @@
         <Field.Field>
           <div class="flex items-center">
             <Field.Label for="password">Contraseña</Field.Label>
-            <a href="##" class="ms-auto inline-block text-sm underline">
-              ¿Olvidaste tu contraseña?
-            </a>
           </div>
           <Input id="password" name="password" type="password" required />
         </Field.Field>

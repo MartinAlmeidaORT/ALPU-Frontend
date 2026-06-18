@@ -17,10 +17,8 @@ export async function load({ cookies, url }) {
       .toPromise();
 
     resultData = result.data.googleAuth;
-
     requiresRegistration = resultData.requiresRegistration;
 
-    userPending = resultData.user.userState;
 
     if (requiresRegistration) {
       cookies.set(
@@ -33,6 +31,8 @@ export async function load({ cookies, url }) {
         }),
         { path: '/', httpOnly: true, maxAge: 600, sameSite: 'lax' },
       );
+    } else {
+      userPending = resultData.user.userState;
     }
   } catch (error) {
     console.error('Error procesando Google callback:', error);
@@ -50,5 +50,5 @@ export async function load({ cookies, url }) {
     });
     throw redirect(303, '/contracts');
   }
-  return fail(400, { pendingState: true, messages: null });
+  throw redirect(303, '/login?pendingState=true');
 }

@@ -19,6 +19,8 @@ export const load = async ({ cookies }) => {
 
 export const actions = {
   default: async ({ request, cookies }) => {
+    let result;
+    let dataKey: string;
     try {
       const formData = await request.formData();
       const pendingData = JSON.parse(cookies.get('pending_signup') || '{}');
@@ -28,7 +30,6 @@ export const actions = {
       const { accountType, ...input } = { ...pendingData, ...data };
 
       let mutationString: string;
-      let dataKey: string;
 
       switch (accountType) {
         case 'broadcaster':
@@ -46,7 +47,7 @@ export const actions = {
           });
       }
 
-      const result = await createUrqlClient()
+      result = await createUrqlClient()
         .mutation(mutationString, {
           input: input,
         })
@@ -60,22 +61,22 @@ export const actions = {
           ],
         });
       }
-      if (result.data) {
-        const resultData = result.data[dataKey];
-        if (!resultData?.token) {
-          return fail(500, {
-            data: null,
-            messages: ['No token received'],
-          });
-        }
-        cookies.delete('pending_signup', { path: '/' });
-      }
     } catch (err) {
       return fail(500, {
         data: null,
         messages: ['An unexpected error occurred'],
       });
     }
-    return fail(400, { pendingState: true, messages: null });
+    if (result.data) {
+      const resultData = result.data[dataKey];
+      if (!resultData?.token) {
+        return fail(500, {
+          data: null,
+          messages: ['No token received'],
+        });
+      }
+      cookies.delete('pending_signup', { path: '/' });
+    }
+    throw redirect(303, '/login?pendingState=true');
   },
 };

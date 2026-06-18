@@ -3,7 +3,7 @@ import {
   SIGNUP_BROADCASTER_MUTATION,
   SIGNUP_CLIENT_MUTATION,
 } from '$lib/graphql/mutations/auth';
-import { fail } from '@sveltejs/kit';
+import { fail, redirect } from '@sveltejs/kit';
 
 export const actions = {
   default: async ({ request, cookies }) => {
@@ -62,6 +62,6 @@ export const actions = {
         messages: ['An unexpected error occurred'],
       });
     }
-    return fail(400, { pendingState: true, messages: null });
+    throw redirect(303, '/login?pendingState=true');
   },
 };

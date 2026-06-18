@@ -46,6 +46,6 @@ export const actions = {
       });
       throw redirect(302, '/contracts');
     }
-    return fail(400, { pendingState: true, messages: null });
+    throw redirect(303, '/login?pendingState=true');
   },
 };

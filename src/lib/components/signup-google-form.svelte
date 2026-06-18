@@ -12,11 +12,11 @@
   import { fetchDepartments } from '$lib/graphql/queries/department';
   import type { OperationResult } from '@urql/core';
   import type { ActionData } from '../../routes/login/signup-google/$types';
+  import { goto } from '$app/navigation';
   import type {
     CountriesQuery,
     DepartmentsQuery,
   } from '$lib/graphql/types/graphql';
-  import { toast } from 'svelte-sonner';
 
   let {
     form,
@@ -35,7 +35,6 @@
     firstName: '',
   });
 
-  let pendingState: boolean = $state(false);
 
   $effect(() => {
     if (data?.pendingData) {
@@ -68,17 +67,6 @@
     }
   });
 
-  $effect(() => {
-    if (pendingState) {
-      toast.error(
-        'Tu cuenta aún no ha sido aprobada. Espera a que un administrador confirme tu aprobación.',
-        {
-          duration: 5000,
-        },
-      );
-    }
-  });
-
   let selectedDepartmentName: string | undefined = $derived(
     departmentsFetch?.data?.departments?.find(
       (d) => d.departmentId === Number(selectedDepartmentId),
@@ -104,7 +92,6 @@
         messages = result.data.messages || [
           'Ocurrió un error inesperado. Inténtalo de nuevo.',
         ];
-        pendingState = result.data?.pendingState;
       }
       await update();
     };
@@ -308,7 +295,7 @@
   {/if}
 </Card.Root>
 
-{#if messages && pendingState != true}
+{#if messages }
   <div class="grid w-full max-w-xl items-start gap-4">
     <Alert.Root variant="destructive">
       <AlertCircleIcon />

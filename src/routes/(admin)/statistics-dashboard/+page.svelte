@@ -29,7 +29,6 @@
   onMount(async () => {
     const urqlClient: Client = createUrqlClient(data.token);
     const response = await urqlClient.query(DASHBOARD_QUERY, {}).toPromise();
-    console.log(JSON.stringify(response.data.dashboard, null, 2)); // ← acá
     if (response.data && response.data.dashboard) {
       contractsRevenue = response.data.dashboard.totalIncome;
       institutionalRevenue = response.data.dashboard.totalIncome * 0.03;

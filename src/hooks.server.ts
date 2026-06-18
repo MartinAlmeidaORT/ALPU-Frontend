@@ -9,7 +9,6 @@ export const handle: Handle = async ({ event, resolve }) => {
   const isAdminProtected = event.route.id?.includes('(admin)');
   const isUserProtected = event.route.id?.includes('(user)');
   const isHome = event.route.id === null || event.route.id === '/';
-  console.log('Route ID:', event.route.id);
   if (isHome) {
     if (session) {
       throw redirect(303, '/contracts');

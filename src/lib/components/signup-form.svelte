@@ -17,21 +17,22 @@
     CountriesQuery,
     DepartmentsQuery,
   } from '$lib/graphql/types/graphql';
-  import { toast } from 'svelte-sonner';
+  import { goto, invalidateAll } from '$app/navigation';
 
   let {
     form,
     ...restProps
-  }: { form: ActionData } & ComponentProps<typeof Card.Root> = $props();
+  }: { 
+    form: ActionData | null | undefined;
+  } & ComponentProps<typeof Card.Root> = $props();
 
   let hasUserChooseAccountType = $state(false);
   let accountType: 'client' | 'broadcaster' | null = $state(null);
   let messages: string[] | null = $state(null);
-  let pendingState: boolean = $state(false);
-
   let countriesFetch = $state<OperationResult<CountriesQuery> | null>(null);
   let departmentsFetch = $state<OperationResult<DepartmentsQuery> | null>(null);
-  let selectedCountryCode: string = $state('UY ');
+  // Tip de antes: quitamos el espacio en blanco 'UY ' para evitar fallos de mapeo
+  let selectedCountryCode: string = $state('UY'); 
   let selectedDepartmentId: string | undefined = $state();
   let selectedCountryName: string | undefined = $state();
 
@@ -39,17 +40,6 @@
     fetchDepartments(selectedCountryCode).then((result) => {
       departmentsFetch = result;
     });
-  });
-
-  $effect(() => {
-    if (pendingState) {
-      toast.error(
-        'Cuenta creada. Espera a que un administrador confirme tu aprobación.',
-        {
-          duration: 5000,
-        },
-      );
-    }
   });
 
   $effect(() => {
@@ -80,12 +70,13 @@
   function handleSubmit() {
     return async ({ result, update }: any) => {
       messages = null;
-
       if (result.type === 'failure') {
         messages = result.data.messages || [
           'Ocurrió un error inesperado. Inténtalo de nuevo.',
         ];
-        pendingState = result.data?.pendingState;
+      } else {
+        invalidateAll();
+        hasUserChooseAccountType = false;
       }
       await update();
     };
@@ -311,7 +302,7 @@
   {/if}
 </Card.Root>
 
-{#if messages && pendingState != true}
+{#if messages }
   <div class="grid w-full max-w-xl items-start gap-4">
     <Alert.Root variant="destructive">
       <AlertCircleIcon />

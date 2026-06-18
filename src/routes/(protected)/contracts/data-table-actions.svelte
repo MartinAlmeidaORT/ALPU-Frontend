@@ -16,6 +16,7 @@
   import type { Client } from '@urql/svelte';
   import { createUrqlClient } from '$lib/graphql/client';
   import { invalidateAll } from '$app/navigation';
+  import { toast } from 'svelte-sonner';
   let token = getContext('token') as string;
   let { contract }: { contract: TableContract } = $props();
 
@@ -43,8 +44,23 @@
   };
 
   const handleAction = async (action: string, contractId: string) => {
-    if (action === 'cancel') {
-      const input: UpdateContractStateInput = {
+    switch (action) {
+      case 'cancel':
+        await cancelContract(contractId);
+        break;
+      case 'approve':
+        await approveContract(contractId);
+        break;
+      case 'ver':
+        await viewContract(contractId);
+        break;
+      default:
+        toast.error('Acción no reconocida');
+    }
+  };
+
+  async function cancelContract(contractId: string) {
+     const input: UpdateContractStateInput = {
         contractId: Number(contractId),
         newState: ContractState.Canceled,
       };
@@ -53,36 +69,47 @@
         .mutation(CANCEL_CONTRACT_QUERY, { input })
         .toPromise();
       if (result.error) {
+        toast.error('Error al cancelar el contrato');
       } else {
         await invalidateAll();
       }
-    } else if (action === 'approve') {
-      const urqlClient: Client = createUrqlClient(token);
-      const result = await urqlClient
-        .mutation(APPROVE_CONTRACT_QUERY, { contractId: Number(contractId) })
-        .toPromise();
-      if (result.error) {
-      } else {
-        await invalidateAll();
-      }
-    } else if (action === 'ver') {
+  }
+
+  async function approveContract(contractId: string) {
+    const urqlClient: Client = createUrqlClient(token);
+    const result = await urqlClient
+      .mutation(APPROVE_CONTRACT_QUERY, { contractId: Number(contractId) })
+      .toPromise();
+    if (result.error) {
+      toast.error('Error al aprobar el contrato');
+    } else {
+      await invalidateAll();
+    }
+  }
+
+  async function viewContract(contractId: string) {
+    try {
       const urqlClient: Client = createUrqlClient(token);
       const result = await urqlClient
         .query(GET_CONTRACT_URL_QUERY, { contractId: Number(contractId) })
         .toPromise();
       if (result.error) {
-      } else {
-        sessionStorage.setItem(
-          'contractPreview',
-          JSON.stringify({
-            pdfUrl: result.data.contractPdfDownloadUrl.pdfAmazonS3Url,
-          }),
-        );
-        sessionStorage.setItem('contractId', contractId);
-        window.open('/contract-preview', '_blank');
+        throw new Error();
       }
+      sessionStorage.setItem(
+        'contractPreview',
+        JSON.stringify({
+          pdfUrl: result.data.contractPdfDownloadUrl.pdfAmazonS3Url,
+        }),
+      );
+      sessionStorage.setItem('contractId', contractId);
+      window.open('/contract-preview', '_blank');
+    } catch (error) {
+      toast.error('Error al obtener el contrato');
     }
-  };
+
+  }
+
 </script>
 
 <DropdownMenu.Root>

@@ -43,11 +43,10 @@
 </script>
 
 <div class="h-full w-full p-4 flex flex-col items-center gap-4">
-  <h1 class="text-2xl font-bold">Panel Estadístico Estratégico</h1>
-
   <div
-    class="w-full max-w-6xl border border-border rounded-lg shadow-sm p-8 flex flex-col gap-8"
+    class="w-full max-w-6xl border border-border rounded-lg shadow-sm p-8 flex flex-col gap-8 bg-background"
   >
+    <h1 class="text-2xl font-bold">Panel Estadístico Estratégico</h1>
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
       <div>
         <h2 class="text-muted-foreground text-lg">

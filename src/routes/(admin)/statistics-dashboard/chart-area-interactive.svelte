@@ -51,8 +51,6 @@
 
   const selectedLabel = $derived.by(() => {
     switch (timeRange) {
-      case '1m':
-        return 'Último mes';
       case '3m':
         return 'Últimos 3 meses';
       case '6m':
@@ -69,9 +67,6 @@
     const cutoff = new Date(now);
 
     switch (timeRange) {
-      case '1m':
-        cutoff.setMonth(cutoff.getMonth() - 1);
-        break;
       case '3m':
         cutoff.setMonth(cutoff.getMonth() - 3);
         break;
@@ -81,7 +76,7 @@
       default:
         cutoff.setFullYear(cutoff.getFullYear() - 1);
     }
-
+    console.log(chartData.filter((item) => item.date >= cutoff));
     return chartData.filter((item) => item.date >= cutoff);
   });
 
@@ -89,6 +84,7 @@
     Puntual: { label: 'Puntuales', color: '#3b82f6' },
     Morosos: { label: 'Morosos', color: '#f97316' },
   } satisfies Chart.ChartConfig;
+
 </script>
 
 <Card.Root class="flex flex-col w-full h-full">
@@ -107,7 +103,6 @@
         {selectedLabel}
       </Select.Trigger>
       <Select.Content class="rounded-xl">
-        <Select.Item value="1m" class="rounded-lg">Último mes</Select.Item>
         <Select.Item value="3m" class="rounded-lg">Últimos 3 meses</Select.Item>
         <Select.Item value="6m" class="rounded-lg">Últimos 6 meses</Select.Item>
         <Select.Item value="1y" class="rounded-lg">Último año</Select.Item>
@@ -138,13 +133,6 @@
           },
         ]}
         props={{
-          xAxis: {
-            format: (v: Date) =>
-              v.toLocaleDateString('es-UY', {
-                month: 'short',
-                year: '2-digit',
-              }),
-          },
           yAxis: { format: (v: number) => String(Math.round(v)) },
         }}
       >

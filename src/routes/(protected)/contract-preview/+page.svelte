@@ -16,6 +16,20 @@
   let pdfAmazonS3Url = $state<string | null>(null);
   let contractId = $state<string | null>(null);
   let { data }: { data: { token: string } } = $props();
+  let urlError = $state(false);
+
+    const validateAndSetUrl = async (url: string) => {
+    try {
+      const response = await fetch(url, { method: 'HEAD' });
+      if (response.ok) {
+        pdfAmazonS3Url = url;
+      } else {
+        urlError = true;
+      }
+    } catch {
+      urlError = true;
+    }
+  };
 
   onMount(() => {
     const storedData = sessionStorage.getItem('contractPreview');
@@ -23,9 +37,9 @@
       goto('/');
     } else {
       const parsed = JSON.parse(storedData);
-      pdfAmazonS3Url = parsed.pdfUrl;
       contractId = sessionStorage.getItem('contractId');
       sessionStorage.removeItem('contractPreview');
+      validateAndSetUrl(parsed.pdfUrl);  
     }
   });
 
@@ -47,15 +61,24 @@
     goto('/select-service');
   };
 
-  // Clase base compartida para todos los botones
   const btn =
     'h-10 flex-1 inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors px-4 py-2 cursor-pointer';
 </script>
 
-<div class="h-full w-full p-4 flex flex-col items-center gap-4">
-  {#if pdfAmazonS3Url}
-    <h1 class="text-2xl font-bold text-center">Preview del Contrato</h1>
-
+  {#if urlError}
+    <div class="flex flex-col items-center gap-3 mt-20 text-center">
+      <p class="text-lg font-semibold text-red-600">El enlace del contrato ha expirado.</p>
+      <p class="text-sm text-muted-foreground">Por favor, volvé a la página anterior y generá una nueva vista previa.</p>
+      <button
+        type="button"
+        class="{btn} mt-4 border border-border bg-background text-muted-foreground hover:bg-muted"
+        onclick={() => goto('/contracts')}
+      >
+        Volver
+      </button>
+    </div>
+  {:else if pdfAmazonS3Url}
+<h1 class="text-2xl font-bold text-center">Preview del Contrato</h1>
     <div
       class="w-full max-w-6xl border border-border rounded-lg overflow-hidden shadow-sm"
     >
@@ -67,9 +90,7 @@
         frameborder="0"
       ></iframe>
     </div>
-
     <div class="flex w-full gap-3 max-w-6xl px-4">
-      <!-- Cancelar -->
       <button
         type="button"
         class="{btn} bg-red-600 text-white hover:bg-red-700"
@@ -77,8 +98,6 @@
       >
         Cancelar contrato
       </button>
-
-      <!-- Volver -->
       <button
         type="button"
         class="{btn} border border-border bg-background text-muted-foreground hover:bg-muted"
@@ -86,15 +105,12 @@
       >
         Volver
       </button>
-
-      <!-- Aceptar (Dialog) -->
       <Dialog.Root>
         <Dialog.Trigger
           class="{btn} bg-[#22964F] text-white hover:bg-[#1a6d3b]"
         >
           Aceptar contrato
         </Dialog.Trigger>
-
         <Dialog.Content class="sm:max-w-md">
           <Dialog.Header>
             <Dialog.Title>Confirmar aceptación</Dialog.Title>
@@ -112,7 +128,6 @@
             >
               Cancelar
             </Dialog.Close>
-
             <button
               type="button"
               class="{btn} bg-[#22964F] text-white hover:bg-[#1a6d3b]"
@@ -134,4 +149,6 @@
       </p>
     </div>
   {/if}
-</div>
+
+
+

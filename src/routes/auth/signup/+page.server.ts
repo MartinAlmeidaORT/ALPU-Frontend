@@ -28,7 +28,7 @@ export const actions = {
         default:
           return fail(400, {
             data: null,
-            messages: ['Invalid account type'],
+            messages: ['Cuenta no válida'],
           });
       }
 
@@ -39,19 +39,19 @@ export const actions = {
         .toPromise();
 
       if (result.error) {
-        return fail(400, {
-          data: null,
-          messages: result.error.graphQLErrors?.map((e) => e.message) || [
-            'Invalid signup data',
-          ],
-        });
+        if (result.error.graphQLErrors.length > 0) {
+          const graphQLErrorMessages = result.error.graphQLErrors.map((e) => e.message);
+          return fail(400, { messages: graphQLErrorMessages });
+        } else {
+          return fail(400, { messages: ['Ocurrió un error inesperado. Inténtalo de nuevo.'] });
+        }
       }
       if (result.data) {
         const resultData = result.data[dataKey];
         if (!resultData?.token) {
           return fail(500, {
             data: null,
-            messages: ['No token received'],
+            messages: ['Token no recibido'],
           });
         }
       }
@@ -59,7 +59,7 @@ export const actions = {
       console.error(err);
       return fail(500, {
         data: null,
-        messages: ['An unexpected error occurred'],
+        messages: ['Ocurrió un error inesperado. Inténtalo de nuevo.'],
       });
     }
     throw redirect(303, '/login?pendingState=true');

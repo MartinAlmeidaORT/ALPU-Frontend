@@ -43,7 +43,7 @@ export const actions = {
         default:
           return fail(400, {
             data: null,
-            messages: ['Invalid account type'],
+            messages: ['Cuenta no válida'],
           });
       }
 
@@ -57,14 +57,14 @@ export const actions = {
         return fail(400, {
           data: null,
           messages: result.error.graphQLErrors.map((e) => e.message) || [
-            'Invalid signup data',
+            'Datos de registro no válidos',
           ],
         });
       }
     } catch (err) {
       return fail(500, {
         data: null,
-        messages: ['An unexpected error occurred'],
+        messages: ['Ocurrió un error inesperado. Inténtalo de nuevo.'],
       });
     }
     if (result.data) {
@@ -72,7 +72,7 @@ export const actions = {
       if (!resultData?.token) {
         return fail(500, {
           data: null,
-          messages: ['No token received'],
+          messages: ['Token no recibido'],
         });
       }
       cookies.delete('pending_signup', { path: '/' });

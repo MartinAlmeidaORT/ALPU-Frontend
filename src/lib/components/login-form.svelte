@@ -6,7 +6,6 @@
   import { Input } from '$lib/components/ui/input/index.js';
   import { enhance } from '$app/forms';
   import { redirectToGoogle } from '$lib/auth/google';
-  import { goto } from '$app/navigation';
 
   let { 
       form, 
@@ -24,9 +23,7 @@ function handleSubmit() {
     return async ({ result, update }: any) => {
       messages = null;
       if (result.type === 'failure') {
-        messages = result.data?.messages || [
-          'Ocurrió un error inesperado. Inténtalo de nuevo.',
-        ];
+        messages = result.data?.messages
       } 
       await update();
     };
@@ -73,7 +70,7 @@ function handleSubmit() {
           </Button>
         </Field.Field>
       </Field.Group>
-      {#if messages && pendingState != true}
+      {#if messages}
         {#each messages as msg}
           <p class="text-sm font-medium text-destructive">
             {msg}

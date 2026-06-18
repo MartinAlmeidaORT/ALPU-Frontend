@@ -10,7 +10,7 @@ export async function load({ cookies, url }) {
   try {
     const code = url.searchParams.get('code');
 
-    if (!code) throw new Error('No authorization code found');
+    if (!code) throw new Error('No se encontró codigo de autenticación en la URL');
 
     const result = await createUrqlClient()
       .mutation(GOOGLE_AUTH_MUTATION, { code })

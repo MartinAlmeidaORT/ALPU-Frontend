@@ -33,8 +33,8 @@
   let departmentsFetch = $state<OperationResult<DepartmentsQuery> | null>(null);
   // Tip de antes: quitamos el espacio en blanco 'UY ' para evitar fallos de mapeo
   let selectedCountryCode: string = $state('UY'); 
-  let selectedDepartmentId: string | undefined = $state();
-  let selectedCountryName: string | undefined = $state();
+  let selectedDepartmentId: string | undefined = $state("Selecciona departamento");
+  let selectedCountryName: string | undefined = $state("Selecciona un país");
 
   $effect(() => {
     fetchDepartments(selectedCountryCode).then((result) => {
@@ -53,7 +53,7 @@
   let selectedDepartmentName: string | undefined = $derived(
     departmentsFetch?.data?.departments.find(
       (d) => d.departmentId === Number(selectedDepartmentId),
-    )?.name ?? 'Selecciona un departamento',
+    )?.name ?? 'Selecciona departamento',
   );
 
   onMount(async () => {
@@ -71,9 +71,7 @@
     return async ({ result, update }: any) => {
       messages = null;
       if (result.type === 'failure') {
-        messages = result.data.messages || [
-          'Ocurrió un error inesperado. Inténtalo de nuevo.',
-        ];
+        messages = result.data.messages
       } else {
         invalidateAll();
         hasUserChooseAccountType = false;

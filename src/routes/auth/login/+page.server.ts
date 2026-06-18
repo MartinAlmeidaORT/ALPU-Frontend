@@ -23,18 +23,19 @@ export const actions = {
 
       // Handle GraphQL-specific errors
       if (result.error) {
-        return fail(400, {
-          messages: result.error.graphQLErrors?.map((e) => e.message) || [
-            'Invalid email or password',
-          ],
-        });
+        if (result.error.graphQLErrors.length > 0) {
+          const graphQLErrorMessages = result.error.graphQLErrors.map((e) => e.message);
+          return fail(400, { messages: graphQLErrorMessages });
+        } else {
+          return fail(400, { messages: ['Ocurrió un error inesperado. Inténtalo de nuevo.'] });
+        }
       }
 
       if (!resultData.token) {
-        return fail(500, { messages: ['No token received'] });
+        return fail(500, { messages: ['Token no recibido'] });
       }
     } catch (err) {
-      return fail(500, { messages: ['An unexpected error occurred'] });
+      return fail(500, { messages: ['Ocurrió un error inesperado. Inténtalo de nuevo.'] });
     }
 
     if (userPending == UserState.Enabled) {

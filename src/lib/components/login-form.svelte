@@ -43,7 +43,7 @@
 
 <Card.Root class=" w-full max-w-sm">
   <Card.Header>
-    <Card.Title class="text-2xl">Login</Card.Title>
+    <Card.Title class="text-2xl">Iniciar Sesión</Card.Title>
     <Card.Description
       >Ingresa tu email y contraseña a continuación para iniciar sesión en tu
       cuenta</Card.Description

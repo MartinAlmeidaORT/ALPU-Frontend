@@ -9,6 +9,7 @@
   import type { Client } from '@urql/svelte';
   import { createUrqlClient } from '$lib/graphql/client';
   import { invalidateAll } from '$app/navigation';
+  import { toast } from 'svelte-sonner';
 
   let token = getContext('token') as string;
   let { user }: { user: TableUser } = $props();
@@ -33,9 +34,10 @@
         .mutation(APPROVE_USER_MUTATION, { input })
         .toPromise();
       if (result.error) {
-        console.error(result.error);
+        toast.error('Error al aprobar usuario: ' + result.error.message);
       } else {
         await invalidateAll();
+        toast.success('Usuario aprobado exitosamente');
       }
     }
   };

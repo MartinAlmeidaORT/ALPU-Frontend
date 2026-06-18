@@ -41,7 +41,7 @@ export async function load({ locals, url }: { locals: App.Locals; url: URL }) {
       return {
         token: locals.token,
         users: [],
-        error: 'No data returned from GraphQL',
+        error: 'No se recibieron datos de usuarios',
       };
     }
 

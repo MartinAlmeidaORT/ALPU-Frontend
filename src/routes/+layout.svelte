@@ -175,15 +175,6 @@
                 {/snippet}
               </NavigationMenu.Link>
             </NavigationMenu.Item>
-          {:else}
-            <NavigationMenu.Item>
-              <NavigationMenu.Link>
-                {#snippet child()}
-                  <a href="/login" class={navigationMenuTriggerStyle()}>Login</a
-                  >
-                {/snippet}
-              </NavigationMenu.Link>
-            </NavigationMenu.Item>
           {/if}
         </NavigationMenu.List>
       </NavigationMenu.Root>

@@ -81,6 +81,10 @@ export const GOOGLE_AUTH_MUTATION = graphql(`
       email
       firstName
       lastName
+      user {
+        userState
+        __typename
+      }
     }
   }
 `);

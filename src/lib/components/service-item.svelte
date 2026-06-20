@@ -8,6 +8,11 @@
   import * as Select from '$lib/components/ui/select/index.js';
   import type { ServicesQuery } from '$lib/graphql/types/graphql';
   import { toast } from 'svelte-sonner';
+  import Calendar from "$lib/components/ui/calendar/calendar.svelte";
+  import * as Popover from "$lib/components/ui/popover/index.js";
+  import ChevronDownIcon from "@lucide/svelte/icons/chevron-down";
+  import { getLocalTimeZone } from "@internationalized/date";
+  import type { CalendarDate } from "@internationalized/date";
   type Service = NonNullable<ServicesQuery['services']>[number];
 
   // Props
@@ -37,6 +42,8 @@
   let canIvrGetMoreMessages = $state(false);
   let ivrMessage = $state('');
   let ivrUpdates = $state(0);
+  let selectedDate = $state<CalendarDate | undefined>();
+  let open = $state(false);
   function handleAddPiece() {
     if (!nombrePieza || nombrePieza.trim() === '') {
       toast.error('Error al agregar un medio', {
@@ -102,7 +109,7 @@
         break;
       case 'EVENT':
         options.forMassBroadcast = broadcastInMassMedia;
-        options.date = null; // Aquí podrías agregar un selector de fecha si es necesario
+        options.date = selectedDate?.toString(); // Aquí podrías agregar un selector de fecha si es necesario
         break;
       case 'OTHERS_VIDEO':
         break;
@@ -252,6 +259,35 @@
               Difusión en medios masivos (+30%)
             </Label>
           </div>
+        {/if}
+        {#if service.name.includes('MAESTRO DE CEREMONIAS') || service.name.includes('CONDUCCIÓN DE SHOWS')}
+          <Label for="selectedDate" class="px-1">Fecha</Label>
+          <Popover.Root bind:open>
+            <Popover.Trigger id="selectedDate">
+              {#snippet child({ props })}
+                <Button
+                  {...props}
+                  variant="outline"
+                  class="w-32 justify-between font-normal"
+                >
+                  {selectedDate
+                    ? selectedDate.toDate(getLocalTimeZone()).toLocaleDateString()
+                    : "Seleccionar fecha"}
+                  <ChevronDownIcon class="pe-2" />
+                </Button>
+              {/snippet}
+            </Popover.Trigger>
+            <Popover.Content class="w-auto overflow-hidden p-0" align="start">
+              <Calendar
+                type="single"
+                bind:value={selectedDate}
+                onValueChange={() => {
+                  open = false;
+                }}
+                captionLayout="dropdown"
+              />
+            </Popover.Content>
+          </Popover.Root>
         {/if}
         <div class="flex items-center gap-2">
           <Label for="nombrePieza_{service.serviceId}">Nombre</Label>

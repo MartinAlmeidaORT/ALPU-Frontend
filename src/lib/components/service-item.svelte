@@ -11,7 +11,7 @@
   import Calendar from "$lib/components/ui/calendar/calendar.svelte";
   import * as Popover from "$lib/components/ui/popover/index.js";
   import ChevronDownIcon from "@lucide/svelte/icons/chevron-down";
-  import { getLocalTimeZone } from "@internationalized/date";
+  import { getLocalTimeZone, today } from "@internationalized/date";
   import type { CalendarDate } from "@internationalized/date";
   type Service = NonNullable<ServicesQuery['services']>[number];
 
@@ -42,6 +42,8 @@
   let canIvrGetMoreMessages = $state(false);
   let ivrMessage = $state('');
   let ivrUpdates = $state(0);
+  let extraRoles = $state(0);
+  let isExtraRoles = $state(false);
   let selectedDate = $state<CalendarDate | undefined>();
   let open = $state(false);
   function handleAddPiece() {
@@ -99,6 +101,7 @@
         options.onInternet = internetBroadcast;
         options.hasLipSync = lipSync;
         options.priceOverride = priceSuggested;
+        options.extraRoles = extraRoles;
         break;
       case 'IVR':
         options.messageText = ivrMessage;
@@ -108,12 +111,14 @@
         options.updates = ivrUpdates;
         break;
       case 'EVENT':
-        options.forMassBroadcast = broadcastInMassMedia;
+        options.ForMassBroadcast = broadcastInMassMedia;
         options.date = selectedDate?.toString(); // Aquí podrías agregar un selector de fecha si es necesario
         break;
       case 'OTHERS_VIDEO':
+        options.period = selectedPeriod;
         break;
       case 'OTHERS_AUDIO':
+        options.period = selectedPeriod;
         break;
       case 'OTHERS':
         options.period = selectedPeriod;
@@ -136,6 +141,12 @@
     ivrMessage = '';
     ivrUpdates = 0;
     broadcastInMassMedia = false;
+    selectedDate = undefined;
+    canIvrUpdate = false;
+    canIvrGetMoreMessages = false;
+    additionalIvrMessage = 0;
+    extraRoles = 0;
+    internalUse = false;
   }
 
   function shouldShowInteriorDiscount(): boolean {
@@ -154,7 +165,8 @@
     return !(
       service.name.includes('PRESENTACIÓN DE PROGRAMAS') ||
       service.name.includes('LOCUCIÓN A CÁMARA') ||
-      service.name.includes('ZÓCALO')
+      service.name.includes('ZÓCALO') ||
+      service.name.includes('NOTICIA EMPRESARIAL') 
     );
   }
 </script>
@@ -281,6 +293,7 @@
               <Calendar
                 type="single"
                 bind:value={selectedDate}
+                minValue={today(getLocalTimeZone())}
                 onValueChange={() => {
                   open = false;
                 }}
@@ -458,10 +471,27 @@
           >
           {#if isPriceSuggested}
             <Input
+              class="w-40"
               id="suggestedPrice_{service.serviceId}"
               bind:value={priceSuggested}
               type="number"
               placeholder="Precio sugerido"
+            />
+          {/if}
+          <Checkbox
+            id="isExtraRoles_{service.serviceId}"
+            bind:checked={isExtraRoles}
+          />
+          <Label for="isExtraRoles_{service.serviceId}"
+            >Roles extra</Label
+          >
+          {#if isExtraRoles}
+            <Input
+              class="w-20"
+              id="extraRoles_{service.serviceId}"
+              bind:value={extraRoles}
+              type="number"
+              placeholder="Roles extra"
             />
           {/if}
         </div>

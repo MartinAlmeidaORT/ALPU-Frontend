@@ -76,7 +76,6 @@
       default:
         cutoff.setFullYear(cutoff.getFullYear() - 1);
     }
-    console.log(chartData.filter((item) => item.date >= cutoff));
     return chartData.filter((item) => item.date >= cutoff);
   });
 

@@ -94,6 +94,14 @@
         return;
       }
     }
+    if (svc.__typename === 'ServicePeriod') {
+      if (options.period == "") {
+        toast.error('Selecciona una duración para el servicio', {
+          description: 'Debes seleccionar una duración para continuar',
+        });
+        return;
+      }
+    }
     if (!validateCampaignInput()) {
       return;
     }
@@ -119,7 +127,7 @@
 
     const input: CampaignInput = {
       broadcasterId:
-        data.rol === 'Broadcaster' ? data.user?.userId : userSelectedId,
+      data.rol === 'Broadcaster' ? data.user?.userId : userSelectedId,
       clientId: data.rol === 'Client' ? data.user?.userId : userSelectedId,
       campaign: campaignName,
       services: totalServices,
@@ -169,7 +177,7 @@
 
     const input: CampaignInput = {
       broadcasterId:
-        data.rol === 'Broadcaster' ? data.user?.userId : userSelectedId,
+      data.rol === 'Broadcaster' ? data.user?.userId : userSelectedId,
       clientId: data.rol === 'Client' ? data.user?.userId : userSelectedId,
       campaign: campaignName,
       services: totalServices,
@@ -203,7 +211,7 @@
 
       const input: CampaignInput = {
         broadcasterId:
-          data.rol === 'Broadcaster' ? data.user?.userId : userSelectedId,
+        data.rol === 'Broadcaster' ? data.user?.userId : userSelectedId,
         clientId: data.rol === 'Client' ? data.user?.userId : userSelectedId,
         campaign: campaignName,
         services: totalServices,

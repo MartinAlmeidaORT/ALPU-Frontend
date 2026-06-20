@@ -86,7 +86,7 @@
         options.forInternalUse = internalUse;
         break;
       case 'NARRATIVE':
-        options.extraMinutes = parseInt(narrativeMinutes) || 0;
+        options.minutes = parseInt(narrativeMinutes) || 0;
         options.extraRoles = parseInt(narrativeRoles);
         options.isNonCommercial = nonCommercialContent;
         options.onInternet = internetBroadcast;

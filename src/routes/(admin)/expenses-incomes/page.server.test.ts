@@ -47,7 +47,7 @@ const createActionEvent = (
   overrides: Record<string, string | Blob> = {},
   token = 'session-token',
 ) => {
-  const formData = new FormData();
+  const formData = new Map<string, string | Blob>();
   const fields: Record<string, string | Blob> = {
     name: 'Comprobante',
     description: 'Pago mensual',
@@ -58,18 +58,13 @@ const createActionEvent = (
   };
 
   for (const [key, value] of Object.entries(fields)) {
-    if (value instanceof File) {
-      formData.set(key, value, value.name);
-    } else {
-      formData.set(key, value);
-    }
+    formData.set(key, value);
   }
 
   return {
-    request: new Request('http://localhost/expenses-incomes', {
-      method: 'POST',
-      body: formData,
-    }),
+    request: {
+      formData: vi.fn().mockResolvedValue(formData),
+    },
     cookies: {
       set: vi.fn(),
     },
@@ -237,7 +232,7 @@ describe('/expenses-incomes action', () => {
 
   it('uploads the receipt file to S3 when the mutation returns an upload url', async () => {
     const file = new File(['receipt'], 'receipt.png', { type: 'image/png' });
-    mockCreateUrqlMutation({
+    const { mutation } = mockCreateUrqlMutation({
       data: {
         registerBill: {
           amazonS3Url: 'https://s3.example.com/upload',
@@ -256,6 +251,13 @@ describe('/expenses-incomes action', () => {
       ),
     ).resolves.toEqual({ success: true });
 
+    expect(mutation).toHaveBeenCalledWith(GENERATE_BILL_MUTATION, {
+      input: expect.objectContaining({
+        fileName: 'receipt.png',
+        contractId: null,
+        type: 'EXPENSE',
+      }),
+    });
     expect(fetch).toHaveBeenCalledWith('https://s3.example.com/upload', {
       method: 'PUT',
       body: file,
@@ -264,6 +266,28 @@ describe('/expenses-incomes action', () => {
         'Content-Disposition': 'attachment; filename="receipt.png"',
       },
     });
+  });
+
+  it('keeps the receipt filename without uploading when there is no file upload url', async () => {
+    const file = new File(['receipt'], 'receipt.png', { type: 'image/png' });
+    const { mutation } = mockCreateUrqlMutation({
+      data: {
+        registerBill: {
+          amazonS3Url: null,
+        },
+      },
+    });
+
+    await expect(
+      actions.default(createActionEvent({ receiptImage: file }) as never),
+    ).resolves.toEqual({ success: true });
+
+    expect(mutation).toHaveBeenCalledWith(GENERATE_BILL_MUTATION, {
+      input: expect.objectContaining({
+        fileName: 'receipt.png',
+      }),
+    });
+    expect(fetch).not.toHaveBeenCalled();
   });
 
   it('returns an error when bill registration fails', async () => {

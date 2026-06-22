@@ -157,6 +157,44 @@ describe('expenses-incomes DataTableActions', () => {
     });
   });
 
+  it('shows a toast when the bill proof url is missing', async () => {
+    renderActions();
+    toPromiseMock.mockResolvedValue({
+      data: {
+        billProofDownloadUrl: {
+          amazonS3Url: null,
+        },
+      },
+    });
+
+    await openMenu();
+    await fireEvent.click(await screen.findByText('Ver comprobante'));
+
+    await waitFor(() => {
+      expect(toastErrorMock).toHaveBeenCalledWith(
+        'Hubo un error al obtener el comprobante.',
+      );
+      expect(sessionStorage.getItem('billPreview')).toBeNull();
+      expect(window.open).not.toHaveBeenCalled();
+    });
+  });
+
+  it('shows a toast when the bill proof payload is missing', async () => {
+    renderActions();
+    toPromiseMock.mockResolvedValue({ data: {} });
+
+    await openMenu();
+    await fireEvent.click(await screen.findByText('Ver comprobante'));
+
+    await waitFor(() => {
+      expect(toastErrorMock).toHaveBeenCalledWith(
+        'Hubo un error al obtener el comprobante.',
+      );
+      expect(sessionStorage.getItem('billPreview')).toBeNull();
+      expect(window.open).not.toHaveBeenCalled();
+    });
+  });
+
   it('shows a toast when deleting the bill fails', async () => {
     renderActions();
     toPromiseMock.mockResolvedValue({ error: new Error('fail') });

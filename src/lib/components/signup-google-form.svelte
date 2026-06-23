@@ -35,7 +35,6 @@
     firstName: '',
   });
 
-
   $effect(() => {
     if (data?.pendingData) {
       googleData.lastName = data.pendingData.lastName ?? '';
@@ -295,7 +294,7 @@
   {/if}
 </Card.Root>
 
-{#if messages }
+{#if messages}
   <div class="grid w-full max-w-xl items-start gap-4">
     <Alert.Root variant="destructive">
       <AlertCircleIcon />

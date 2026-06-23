@@ -40,10 +40,14 @@ export const actions = {
 
       if (result.error) {
         if (result.error.graphQLErrors.length > 0) {
-          const graphQLErrorMessages = result.error.graphQLErrors.map((e) => e.message);
+          const graphQLErrorMessages = result.error.graphQLErrors.map(
+            (e) => e.message,
+          );
           return fail(400, { messages: graphQLErrorMessages });
         } else {
-          return fail(400, { messages: ['Ocurrió un error inesperado. Inténtalo de nuevo.'] });
+          return fail(400, {
+            messages: ['Ocurrió un error inesperado. Inténtalo de nuevo.'],
+          });
         }
       }
       if (result.data) {

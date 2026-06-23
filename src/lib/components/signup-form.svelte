@@ -22,7 +22,7 @@
   let {
     form,
     ...restProps
-  }: { 
+  }: {
     form: ActionData | null | undefined;
   } & ComponentProps<typeof Card.Root> = $props();
 
@@ -32,9 +32,11 @@
   let countriesFetch = $state<OperationResult<CountriesQuery> | null>(null);
   let departmentsFetch = $state<OperationResult<DepartmentsQuery> | null>(null);
   // Tip de antes: quitamos el espacio en blanco 'UY ' para evitar fallos de mapeo
-  let selectedCountryCode: string = $state('UY'); 
-  let selectedDepartmentId: string | undefined = $state("Selecciona departamento");
-  let selectedCountryName: string | undefined = $state("Selecciona un país");
+  let selectedCountryCode: string = $state('UY');
+  let selectedDepartmentId: string | undefined = $state(
+    'Selecciona departamento',
+  );
+  let selectedCountryName: string | undefined = $state('Selecciona un país');
 
   $effect(() => {
     fetchDepartments(selectedCountryCode).then((result) => {
@@ -71,7 +73,7 @@
     return async ({ result, update }: any) => {
       messages = null;
       if (result.type === 'failure') {
-        messages = result.data.messages
+        messages = result.data.messages;
       } else {
         invalidateAll();
         hasUserChooseAccountType = false;
@@ -300,7 +302,7 @@
   {/if}
 </Card.Root>
 
-{#if messages }
+{#if messages}
   <div class="grid w-full max-w-xl items-start gap-4">
     <Alert.Root variant="destructive">
       <AlertCircleIcon />

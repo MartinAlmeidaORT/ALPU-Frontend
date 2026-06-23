@@ -24,10 +24,14 @@ export const actions = {
       // Handle GraphQL-specific errors
       if (result.error) {
         if (result.error.graphQLErrors.length > 0) {
-          const graphQLErrorMessages = result.error.graphQLErrors.map((e) => e.message);
+          const graphQLErrorMessages = result.error.graphQLErrors.map(
+            (e) => e.message,
+          );
           return fail(400, { messages: graphQLErrorMessages });
         } else {
-          return fail(400, { messages: ['Ocurrió un error inesperado. Inténtalo de nuevo.'] });
+          return fail(400, {
+            messages: ['Ocurrió un error inesperado. Inténtalo de nuevo.'],
+          });
         }
       }
 
@@ -35,7 +39,9 @@ export const actions = {
         return fail(500, { messages: ['Token no recibido'] });
       }
     } catch (err) {
-      return fail(500, { messages: ['Ocurrió un error inesperado. Inténtalo de nuevo.'] });
+      return fail(500, {
+        messages: ['Ocurrió un error inesperado. Inténtalo de nuevo.'],
+      });
     }
 
     if (userPending == UserState.Enabled) {

@@ -7,24 +7,24 @@
   import { enhance } from '$app/forms';
   import { redirectToGoogle } from '$lib/auth/google';
 
-  let { 
-      form, 
-    }: { 
-      form: ActionData | null | undefined; 
-    } = $props();
-    
+  let {
+    form,
+  }: {
+    form: ActionData | null | undefined;
+  } = $props();
+
   let messages: string[] | null = $state(null);
 
   $effect(() => {
     if (form?.messages) messages = form.messages;
   });
 
-function handleSubmit() {
+  function handleSubmit() {
     return async ({ result, update }: any) => {
       messages = null;
       if (result.type === 'failure') {
-        messages = result.data?.messages
-      } 
+        messages = result.data?.messages;
+      }
       await update();
     };
   }

@@ -83,7 +83,6 @@
     Puntual: { label: 'Puntuales', color: '#3b82f6' },
     Morosos: { label: 'Morosos', color: '#f97316' },
   } satisfies Chart.ChartConfig;
-
 </script>
 
 <Card.Root class="flex flex-col w-full h-full">

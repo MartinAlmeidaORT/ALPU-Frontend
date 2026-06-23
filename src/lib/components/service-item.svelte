@@ -8,11 +8,11 @@
   import * as Select from '$lib/components/ui/select/index.js';
   import type { ServicesQuery } from '$lib/graphql/types/graphql';
   import { toast } from 'svelte-sonner';
-  import Calendar from "$lib/components/ui/calendar/calendar.svelte";
-  import * as Popover from "$lib/components/ui/popover/index.js";
-  import ChevronDownIcon from "@lucide/svelte/icons/chevron-down";
-  import { getLocalTimeZone, today } from "@internationalized/date";
-  import type { CalendarDate } from "@internationalized/date";
+  import Calendar from '$lib/components/ui/calendar/calendar.svelte';
+  import * as Popover from '$lib/components/ui/popover/index.js';
+  import ChevronDownIcon from '@lucide/svelte/icons/chevron-down';
+  import { getLocalTimeZone, today } from '@internationalized/date';
+  import type { CalendarDate } from '@internationalized/date';
   type Service = NonNullable<ServicesQuery['services']>[number];
 
   // Props
@@ -166,7 +166,7 @@
       service.name.includes('PRESENTACIÓN DE PROGRAMAS') ||
       service.name.includes('LOCUCIÓN A CÁMARA') ||
       service.name.includes('ZÓCALO') ||
-      service.name.includes('NOTICIA EMPRESARIAL') 
+      service.name.includes('NOTICIA EMPRESARIAL')
     );
   }
 </script>
@@ -283,8 +283,10 @@
                   class="w-32 justify-between font-normal"
                 >
                   {selectedDate
-                    ? selectedDate.toDate(getLocalTimeZone()).toLocaleDateString()
-                    : "Seleccionar fecha"}
+                    ? selectedDate
+                        .toDate(getLocalTimeZone())
+                        .toLocaleDateString()
+                    : 'Seleccionar fecha'}
                   <ChevronDownIcon class="pe-2" />
                 </Button>
               {/snippet}
@@ -482,9 +484,7 @@
             id="isExtraRoles_{service.serviceId}"
             bind:checked={isExtraRoles}
           />
-          <Label for="isExtraRoles_{service.serviceId}"
-            >Roles extra</Label
-          >
+          <Label for="isExtraRoles_{service.serviceId}">Roles extra</Label>
           {#if isExtraRoles}
             <Input
               class="w-20"

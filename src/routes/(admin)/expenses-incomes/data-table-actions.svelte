@@ -32,10 +32,16 @@
       if (result.error) {
         toast.error('Hubo un error al obtener el comprobante.');
       } else {
+        const proofFileUrl = result.data?.billProofDownloadUrl?.amazonS3Url;
+        if (!proofFileUrl) {
+          toast.error('Hubo un error al obtener el comprobante.');
+          return;
+        }
+
         sessionStorage.setItem(
           'billPreview',
           JSON.stringify({
-            proofFileUrl: result.data.billProofDownloadUrl.amazonS3Url,
+            proofFileUrl,
           }),
         );
         window.open('/expenses-incomes-preview', '_blank');

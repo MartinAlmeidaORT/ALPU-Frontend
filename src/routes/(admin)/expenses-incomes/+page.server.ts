@@ -3,6 +3,7 @@ import {
   BILLS_QUERY,
   GENERATE_BILL_MUTATION,
 } from '$lib/graphql/queries/bills.js';
+import { fail } from '@sveltejs/kit';
 import type { TableBill } from './columns.js';
 
 export async function load({ locals, url }: { locals: App.Locals; url: URL }) {
@@ -71,7 +72,12 @@ export const actions = {
         })
         .toPromise();
       if (result.error) {
-        return { error: result.error.message };
+        const graphQLErrorMessages = result.error.graphQLErrors.map(
+            (e) => e.message,
+          );
+        return fail(400, {
+          messages: graphQLErrorMessages
+        });
       }
 
       const s3Url = result.data?.registerBill?.amazonS3Url;

@@ -185,25 +185,20 @@
           onclick={() => (selectedPeriod = servicePrice.interval)}
           class="flex-1"
         >
-          {servicePrice.basePrice}
+          ${servicePrice.basePrice}
         </Button>
       {/each}
     </Accordion.Trigger>
     <Accordion.Content class="flex flex-col gap-4 text-balance">
       {#if shouldShowSubsiguiente()}
-        <div
-          class="grid grid-cols-[1fr_repeat(5,70px)] gap-2 min-h-16 px-2 items-center"
-        >
-          <span class="truncate">SUBSIGUIENTE</span>
+        <div class="grid grid-cols-[1fr_repeat(5,70px)] gap-2 px-2 pb-3 mb-2 border-b border-border items-center">
+          <span class="truncate text-sm font-medium text-muted-foreground uppercase tracking-wider">
+            Subsiguiente
+          </span>
           {#each service.periods as servicePrice}
-            <Button
-              variant="outline"
-              bgColor="bg-[#1F5BB8] text-white hover:bg-[#1a4a94] hover:text-white"
-              onclick={() => (selectedPeriod = servicePrice.interval)}
-              class="flex-1"
-            >
-              {servicePrice.extraPrice}
-            </Button>
+            <div class="text-center text-sm font-medium text-muted-foreground">
+              ${servicePrice.extraPrice}
+            </div>
           {/each}
         </div>
       {/if}

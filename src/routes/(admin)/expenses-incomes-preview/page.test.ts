@@ -58,7 +58,9 @@ describe('/expenses-incomes-preview page', () => {
 
     render(Page);
 
-    await fireEvent.click(await screen.findByRole('button', { name: 'Volver' }));
+    await fireEvent.click(
+      await screen.findByRole('button', { name: 'Volver' }),
+    );
 
     expect(gotoMock).toHaveBeenCalledWith('/expenses-incomes');
   });

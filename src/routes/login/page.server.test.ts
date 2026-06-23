@@ -16,7 +16,9 @@ describe('/login load', () => {
     ).resolves.toEqual({ pendingState: false });
 
     await expect(
-      load({ url: new URL('http://localhost/login?pendingState=false') } as never),
+      load({
+        url: new URL('http://localhost/login?pendingState=false'),
+      } as never),
     ).resolves.toEqual({ pendingState: false });
   });
 });

@@ -2,8 +2,8 @@ import { APPROVE_USER_MUTATION } from '$lib/graphql/queries/user';
 import { UserState } from '$lib/graphql/schema';
 import { fireEvent, render, screen, waitFor } from '@testing-library/svelte';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import DataTableActions from './data-table-actions.svelte';
 import type { TableUser } from './columns';
+import DataTableActions from './data-table-actions.svelte';
 
 const {
   createUrqlClientMock,
@@ -87,7 +87,9 @@ describe('user DataTableActions', () => {
   it('does not show actions for non-pending users', () => {
     renderActions('ENABLED');
 
-    expect(screen.queryByRole('button', { name: 'Open menu' })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: 'Open menu' }),
+    ).not.toBeInTheDocument();
   });
 
   it('approves a pending user and invalidates data', async () => {
@@ -113,7 +115,9 @@ describe('user DataTableActions', () => {
       });
       expect(createUrqlClientMock).toHaveBeenCalledWith('session-token');
       expect(invalidateAllMock).toHaveBeenCalledOnce();
-      expect(toastSuccessMock).toHaveBeenCalledWith('Usuario aprobado exitosamente');
+      expect(toastSuccessMock).toHaveBeenCalledWith(
+        'Usuario aprobado exitosamente',
+      );
     });
   });
 

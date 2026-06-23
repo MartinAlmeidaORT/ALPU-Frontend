@@ -19,7 +19,9 @@ const createCookies = () => ({
   set: vi.fn(),
 });
 
-const createCallbackEvent = (url = 'http://localhost/auth/callback?code=abc') => ({
+const createCallbackEvent = (
+  url = 'http://localhost/auth/callback?code=abc',
+) => ({
   cookies: createCookies(),
   url: new URL(url),
 });

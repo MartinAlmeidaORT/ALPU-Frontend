@@ -1,7 +1,7 @@
 import { createUrqlClient } from '$lib/graphql/client';
 import { GOOGLE_AUTH_MUTATION } from '$lib/graphql/mutations/auth';
 import { UserState } from '$lib/graphql/schema';
-import { fail, redirect } from '@sveltejs/kit';
+import { redirect } from '@sveltejs/kit';
 
 export async function load({ cookies, url }) {
   let requiresRegistration: boolean | null = null;
@@ -10,7 +10,8 @@ export async function load({ cookies, url }) {
   try {
     const code = url.searchParams.get('code');
 
-    if (!code) throw new Error('No se encontró codigo de autenticación en la URL');
+    if (!code)
+      throw new Error('No se encontró codigo de autenticación en la URL');
 
     const result = await createUrqlClient()
       .mutation(GOOGLE_AUTH_MUTATION, { code })
@@ -18,7 +19,6 @@ export async function load({ cookies, url }) {
 
     resultData = result.data.googleAuth;
     requiresRegistration = resultData.requiresRegistration;
-
 
     if (requiresRegistration) {
       cookies.set(

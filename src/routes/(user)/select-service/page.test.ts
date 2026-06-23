@@ -182,15 +182,23 @@ describe('/select-service page', () => {
     await openServiceForm();
     await fillPieceName('Spot matutino');
 
-    await fireEvent.input(screen.getByPlaceholderText('Ingresa el nombre del cliente'), {
-      target: { value: 'Grace' },
-    });
-    await fireEvent.input(screen.getByPlaceholderText('Ingresa el apellido del cliente'), {
-      target: { value: 'Client' },
-    });
+    await fireEvent.input(
+      screen.getByPlaceholderText('Ingresa el nombre del cliente'),
+      {
+        target: { value: 'Grace' },
+      },
+    );
+    await fireEvent.input(
+      screen.getByPlaceholderText('Ingresa el apellido del cliente'),
+      {
+        target: { value: 'Client' },
+      },
+    );
 
     await fireEvent.click(screen.getByRole('button', { name: 'Buscar' }));
-    await fireEvent.click(await screen.findByRole('button', { name: 'Escoger' }));
+    await fireEvent.click(
+      await screen.findByRole('button', { name: 'Escoger' }),
+    );
     await openServiceForm();
     await clickAddPiece();
 
@@ -212,7 +220,9 @@ describe('/select-service page', () => {
           ],
         }),
       );
-      expect(screen.getByText('Total con descuentos: $500')).toBeInTheDocument();
+      expect(
+        screen.getByText('Total con descuentos: $500'),
+      ).toBeInTheDocument();
     });
   });
 });

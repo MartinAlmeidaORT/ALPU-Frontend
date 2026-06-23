@@ -1,7 +1,4 @@
-import {
-  USERS_FILTERED_QUERY,
-  USERS_QUERY,
-} from '$lib/graphql/queries/user';
+import { USERS_FILTERED_QUERY, USERS_QUERY } from '$lib/graphql/queries/user';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { load } from './+page.server';
 

@@ -6,8 +6,8 @@ import {
 import { ContractState } from '$lib/graphql/schema';
 import { fireEvent, render, screen, waitFor } from '@testing-library/svelte';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import DataTableActions from './data-table-actions.svelte';
 import type { TableContract } from './columns';
+import DataTableActions from './data-table-actions.svelte';
 
 const {
   createUrqlClientMock,
@@ -100,7 +100,9 @@ describe('DataTableActions', () => {
 
   it('approves a pending contract and invalidates data', async () => {
     renderActions();
-    toPromiseMock.mockResolvedValue({ data: { approveContract: { state: 'ACTIVE' } } });
+    toPromiseMock.mockResolvedValue({
+      data: { approveContract: { state: 'ACTIVE' } },
+    });
 
     await openMenu();
     await fireEvent.click(await screen.findByText('Aprobar'));
@@ -167,7 +169,9 @@ describe('DataTableActions', () => {
     await fireEvent.click(await screen.findByText('Aprobar'));
 
     await waitFor(() => {
-      expect(toastErrorMock).toHaveBeenCalledWith('Error al aprobar el contrato');
+      expect(toastErrorMock).toHaveBeenCalledWith(
+        'Error al aprobar el contrato',
+      );
       expect(invalidateAllMock).not.toHaveBeenCalled();
     });
   });
@@ -180,7 +184,9 @@ describe('DataTableActions', () => {
     await fireEvent.click(await screen.findByText('Ver'));
 
     await waitFor(() => {
-      expect(toastErrorMock).toHaveBeenCalledWith('Error al obtener el contrato');
+      expect(toastErrorMock).toHaveBeenCalledWith(
+        'Error al obtener el contrato',
+      );
       expect(window.open).not.toHaveBeenCalled();
     });
   });

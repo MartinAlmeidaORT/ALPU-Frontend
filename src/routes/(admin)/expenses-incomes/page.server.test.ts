@@ -213,7 +213,9 @@ describe('/expenses-incomes action', () => {
       },
     });
 
-    await expect(actions.default(createActionEvent() as never)).resolves.toEqual({
+    await expect(
+      actions.default(createActionEvent() as never),
+    ).resolves.toEqual({
       success: true,
     });
     expect(createUrqlClient).toHaveBeenCalledWith('session-token');
@@ -297,7 +299,9 @@ describe('/expenses-incomes action', () => {
       },
     });
 
-    await expect(actions.default(createActionEvent() as never)).resolves.toEqual({
+    await expect(
+      actions.default(createActionEvent() as never),
+    ).resolves.toEqual({
       error: 'Invalid bill',
     });
   });
@@ -326,7 +330,9 @@ describe('/expenses-incomes action', () => {
     }));
     vi.mocked(createUrqlClient).mockReturnValue({ mutation } as never);
 
-    await expect(actions.default(createActionEvent() as never)).resolves.toEqual({
+    await expect(
+      actions.default(createActionEvent() as never),
+    ).resolves.toEqual({
       error: 'Network down',
     });
   });

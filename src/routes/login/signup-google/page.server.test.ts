@@ -24,7 +24,9 @@ const pendingSignup = {
   lastName: 'Lovelace',
 };
 
-const createCookies = (pendingValue: string | null = JSON.stringify(pendingSignup)) => ({
+const createCookies = (
+  pendingValue: string | null = JSON.stringify(pendingSignup),
+) => ({
   get: vi.fn((name: string) =>
     name === 'pending_signup' ? (pendingValue ?? undefined) : undefined,
   ),
@@ -112,20 +114,23 @@ describe('/login/signup-google action', () => {
       location: '/login?pendingState=true',
     });
 
-    expect(mutationMock).toHaveBeenCalledWith(COMPLETE_GOOGLE_SIGNUP_CLIENT_MUTATION, {
-      input: {
-        subject: 'google-subject',
-        email: 'ada@example.com',
-        firstName: 'Ada',
-        lastName: 'Lovelace',
-        rut: '123456789012',
-        agencyName: 'Analytical Engines',
-        city: 'Montevideo',
-        departmentId: 1,
-        street: 'Main Street',
-        countryCode: 'UY',
+    expect(mutationMock).toHaveBeenCalledWith(
+      COMPLETE_GOOGLE_SIGNUP_CLIENT_MUTATION,
+      {
+        input: {
+          subject: 'google-subject',
+          email: 'ada@example.com',
+          firstName: 'Ada',
+          lastName: 'Lovelace',
+          rut: '123456789012',
+          agencyName: 'Analytical Engines',
+          city: 'Montevideo',
+          departmentId: 1,
+          street: 'Main Street',
+          countryCode: 'UY',
+        },
       },
-    });
+    );
     expect(event.cookies.delete).toHaveBeenCalledWith('pending_signup', {
       path: '/',
     });

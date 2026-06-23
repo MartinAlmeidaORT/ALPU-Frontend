@@ -60,19 +60,19 @@
   };
 
   async function cancelContract(contractId: string) {
-     const input: UpdateContractStateInput = {
-        contractId: Number(contractId),
-        newState: ContractState.Canceled,
-      };
-      const urqlClient: Client = createUrqlClient(token);
-      const result = await urqlClient
-        .mutation(CANCEL_CONTRACT_QUERY, { input })
-        .toPromise();
-      if (result.error) {
-        toast.error('Error al cancelar el contrato');
-      } else {
-        await invalidateAll();
-      }
+    const input: UpdateContractStateInput = {
+      contractId: Number(contractId),
+      newState: ContractState.Canceled,
+    };
+    const urqlClient: Client = createUrqlClient(token);
+    const result = await urqlClient
+      .mutation(CANCEL_CONTRACT_QUERY, { input })
+      .toPromise();
+    if (result.error) {
+      toast.error('Error al cancelar el contrato');
+    } else {
+      await invalidateAll();
+    }
   }
 
   async function approveContract(contractId: string) {
@@ -107,9 +107,7 @@
     } catch (error) {
       toast.error('Error al obtener el contrato');
     }
-
   }
-
 </script>
 
 <DropdownMenu.Root>

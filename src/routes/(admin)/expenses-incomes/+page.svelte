@@ -2,7 +2,11 @@
 <script lang="ts">
   import DataTable from '$lib/components/DataTable.svelte';
   import { columns } from './columns';
-  import { Alert, AlertDescription, AlertTitle } from '$lib/components/ui/alert/index.js';
+  import {
+    Alert,
+    AlertDescription,
+    AlertTitle,
+  } from '$lib/components/ui/alert/index.js';
   import * as Dialog from '$lib/components/ui/dialog/index.js';
   import { Button } from '$lib/components/ui/button/index.js';
   import { Input } from '$lib/components/ui/input/index.js';
@@ -76,8 +80,8 @@
         <Dialog.Header>
           <Dialog.Title class="text-lg font-semibold">Agregar</Dialog.Title>
           <Dialog.Description>
-            Selecciona el tipo de comprobante que deseas agregar y completa
-            los datos necesarios para su creación.
+            Selecciona el tipo de comprobante que deseas agregar y completa los
+            datos necesarios para su creación.
           </Dialog.Description>
         </Dialog.Header>
         <div class="grid gap-4">
@@ -87,11 +91,21 @@
           </div>
           <div class="grid gap-3">
             <Label for="description">Descripción</Label>
-            <Input id="description" name="description" placeholder="Descripción del comprobante.." />
+            <Input
+              id="description"
+              name="description"
+              placeholder="Descripción del comprobante.."
+            />
           </div>
           <div class="grid gap-3">
             <Label for="amount">Monto</Label>
-            <Input id="amount" name="amount" type="number" step="0.01" placeholder="Monto del comprobante.." />
+            <Input
+              id="amount"
+              name="amount"
+              type="number"
+              step="0.01"
+              placeholder="Monto del comprobante.."
+            />
           </div>
           <input type="hidden" name="type" value={selectedType} />
           <div class="grid gap-3">
@@ -99,20 +113,29 @@
             <Select.Root type="single" bind:value={selectedType}>
               <Select.Trigger class="w-full">
                 {selectedType
-                  ? selectedType === BillType.Income ? 'Ingreso' : 'Gasto'
+                  ? selectedType === BillType.Income
+                    ? 'Ingreso'
+                    : 'Gasto'
                   : 'Seleccionar tipo...'}
               </Select.Trigger>
               <Select.Content>
                 <Select.Group>
-                  <Select.Item value={BillType.Income} label="Ingreso">Ingreso</Select.Item>
-                  <Select.Item value={BillType.Expense} label="Gasto">Gasto</Select.Item>
+                  <Select.Item value={BillType.Income} label="Ingreso"
+                    >Ingreso</Select.Item
+                  >
+                  <Select.Item value={BillType.Expense} label="Gasto"
+                    >Gasto</Select.Item
+                  >
                 </Select.Group>
               </Select.Content>
             </Select.Root>
           </div>
           <div class="flex items-center space-x-2 mt-2">
             <Checkbox id="is-contract" bind:checked={isContract} />
-            <Label for="is-contract" class="text-sm font-medium leading-none cursor-pointer">
+            <Label
+              for="is-contract"
+              class="text-sm font-medium leading-none cursor-pointer"
+            >
               Pertenece a contrato
             </Label>
           </div>

@@ -28,9 +28,7 @@ describe('LoginForm', () => {
     const passwordInput = screen.getByLabelText(/Contrase/);
 
     expect(screen.getAllByText(/^Iniciar Sesi/)).toHaveLength(2);
-    expect(
-      screen.getByText(/Ingresa tu email y contrase/),
-    ).toBeInTheDocument();
+    expect(screen.getByText(/Ingresa tu email y contrase/)).toBeInTheDocument();
     expect(form).toHaveAttribute('method', 'POST');
     expect(form).toHaveAttribute('action', '/auth/login');
     expect(emailInput).toHaveAttribute('name', 'email');
@@ -39,13 +37,10 @@ describe('LoginForm', () => {
     expect(passwordInput).toHaveAttribute('name', 'password');
     expect(passwordInput).toHaveAttribute('type', 'password');
     expect(passwordInput).toBeRequired();
-    expect(screen.getByRole('button', { name: /^Iniciar Sesi/ })).toHaveAttribute(
-      'type',
-      'submit',
-    );
     expect(
-      screen.getByRole('button', { name: /Google/ }),
-    ).toBeInTheDocument();
+      screen.getByRole('button', { name: /^Iniciar Sesi/ }),
+    ).toHaveAttribute('type', 'submit');
+    expect(screen.getByRole('button', { name: /Google/ })).toBeInTheDocument();
     expect(enhanceMock).toHaveBeenCalledOnce();
   });
 
@@ -65,7 +60,9 @@ describe('LoginForm', () => {
   it('does not render error messages when form is empty', () => {
     render(LoginForm, { form: null });
 
-    expect(screen.queryByText('Credenciales inválidas')).not.toBeInTheDocument();
+    expect(
+      screen.queryByText('Credenciales inválidas'),
+    ).not.toBeInTheDocument();
   });
 
   it('starts the Google login flow from the secondary button', async () => {

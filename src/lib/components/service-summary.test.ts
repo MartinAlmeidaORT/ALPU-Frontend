@@ -95,15 +95,21 @@ describe('ServiceSummary', () => {
   it('shows an empty state when no services were selected', () => {
     renderSummary();
 
-    expect(screen.getByText('No ha seleccionado ningún servicio.')).toBeInTheDocument();
+    expect(
+      screen.getByText('No ha seleccionado ningún servicio.'),
+    ).toBeInTheDocument();
   });
 
   it('renders contract totals and service details', () => {
     renderSummary({ totalContrato });
 
     expect(screen.getByText('Total con descuentos: $500')).toBeInTheDocument();
-    expect(screen.getByText(/Nombre de pieza: Spot matutino/)).toBeInTheDocument();
-    expect(screen.getByText(/Nombre del servicio: RADIO SPOT GENERICO/)).toBeInTheDocument();
+    expect(
+      screen.getByText(/Nombre de pieza: Spot matutino/),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/Nombre del servicio: RADIO SPOT GENERICO/),
+    ).toBeInTheDocument();
   });
 
   it('shows validation errors passed from the page', () => {
@@ -126,7 +132,9 @@ describe('ServiceSummary', () => {
       userState: UserState.Pending,
     });
 
-    expect(screen.getByRole('button', { name: 'Generar contrato' })).toBeDisabled();
+    expect(
+      screen.getByRole('button', { name: 'Generar contrato' }),
+    ).toBeDisabled();
   });
 
   it('generates a contract and navigates to the preview page', async () => {
@@ -142,7 +150,9 @@ describe('ServiceSummary', () => {
       },
     });
 
-    await fireEvent.click(screen.getByRole('button', { name: 'Generar contrato' }));
+    await fireEvent.click(
+      screen.getByRole('button', { name: 'Generar contrato' }),
+    );
 
     await waitFor(() => {
       expect(mutationMock).toHaveBeenCalledWith(
@@ -173,7 +183,9 @@ describe('ServiceSummary', () => {
       },
     });
 
-    await fireEvent.click(screen.getByRole('button', { name: 'Generar contrato' }));
+    await fireEvent.click(
+      screen.getByRole('button', { name: 'Generar contrato' }),
+    );
 
     await waitFor(() => {
       expect(
@@ -192,7 +204,9 @@ describe('ServiceSummary', () => {
       onRemoveAllServices,
     });
 
-    await fireEvent.click(screen.getByRole('button', { name: 'Eliminar medio' }));
+    await fireEvent.click(
+      screen.getByRole('button', { name: 'Eliminar medio' }),
+    );
     await fireEvent.click(screen.getByRole('button', { name: 'Borrar todo' }));
 
     expect(onRemoveService).toHaveBeenCalledWith(0);

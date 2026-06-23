@@ -52,7 +52,9 @@ describe('/contract-preview page', () => {
 
     render(Page, { props: { data } });
 
-    await fireEvent.click(await screen.findByRole('button', { name: 'Volver' }));
+    await fireEvent.click(
+      await screen.findByRole('button', { name: 'Volver' }),
+    );
 
     expect(gotoMock).toHaveBeenCalledWith('/select-service');
   });

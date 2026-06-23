@@ -3,17 +3,13 @@ import { tick } from 'svelte';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import SignupGoogleForm from './signup-google-form.svelte';
 
-const {
-  enhanceMock,
-  fetchCountriesMock,
-  fetchDepartmentsMock,
-  gotoMock,
-} = vi.hoisted(() => ({
-  enhanceMock: vi.fn(() => ({ destroy: vi.fn() })),
-  fetchCountriesMock: vi.fn(),
-  fetchDepartmentsMock: vi.fn(),
-  gotoMock: vi.fn(),
-}));
+const { enhanceMock, fetchCountriesMock, fetchDepartmentsMock, gotoMock } =
+  vi.hoisted(() => ({
+    enhanceMock: vi.fn(() => ({ destroy: vi.fn() })),
+    fetchCountriesMock: vi.fn(),
+    fetchDepartmentsMock: vi.fn(),
+    gotoMock: vi.fn(),
+  }));
 
 vi.mock('$app/forms', () => ({
   enhance: enhanceMock,
@@ -87,7 +83,9 @@ describe('SignupGoogleForm', () => {
       'action',
       '/login/signup-google',
     );
-    expect(container.querySelector('input[name="accountType"]')).toHaveValue('client');
+    expect(container.querySelector('input[name="accountType"]')).toHaveValue(
+      'client',
+    );
     expect(screen.getByPlaceholderText('Nombre')).toHaveValue('Ada');
     expect(screen.getByPlaceholderText('Apellido')).toHaveValue('Lovelace');
     expect(screen.getByPlaceholderText('RUT')).toBeRequired();
@@ -140,7 +138,9 @@ describe('SignupGoogleForm', () => {
   });
 
   it('renders action failure messages returned by enhance', async () => {
-    let submitCallbackFactory: (() => (event: unknown) => Promise<void>) | undefined;
+    let submitCallbackFactory:
+      | (() => (event: unknown) => Promise<void>)
+      | undefined;
     enhanceMock.mockImplementation((_form, callbackFactory) => {
       submitCallbackFactory = callbackFactory;
       return { destroy: vi.fn() };
@@ -163,7 +163,9 @@ describe('SignupGoogleForm', () => {
   });
 
   it('renders a generic message when enhanced failure has no messages', async () => {
-    let submitCallbackFactory: (() => (event: unknown) => Promise<void>) | undefined;
+    let submitCallbackFactory:
+      | (() => (event: unknown) => Promise<void>)
+      | undefined;
     enhanceMock.mockImplementation((_form, callbackFactory) => {
       submitCallbackFactory = callbackFactory;
       return { destroy: vi.fn() };

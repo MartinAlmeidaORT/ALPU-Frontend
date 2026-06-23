@@ -4,8 +4,8 @@ import {
 } from '$lib/graphql/queries/bills';
 import { fireEvent, render, screen, waitFor } from '@testing-library/svelte';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import DataTableActions from './data-table-actions.svelte';
 import type { TableBill } from './columns';
+import DataTableActions from './data-table-actions.svelte';
 
 const {
   createUrqlClientMock,

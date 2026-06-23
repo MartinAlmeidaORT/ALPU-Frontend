@@ -49,7 +49,10 @@ const createSignupEvent = (overrides: Record<string, string> = {}) => {
   };
 };
 
-const createSignupResult = (dataKey: 'registerClient' | 'registerBroadcaster', token = 'token') => ({
+const createSignupResult = (
+  dataKey: 'registerClient' | 'registerBroadcaster',
+  token = 'token',
+) => ({
   data: {
     [dataKey]: {
       token,

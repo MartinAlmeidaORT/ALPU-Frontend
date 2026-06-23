@@ -14,11 +14,15 @@ const user: TableUser = {
 const createRow = (original: TableUser = user) => ({ original });
 
 const getColumn = (accessorKey: string) =>
-  columns.find((column) => 'accessorKey' in column && column.accessorKey === accessorKey);
+  columns.find(
+    (column) => 'accessorKey' in column && column.accessorKey === accessorKey,
+  );
 
 describe('user columns', () => {
   it('formats user id with a leading hash', () => {
-    expect(getColumn('userId')?.cell?.({ row: createRow() } as never)).toBe('#3');
+    expect(getColumn('userId')?.cell?.({ row: createRow() } as never)).toBe(
+      '#3',
+    );
   });
 
   it('formats full name, email, and rut', () => {
@@ -79,8 +83,8 @@ describe('user columns', () => {
   });
 
   it('includes an actions column', () => {
-    expect(columns.some((column) => 'id' in column && column.id === 'actions')).toBe(
-      true,
-    );
+    expect(
+      columns.some((column) => 'id' in column && column.id === 'actions'),
+    ).toBe(true);
   });
 });

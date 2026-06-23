@@ -4,17 +4,13 @@ import { readable } from 'svelte/store';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import Page from './+page.svelte';
 
-const {
-  enhanceMock,
-  invalidateAllMock,
-  toastErrorMock,
-  toastSuccessMock,
-} = vi.hoisted(() => ({
-  enhanceMock: vi.fn(() => ({ destroy: vi.fn() })),
-  invalidateAllMock: vi.fn(),
-  toastErrorMock: vi.fn(),
-  toastSuccessMock: vi.fn(),
-}));
+const { enhanceMock, invalidateAllMock, toastErrorMock, toastSuccessMock } =
+  vi.hoisted(() => ({
+    enhanceMock: vi.fn(() => ({ destroy: vi.fn() })),
+    invalidateAllMock: vi.fn(),
+    toastErrorMock: vi.fn(),
+    toastSuccessMock: vi.fn(),
+  }));
 
 vi.mock('$app/forms', () => ({
   enhance: enhanceMock,
@@ -72,7 +68,9 @@ describe('/expenses-incomes page', () => {
 
     await openDialog();
 
-    expect(screen.getByRole('heading', { name: 'Agregar' })).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { name: 'Agregar' }),
+    ).toBeInTheDocument();
     expect(screen.getByLabelText('Nombre')).toBeInTheDocument();
     expect(screen.getByLabelText('Imagen del comprobante')).toBeInTheDocument();
   });
@@ -114,7 +112,9 @@ describe('/expenses-incomes page', () => {
     expect(toastSuccessMock).toHaveBeenCalledWith(
       'Comprobante agregado exitosamente.',
     );
-    expect(screen.queryByRole('heading', { name: 'Agregar' })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('heading', { name: 'Agregar' }),
+    ).not.toBeInTheDocument();
   });
 
   it('keeps the dialog open and shows an error toast after submit fails', async () => {
@@ -143,6 +143,8 @@ describe('/expenses-incomes page', () => {
     );
     expect(update).toHaveBeenCalledWith({ reset: false });
     expect(invalidateAllMock).not.toHaveBeenCalled();
-    expect(screen.getByRole('heading', { name: 'Agregar' })).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { name: 'Agregar' }),
+    ).toBeInTheDocument();
   });
 });

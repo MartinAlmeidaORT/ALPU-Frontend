@@ -7,9 +7,7 @@ describe('/auth/logout action', () => {
       delete: vi.fn(),
     };
 
-    await expect(
-      actions.default({ cookies } as never),
-    ).rejects.toMatchObject({
+    await expect(actions.default({ cookies } as never)).rejects.toMatchObject({
       status: 303,
       location: '/login',
     });

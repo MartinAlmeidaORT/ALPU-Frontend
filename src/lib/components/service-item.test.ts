@@ -1,8 +1,8 @@
+import type { ServicesQuery } from '$lib/graphql/types/graphql';
 import { fireEvent, render, screen, waitFor } from '@testing-library/svelte';
 import { tick } from 'svelte';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import ServiceItemHarness from './service-item.test-harness.svelte';
-import type { ServicesQuery } from '$lib/graphql/types/graphql';
 
 const { toastErrorMock } = vi.hoisted(() => ({
   toastErrorMock: vi.fn(),

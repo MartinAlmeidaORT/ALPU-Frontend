@@ -58,7 +58,7 @@
 
   // Read once from URL — no $effect, no reactivity loop
   let selectedState = $state<string>(
-    $page.url.searchParams.get(stateParamKey) ?? 'ALL'
+    $page.url.searchParams.get(stateParamKey) ?? 'ALL',
   );
 
   function handleStateChange(value: string) {
@@ -88,7 +88,9 @@
   }
 
   const table = createSvelteTable({
-    get data() { return data; },
+    get data() {
+      return data;
+    },
     columns,
     getCoreRowModel: getCoreRowModel(),
     manualPagination: true,
@@ -99,15 +101,23 @@
       sorting = typeof updater === 'function' ? updater(sorting) : updater;
     },
     onColumnFiltersChange: (updater) => {
-      columnFilters = typeof updater === 'function' ? updater(columnFilters) : updater;
+      columnFilters =
+        typeof updater === 'function' ? updater(columnFilters) : updater;
     },
     onPaginationChange: (updater) => {
-      pagination = typeof updater === 'function' ? updater(pagination) : updater;
+      pagination =
+        typeof updater === 'function' ? updater(pagination) : updater;
     },
     state: {
-      get pagination() { return pagination; },
-      get sorting() { return sorting; },
-      get columnFilters() { return columnFilters; },
+      get pagination() {
+        return pagination;
+      },
+      get sorting() {
+        return sorting;
+      },
+      get columnFilters() {
+        return columnFilters;
+      },
     },
   });
 
@@ -117,19 +127,28 @@
 
   function getTriggerLabel(value: string): string {
     if (stateTriggerLabel) return stateTriggerLabel(value);
-    return allStateOptions.find((o) => o.value === value)?.label ?? 'Todos los estados';
+    return (
+      allStateOptions.find((o) => o.value === value)?.label ??
+      'Todos los estados'
+    );
   }
 </script>
 
 <div class="{widthClass} mx-auto p-4">
   <div class="rounded-md border bg-white overflow-hidden">
-
     <div class="flex items-center gap-4 mx-1 py-4">
       <Input
         placeholder={filterPlaceholder}
-        value={(table.getColumn(filterColumnId)?.getFilterValue() as string) ?? ''}
-        oninput={(e) => table.getColumn(filterColumnId)?.setFilterValue(e.currentTarget.value)}
-        onchange={(e) => table.getColumn(filterColumnId)?.setFilterValue(e.currentTarget.value)}
+        value={(table.getColumn(filterColumnId)?.getFilterValue() as string) ??
+          ''}
+        oninput={(e) =>
+          table
+            .getColumn(filterColumnId)
+            ?.setFilterValue(e.currentTarget.value)}
+        onchange={(e) =>
+          table
+            .getColumn(filterColumnId)
+            ?.setFilterValue(e.currentTarget.value)}
         class="max-w-sm border-[#cad8e4]"
       />
       {#if stateOptions}

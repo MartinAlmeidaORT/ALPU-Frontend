@@ -73,12 +73,18 @@ describe('SearchClientBroadcaster', () => {
       },
     });
 
-    await fireEvent.input(screen.getByPlaceholderText('Ingresa el nombre del cliente'), {
-      target: { value: 'Grace' },
-    });
-    await fireEvent.input(screen.getByPlaceholderText('Ingresa el apellido del cliente'), {
-      target: { value: 'Client' },
-    });
+    await fireEvent.input(
+      screen.getByPlaceholderText('Ingresa el nombre del cliente'),
+      {
+        target: { value: 'Grace' },
+      },
+    );
+    await fireEvent.input(
+      screen.getByPlaceholderText('Ingresa el apellido del cliente'),
+      {
+        target: { value: 'Client' },
+      },
+    );
     await fireEvent.click(screen.getByRole('button', { name: 'Buscar' }));
 
     await waitFor(() => {
@@ -109,12 +115,18 @@ describe('SearchClientBroadcaster', () => {
       },
     });
 
-    await fireEvent.input(screen.getByPlaceholderText('Ingresa el nombre del cliente'), {
-      target: { value: 'Missing' },
-    });
-    await fireEvent.input(screen.getByPlaceholderText('Ingresa el apellido del cliente'), {
-      target: { value: 'User' },
-    });
+    await fireEvent.input(
+      screen.getByPlaceholderText('Ingresa el nombre del cliente'),
+      {
+        target: { value: 'Missing' },
+      },
+    );
+    await fireEvent.input(
+      screen.getByPlaceholderText('Ingresa el apellido del cliente'),
+      {
+        target: { value: 'User' },
+      },
+    );
     await fireEvent.click(screen.getByRole('button', { name: 'Buscar' }));
 
     await waitFor(() => {
@@ -138,12 +150,18 @@ describe('SearchClientBroadcaster', () => {
       },
     });
 
-    await fireEvent.input(screen.getByPlaceholderText('Ingresa el nombre del cliente'), {
-      target: { value: 'Missing' },
-    });
-    await fireEvent.input(screen.getByPlaceholderText('Ingresa el apellido del cliente'), {
-      target: { value: 'User' },
-    });
+    await fireEvent.input(
+      screen.getByPlaceholderText('Ingresa el nombre del cliente'),
+      {
+        target: { value: 'Missing' },
+      },
+    );
+    await fireEvent.input(
+      screen.getByPlaceholderText('Ingresa el apellido del cliente'),
+      {
+        target: { value: 'User' },
+      },
+    );
     await fireEvent.click(screen.getByRole('button', { name: 'Buscar' }));
 
     await waitFor(() => {

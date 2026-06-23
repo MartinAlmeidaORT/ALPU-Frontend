@@ -76,8 +76,13 @@ describe('SignupForm', () => {
     expect(screen.getByText(/Registro cliente/)).toBeInTheDocument();
     expect(screen.getByText(/Ingresa tu informaci/)).toBeInTheDocument();
     expect(container.querySelector('form')).toHaveAttribute('method', 'POST');
-    expect(container.querySelector('form')).toHaveAttribute('action', '/auth/signup');
-    expect(container.querySelector('input[name="accountType"]')).toHaveValue('client');
+    expect(container.querySelector('form')).toHaveAttribute(
+      'action',
+      '/auth/signup',
+    );
+    expect(container.querySelector('input[name="accountType"]')).toHaveValue(
+      'client',
+    );
     expect(screen.getByPlaceholderText('Nombre')).toBeRequired();
     expect(screen.getByPlaceholderText('Apellido')).toBeRequired();
     expect(screen.getByPlaceholderText('email@example.com')).toHaveAttribute(
@@ -88,7 +93,10 @@ describe('SignupForm', () => {
       'minlength',
       '10',
     );
-    expect(screen.getByPlaceholderText('RUT')).toHaveAttribute('maxlength', '12');
+    expect(screen.getByPlaceholderText('RUT')).toHaveAttribute(
+      'maxlength',
+      '12',
+    );
     expect(screen.getByPlaceholderText('Agencia')).toBeRequired();
     expect(screen.getByPlaceholderText('Ciudad')).toHaveAttribute(
       'pattern',
@@ -142,7 +150,9 @@ describe('SignupForm', () => {
   });
 
   it('renders action failure messages returned by enhance', async () => {
-    let submitCallbackFactory: (() => (event: unknown) => Promise<void>) | undefined;
+    let submitCallbackFactory:
+      | (() => (event: unknown) => Promise<void>)
+      | undefined;
     enhanceMock.mockImplementation((_form, callbackFactory) => {
       submitCallbackFactory = callbackFactory;
       return { destroy: vi.fn() };
@@ -169,7 +179,9 @@ describe('SignupForm', () => {
   });
 
   it('clears the selected account type after a successful enhanced submit', async () => {
-    let submitCallbackFactory: (() => (event: unknown) => Promise<void>) | undefined;
+    let submitCallbackFactory:
+      | (() => (event: unknown) => Promise<void>)
+      | undefined;
     enhanceMock.mockImplementation((_form, callbackFactory) => {
       submitCallbackFactory = callbackFactory;
       return { destroy: vi.fn() };

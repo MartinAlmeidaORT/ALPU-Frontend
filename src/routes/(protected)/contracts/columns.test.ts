@@ -22,7 +22,9 @@ const contract: TableContract = {
 const createRow = (original: TableContract = contract) => ({ original });
 
 const getColumn = (accessorKey: string) =>
-  columns.find((column) => 'accessorKey' in column && column.accessorKey === accessorKey);
+  columns.find(
+    (column) => 'accessorKey' in column && column.accessorKey === accessorKey,
+  );
 
 describe('contracts columns', () => {
   it('formats contract id with a leading hash', () => {
@@ -32,9 +34,9 @@ describe('contracts columns', () => {
   });
 
   it('formats broadcaster and client full names', () => {
-    expect(getColumn('broadcaster')?.cell?.({ row: createRow() } as never)).toBe(
-      'Ada Radio',
-    );
+    expect(
+      getColumn('broadcaster')?.cell?.({ row: createRow() } as never),
+    ).toBe('Ada Radio');
     expect(getColumn('client')?.cell?.({ row: createRow() } as never)).toBe(
       'Grace Client',
     );
@@ -58,7 +60,9 @@ describe('contracts columns', () => {
   });
 
   it('translates known states and preserves unknown states', () => {
-    expect(getColumn('state')?.cell?.({ row: createRow() } as never)).toBe('Activo');
+    expect(getColumn('state')?.cell?.({ row: createRow() } as never)).toBe(
+      'Activo',
+    );
     expect(
       getColumn('state')?.cell?.({
         row: createRow({
@@ -82,11 +86,15 @@ describe('contracts columns', () => {
     const broadcasterColumn = getColumn('broadcaster');
     const row = createRow();
 
-    expect(broadcasterColumn?.filterFn?.(row as never, 'broadcaster', 'ada')).toBe(
-      true,
-    );
     expect(
-      broadcasterColumn?.filterFn?.(row as never, 'broadcaster', 'grace client'),
+      broadcasterColumn?.filterFn?.(row as never, 'broadcaster', 'ada'),
+    ).toBe(true);
+    expect(
+      broadcasterColumn?.filterFn?.(
+        row as never,
+        'broadcaster',
+        'grace client',
+      ),
     ).toBe(true);
     expect(
       broadcasterColumn?.filterFn?.(row as never, 'broadcaster', 'missing'),
@@ -94,8 +102,8 @@ describe('contracts columns', () => {
   });
 
   it('does not filter rows through the client column', () => {
-    expect(getColumn('client')?.filterFn?.(createRow() as never, 'client', 'x')).toBe(
-      true,
-    );
+    expect(
+      getColumn('client')?.filterFn?.(createRow() as never, 'client', 'x'),
+    ).toBe(true);
   });
 });

@@ -4,25 +4,23 @@ import { graphql } from '../types';
 import type { BroadcastersQuery, ClientsQuery } from '../types/graphql';
 
 const CLIENT_QUERY = graphql(`
-  query clients($firstName: String!, $lastName: String!) {
-    clients(
-      where: { firstName: { eq: $firstName }, lastName: { eq: $lastName } }
-    ) {
+  query clients($email: String!) {
+    clients(where: { email: { eq: $email } }) {
       userId
       firstName
       lastName
+      email
     }
   }
 `);
 
 const BROADCASTER_QUERY = graphql(`
-  query broadcasters($firstName: String!, $lastName: String!) {
-    broadcasters(
-      where: { firstName: { eq: $firstName }, lastName: { eq: $lastName } }
-    ) {
+  query broadcasters($email: String!) {
+    broadcasters(where: { email: { eq: $email } }) {
       userId
       firstName
       lastName
+      email
     }
   }
 `);
@@ -88,25 +86,21 @@ export const APPROVE_USER_MUTATION = graphql(`
 `);
 
 export async function fetchClient(input: {
-  firstName: string;
-  lastName: string;
+  email: string;
 }): Promise<OperationResult<ClientsQuery>> {
   return await createUrqlClient()
     .query(CLIENT_QUERY, {
-      firstName: input.firstName,
-      lastName: input.lastName,
+      email: input.email,
     })
     .toPromise();
 }
 
 export async function fetchBroadcaster(input: {
-  firstName: string;
-  lastName: string;
+  email: string;
 }): Promise<OperationResult<BroadcastersQuery>> {
   return await createUrqlClient()
     .query(BROADCASTER_QUERY, {
-      firstName: input.firstName,
-      lastName: input.lastName,
+      email: input.email,
     })
     .toPromise();
 }

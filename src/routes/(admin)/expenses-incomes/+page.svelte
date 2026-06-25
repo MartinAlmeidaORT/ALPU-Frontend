@@ -23,7 +23,6 @@
   let { data }: { data: PageData } = $props();
   setContext('token', data.token);
 
-  // Dialog state lives here — completely isolated from DataTable
   let dialogOpen = $state(false);
   let isContract = $state(false);
   let selectedType = $state<string>('');
@@ -31,7 +30,11 @@
   function handleSubmit() {
     return async ({ result, update }: any) => {
       if (result.type === 'failure' || result.type === 'error') {
-        toast.error('Hubo un error al agregar el comprobante.');
+        console.error('Error al agregar comprobante:', result);
+        toast.error(
+          result.data?.messages?.[0] ||
+            'Ocurrió un error inesperado. Inténtalo de nuevo.',
+        );
         await update({ reset: false });
         return;
       }
@@ -50,7 +53,6 @@
     </Alert>
   </div>
 {:else}
-  <!-- Dialog lives outside DataTable so its form state never triggers a table re-render -->
   <Dialog.Root bind:open={dialogOpen}>
     <DataTable
       data={data.bills}

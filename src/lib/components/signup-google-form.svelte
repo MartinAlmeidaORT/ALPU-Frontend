@@ -146,7 +146,7 @@
               required
               minlength={3}
               maxlength={50}
-              pattern="[A-Za-z]+"
+              pattern="^[A-Za-zÁÉÍÓÚáéíóúÑñ]+(?:[ -][A-Za-zÁÉÍÓÚáéíóúÑñ]+)*$"
               oninvalid={(e) => {
                 const input = e.target as HTMLInputElement;
                 if (input.validity.patternMismatch) {
@@ -169,7 +169,7 @@
               required
               minlength={3}
               maxlength={50}
-              pattern="[A-Za-z]+"
+              pattern="^[A-Za-zÁÉÍÓÚáéíóúÑñ]+(?:[ -][A-Za-zÁÉÍÓÚáéíóúÑñ]+)*$"
               oninvalid={(e) => {
                 const input = e.target as HTMLInputElement;
                 if (input.validity.patternMismatch) {
@@ -216,7 +216,7 @@
               required
               minlength={4}
               maxlength={100}
-              pattern="[A-Za-z]+"
+              pattern="^[A-Za-zÁÉÍÓÚáéíóúÑñ]+(?:[ -][A-Za-zÁÉÍÓÚáéíóúÑñ]+)*$"
               oninvalid={(e) => {
                 const input = e.target as HTMLInputElement;
                 if (input.validity.patternMismatch) {

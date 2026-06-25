@@ -103,6 +103,7 @@ export const columns: ColumnDef<TableContract>[] = [
         ACTIVE: 'Activo',
         COMPLETED: 'Completado',
         CANCELED: 'Cancelado',
+        PAID: 'Pagado',
       };
       return stateMap[row.original.state] || row.original.state;
     },

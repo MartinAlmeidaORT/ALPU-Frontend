@@ -31,7 +31,10 @@
     return async ({ result, update }: any) => {
       if (result.type === 'failure' || result.type === 'error') {
         console.error('Error al agregar comprobante:', result);
-        toast.error(result.data?.messages?.[0] || 'Ocurrió un error inesperado. Inténtalo de nuevo.');
+        toast.error(
+          result.data?.messages?.[0] ||
+            'Ocurrió un error inesperado. Inténtalo de nuevo.',
+        );
         await update({ reset: false });
         return;
       }

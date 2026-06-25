@@ -191,8 +191,12 @@
     </Accordion.Trigger>
     <Accordion.Content class="flex flex-col gap-4 text-balance">
       {#if shouldShowSubsiguiente()}
-        <div class="grid grid-cols-[1fr_repeat(5,70px)] gap-2 px-2 pb-3 mb-2 border-b border-border items-center">
-          <span class="truncate text-sm font-medium text-muted-foreground uppercase tracking-wider">
+        <div
+          class="grid grid-cols-[1fr_repeat(5,70px)] gap-2 px-2 pb-3 mb-2 border-b border-border items-center"
+        >
+          <span
+            class="truncate text-sm font-medium text-muted-foreground uppercase tracking-wider"
+          >
             Subsiguiente
           </span>
           {#each service.periods as servicePrice}

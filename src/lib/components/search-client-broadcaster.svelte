@@ -3,7 +3,7 @@
   import { Input } from '$lib/components/ui/input/index.js';
   import Label from './ui/label/label.svelte';
   import { fetchClient, fetchBroadcaster } from '$lib/graphql/queries/user';
-  import * as AlertDialog from "$lib/components/ui/alert-dialog/index.js";
+  import * as AlertDialog from '$lib/components/ui/alert-dialog/index.js';
   import X from '@lucide/svelte/icons/x';
   import type {
     BroadcastersQuery,
@@ -53,9 +53,7 @@
               if (result.data?.clients.length > 0) {
                 user = result.data.clients;
               } else {
-                toast.error(
-                  'No se encontró ningún cliente con ese email',
-                );
+                toast.error('No se encontró ningún cliente con ese email');
               }
             } else {
               const result = await fetchBroadcaster({
@@ -64,9 +62,7 @@
               if (result.data?.broadcasters.length > 0) {
                 user = result.data.broadcasters;
               } else {
-                toast.error(
-                  'No se encontró ningún broadcaster con ese email',
-                );
+                toast.error('No se encontró ningún broadcaster con ese email');
               }
             }
           }}
@@ -74,7 +70,7 @@
           Buscar
         </Button>
       </AlertDialog.Trigger>
-      {#if user} 
+      {#if user}
         <AlertDialog.Content>
           <AlertDialog.Cancel
             class="absolute top-4 right-4 rounded-sm p-1 opacity-70 transition-opacity hover:opacity-100"
@@ -92,23 +88,26 @@
               <div class="mt-6 text-left">
                 {#each user as client}
                   <div>
-                    {client.firstName} {client.lastName}
-                  <AlertDialog.Action
-                    onclick={() => {
-                      valorId = client.userId;
-                      toast.success(`Usuario seleccionado: ${client.firstName} ${client.lastName}`);
-                      openAlertDialog = false;
-                      email = '';
-                    }}
-                  >
-                  Escoger
-                  </AlertDialog.Action>
+                    {client.firstName}
+                    {client.lastName}
+                    <AlertDialog.Action
+                      onclick={() => {
+                        valorId = client.userId;
+                        toast.success(
+                          `Usuario seleccionado: ${client.firstName} ${client.lastName}`,
+                        );
+                        openAlertDialog = false;
+                        email = '';
+                      }}
+                    >
+                      Escoger
+                    </AlertDialog.Action>
                   </div>
                 {/each}
               </div>
             </AlertDialog.Description>
           </AlertDialog.Header>
-          </AlertDialog.Content>
+        </AlertDialog.Content>
       {/if}
     </AlertDialog.Root>
   </div>

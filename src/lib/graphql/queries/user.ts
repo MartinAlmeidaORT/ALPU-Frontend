@@ -5,9 +5,7 @@ import type { BroadcastersQuery, ClientsQuery } from '../types/graphql';
 
 const CLIENT_QUERY = graphql(`
   query clients($email: String!) {
-    clients(
-      where: { email: { eq: $email } }
-    ) {
+    clients(where: { email: { eq: $email } }) {
       userId
       firstName
       lastName
@@ -18,9 +16,7 @@ const CLIENT_QUERY = graphql(`
 
 const BROADCASTER_QUERY = graphql(`
   query broadcasters($email: String!) {
-    broadcasters(
-      where: { email: { eq: $email } }
-    ) {
+    broadcasters(where: { email: { eq: $email } }) {
       userId
       firstName
       lastName

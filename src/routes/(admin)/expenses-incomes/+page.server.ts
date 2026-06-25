@@ -73,10 +73,10 @@ export const actions = {
         .toPromise();
       if (result.error) {
         const graphQLErrorMessages = result.error.graphQLErrors.map(
-            (e) => e.message,
-          );
+          (e) => e.message,
+        );
         return fail(400, {
-          messages: graphQLErrorMessages
+          messages: graphQLErrorMessages,
         });
       }
 

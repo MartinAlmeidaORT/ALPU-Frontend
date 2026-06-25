@@ -50,7 +50,7 @@
               const result = await fetchClient({
                 email: email,
               });
-              if (result.data?.clients.length > 0) {
+              if (result.data?.clients && result.data?.clients.length > 0) {
                 user = result.data.clients;
               } else {
                 toast.error('No se encontró ningún cliente con ese email');
@@ -59,7 +59,7 @@
               const result = await fetchBroadcaster({
                 email: email,
               });
-              if (result.data?.broadcasters.length > 0) {
+              if (result.data?.broadcasters && result.data?.broadcasters.length > 0) {
                 user = result.data.broadcasters;
               } else {
                 toast.error('No se encontró ningún broadcaster con ese email');

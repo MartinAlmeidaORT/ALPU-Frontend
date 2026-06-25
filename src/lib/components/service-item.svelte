@@ -8,11 +8,17 @@
   import * as Select from '$lib/components/ui/select/index.js';
   import type { ServicesQuery } from '$lib/graphql/types/graphql';
   import { toast } from 'svelte-sonner';
-  import Calendar from '$lib/components/ui/calendar/calendar.svelte';
-  import * as Popover from '$lib/components/ui/popover/index.js';
-  import ChevronDownIcon from '@lucide/svelte/icons/chevron-down';
-  import { getLocalTimeZone, today } from '@internationalized/date';
   import type { CalendarDate } from '@internationalized/date';
+  import DatePicker from './DatePicker.svelte';
+  import ServicePeriod from './ServicePeriod.svelte';
+  import type { ServicePeriod as ServicePeriodType } from '$lib/graphql/schema';
+  import type { ServiceDate as ServiceDateType } from '$lib/graphql/schema';
+  import type { ServiceIvr as ServiceIVRType } from '$lib/graphql/schema';
+  import type { ServiceNarrative as ServiceNarrativeType } from '$lib/graphql/schema';
+
+  import ServiceDate from './ServiceDate.svelte';
+  import ServiceIVR from './ServiceIVR.svelte';
+  import ServiceNarrative from './ServiceNarrative.svelte';
   type Service = NonNullable<ServicesQuery['services']>[number];
 
   // Props
@@ -45,7 +51,6 @@
   let extraRoles = $state(0);
   let isExtraRoles = $state(false);
   let selectedDate = $state<CalendarDate | undefined>();
-  let open = $state(false);
   function handleAddPiece() {
     if (!nombrePieza || nombrePieza.trim() === '') {
       toast.error('Error al agregar un medio', {
@@ -53,6 +58,13 @@
       });
       return;
     }
+    if (selectedDate && selectedDate.toString() === '' || selectedDate === undefined) {
+      toast.error('Error al agregar un medio', {
+        description: 'Debe seleccionar una fecha',
+      });
+      return;
+    }
+    console.log(selectedDate);
 
     const options: any = {};
     switch (service.type) {
@@ -102,6 +114,7 @@
         options.hasLipSync = lipSync;
         options.priceOverride = priceSuggested;
         options.extraRoles = extraRoles;
+        options.date = selectedDate?.toString();
         break;
       case 'IVR':
         options.messageText = ivrMessage;
@@ -109,10 +122,11 @@
         options.isInterior = isInterior;
         options.priceOverride = priceSuggested;
         options.updates = ivrUpdates;
+        options.date = selectedDate?.toString();
         break;
       case 'EVENT':
         options.ForMassBroadcast = broadcastInMassMedia;
-        options.date = selectedDate?.toString(); // Aquí podrías agregar un selector de fecha si es necesario
+        options.date = selectedDate?.toString(); 
         break;
       case 'OTHERS_VIDEO':
         options.period = selectedPeriod;
@@ -148,364 +162,52 @@
     extraRoles = 0;
     internalUse = false;
   }
-
-  function shouldShowInteriorDiscount(): boolean {
-    return (
-      service.name.includes('RADIO') ||
-      service.name.includes('TELEVISIÓN') ||
-      service.name.includes('CINE')
-    );
-  }
-
-  function shouldShowForInteralUse(): boolean {
-    return service.type == 'CAMERA';
-  }
-
-  function shouldShowSubsiguiente(): boolean {
-    return !(
-      service.name.includes('PRESENTACIÓN DE PROGRAMAS') ||
-      service.name.includes('LOCUCIÓN A CÁMARA') ||
-      service.name.includes('ZÓCALO') ||
-      service.name.includes('NOTICIA EMPRESARIAL')
-    );
-  }
 </script>
 
 {#if service.__typename === 'ServicePeriod'}
-  <Accordion.Item value={String(service.serviceId)}>
-    <Accordion.Trigger
-      class="grid grid-cols-[1fr_repeat(5,70px)] gap-2 min-h-16 px-2 items-center"
-    >
-      <span class="truncate hover:underline cursor-pointer">{service.name}</span
-      >
-      {#each service.periods as servicePrice}
-        <Button
-          variant="outline"
-          bgColor="bg-[#1F5BB8] text-white hover:bg-[#1a4a94] hover:text-white"
-          onclick={() => (selectedPeriod = servicePrice.interval)}
-          class="flex-1"
-        >
-          ${servicePrice.basePrice}
-        </Button>
-      {/each}
-    </Accordion.Trigger>
-    <Accordion.Content class="flex flex-col gap-4 text-balance">
-      {#if shouldShowSubsiguiente()}
-        <div
-          class="grid grid-cols-[1fr_repeat(5,70px)] gap-2 px-2 pb-3 mb-2 border-b border-border items-center"
-        >
-          <span
-            class="truncate text-sm font-medium text-muted-foreground uppercase tracking-wider"
-          >
-            Subsiguiente
-          </span>
-          {#each service.periods as servicePrice}
-            <div class="text-center text-sm font-medium text-muted-foreground">
-              ${servicePrice.extraPrice}
-            </div>
-          {/each}
-        </div>
-      {/if}
-      <div class="flex gap-3 px-2">
-        {#if shouldShowInteriorDiscount()}
-          <div class="flex items-center gap-2">
-            <Checkbox
-              id="discInterior_{service.serviceId}"
-              bind:checked={isInterior}
-            />
-            <Label for="discInterior_{service.serviceId}"
-              >Descuento interior (-70%)</Label
-            >
-          </div>
-        {/if}
-        {#if shouldShowForInteralUse()}
-          <div class="flex items-center gap-2">
-            <Checkbox
-              id="forInternalUse_{service.serviceId}"
-              bind:checked={internalUse}
-            />
-            <Label for="forInternalUse_{service.serviceId}"
-              >Para uso interno</Label
-            >
-          </div>
-        {/if}
-        <div class="flex items-center gap-2">
-          <Label for="nombrePieza_{service.serviceId}">Nombre</Label>
-          <Input
-            id="nombrePieza_{service.serviceId}"
-            bind:value={nombrePieza}
-            type="text"
-            placeholder="Nombre de la pieza"
-          />
-        </div>
-        <Button
-          type="button"
-          class="col-span-2"
-          variant="outline"
-          bgColor="bg-[#22964F] text-white hover:bg-[#1a6d3b] hover:text-white"
-          onclick={() => handleAddPiece()}
-        >
-          Agregar
-        </Button>
-      </div>
-    </Accordion.Content>
-  </Accordion.Item>
+ <ServicePeriod
+    bind:service={service as ServicePeriodType}
+    bind:selectedPeriod={selectedPeriod}
+    bind:isInterior={isInterior}
+    bind:internalUse={internalUse}
+    bind:nombrePieza={nombrePieza}
+    handleAddPiece={handleAddPiece}
+  />
 {:else if service.__typename === 'ServiceDate'}
-  <Accordion.Item value={String(service.serviceId)}>
-    <Accordion.Trigger class="gap-2 min-h-16 px-2 items-center">
-      {service.name}
-    </Accordion.Trigger>
-    <Accordion.Content class="flex flex-col gap-4 text-balance">
-      <div class="flex gap-3 px-2">
-        <Label for="serviceSpecialBasePrice_{service.serviceId}">
-          Precio base ${service.basePrice}
-        </Label>
-        {#if service.name.includes('MAESTRO DE CEREMONIAS')}
-          <div class="flex items-center gap-2">
-            <Checkbox
-              id="broadcastInMassMedia_{service.serviceId}"
-              bind:checked={broadcastInMassMedia}
-            />
-            <Label for="broadcastInMassMedia_{service.serviceId}">
-              Difusión en medios masivos (+30%)
-            </Label>
-          </div>
-        {/if}
-        {#if service.name.includes('MAESTRO DE CEREMONIAS') || service.name.includes('CONDUCCIÓN DE SHOWS')}
-          <Label for="selectedDate" class="px-1">Fecha</Label>
-          <Popover.Root bind:open>
-            <Popover.Trigger id="selectedDate">
-              {#snippet child({ props })}
-                <Button
-                  {...props}
-                  variant="outline"
-                  class="w-32 justify-between font-normal"
-                >
-                  {selectedDate
-                    ? selectedDate
-                        .toDate(getLocalTimeZone())
-                        .toLocaleDateString()
-                    : 'Seleccionar fecha'}
-                  <ChevronDownIcon class="pe-2" />
-                </Button>
-              {/snippet}
-            </Popover.Trigger>
-            <Popover.Content class="w-auto overflow-hidden p-0" align="start">
-              <Calendar
-                type="single"
-                bind:value={selectedDate}
-                minValue={today(getLocalTimeZone())}
-                onValueChange={() => {
-                  open = false;
-                }}
-                captionLayout="dropdown"
-              />
-            </Popover.Content>
-          </Popover.Root>
-        {/if}
-        <div class="flex items-center gap-2">
-          <Label for="nombrePieza_{service.serviceId}">Nombre</Label>
-          <Input
-            id="nombrePieza_{service.serviceId}"
-            bind:value={nombrePieza}
-            type="text"
-            placeholder="Nombre de la pieza"
-          />
-        </div>
-        <Button
-          type="button"
-          class="col-span-2"
-          variant="outline"
-          bgColor="bg-[#22964F] text-white hover:bg-[#1a6d3b] hover:text-white"
-          onclick={() => handleAddPiece()}
-        >
-          Agregar
-        </Button>
-      </div>
-    </Accordion.Content>
-  </Accordion.Item>
+  <ServiceDate
+    bind:service={service as ServiceDateType}
+    bind:broadcastInMassMedia={broadcastInMassMedia}
+    bind:nombrePieza={nombrePieza}
+    bind:selectedDate={selectedDate}
+    handleAddPiece={handleAddPiece}
+  />
 {:else if service.__typename === 'ServiceIvr'}
-  <Accordion.Item value={String(service.serviceId)}>
-    <Accordion.Trigger class="gap-2 min-h-16 px-2 items-center">
-      {service.name}
-    </Accordion.Trigger>
-    <Accordion.Content class="flex flex-col gap-4 text-balance">
-      <div class="flex gap-3 px-2">
-        <Label for="serviceIVRInitialMessagePrice_{service.serviceId}">
-          Precio mensaje inicial ${service.basePrice}
-        </Label>
-        <div class="flex items-center gap-2">
-          <Checkbox
-            id="ispriceSuggestion_{service.serviceId}"
-            bind:checked={isPriceSuggested}
-          />
-          <Label for="ispriceSuggestion_{service.serviceId}"
-            >Sugerir precio</Label
-          >
-          {#if isPriceSuggested}
-            <Input
-              class="w-25"
-              id="suggestedPrice_{service.serviceId}"
-              bind:value={priceSuggested}
-              type="number"
-            />
-          {/if}
-          <Checkbox
-            id="canIvrUpdate{service.serviceId}"
-            bind:checked={canIvrUpdate}
-          />
-          <Label for="canIvrUpdate{service.serviceId}">Actualizar IVR</Label>
-          {#if canIvrUpdate}
-            <Input
-              class="w-20"
-              id="Updates{service.serviceId}"
-              bind:value={ivrUpdates}
-              type="number"
-            />
-          {/if}
-          <Checkbox
-            id="canIvrGetMoreMessages{service.serviceId}"
-            bind:checked={canIvrGetMoreMessages}
-          />
-          <Label for="canIvrGetMoreMessages{service.serviceId}"
-            >Mensajes adicionales</Label
-          >
-          {#if canIvrGetMoreMessages}
-            <Input
-              class="w-20"
-              id="additionalIvrMessages{service.serviceId}"
-              bind:value={additionalIvrMessage}
-              type="number"
-            />
-          {/if}
-        </div>
-        <div class="flex items-center gap-2">
-          <Label for="nombrePieza_{service.serviceId}">Nombre</Label>
-          <Input
-            id="nombrePieza_{service.serviceId}"
-            bind:value={nombrePieza}
-            type="text"
-            placeholder="Nombre de la pieza"
-          />
-        </div>
-        <Button
-          type="button"
-          class="col-span-2"
-          variant="outline"
-          bgColor="bg-[#22964F] text-white hover:bg-[#1a6d3b] hover:text-white"
-          onclick={() => handleAddPiece()}
-        >
-          Agregar
-        </Button>
-      </div>
-      <div class="items-center gap-2 px-2">
-        <Label for="ivrMessage_{service.serviceId}" class="py-2">Mensaje</Label>
-        <Textarea
-          id="ivrMessage_{service.serviceId}"
-          bind:value={ivrMessage}
-          placeholder="Ingrese su mensaje"
-        />
-      </div>
-    </Accordion.Content>
-  </Accordion.Item>
+  <ServiceIVR
+    bind:service={service as ServiceIVRType}
+    bind:nombrePieza={nombrePieza}
+    bind:isPriceSuggested={isPriceSuggested}
+    bind:priceSuggested={priceSuggested}
+    bind:canIvrUpdate={canIvrUpdate}
+    bind:ivrUpdates={ivrUpdates}
+    bind:canIvrGetMoreMessages={canIvrGetMoreMessages}
+    bind:additionalIvrMessage={additionalIvrMessage}
+    bind:ivrMessage={ivrMessage}
+    bind:selectedDate={selectedDate}
+    handleAddPiece={handleAddPiece}
+  />
 {:else if service.__typename === 'ServiceNarrative'}
-  <Accordion.Item value={String(service.serviceId)}>
-    <Accordion.Trigger class="gap-2 min-h-16 px-2 items-center">
-      {service.name}
-    </Accordion.Trigger>
-    <Accordion.Content class="flex flex-col gap-4 text-balance">
-      <div class="flex gap-3 px-2">
-        <Label for="serviceNarrativeInitialPrice_{service.serviceId}">
-          Hasta 3 minutos ${service.basePrice}
-        </Label>
-        <div class="flex items-center gap-2">
-          <Label for="nombrePieza_{service.serviceId}">Nombre</Label>
-          <Input
-            id="nombrePieza_{service.serviceId}"
-            bind:value={nombrePieza}
-            type="text"
-            placeholder="Nombre de la pieza"
-          />
-        </div>
-        <div class="flex items-center gap-2">
-          <Checkbox
-            id="nonCommercialContent_{service.serviceId}"
-            bind:checked={nonCommercialContent}
-          />
-          <Label for="nonCommercialContent_{service.serviceId}">
-            Contenido no comercial (-20%)
-          </Label>
-        </div>
-        <div class="flex items-center gap-2">
-          <Checkbox id="lypSinc_{service.serviceId}" bind:checked={lipSync} />
-          <Label for="lypSinc_{service.serviceId}">Sincro labial (+20%)</Label>
-        </div>
-        <div class="flex items-center gap-2">
-          <Checkbox
-            id="internetBroadcast_{service.serviceId}"
-            bind:checked={internetBroadcast}
-          />
-          <Label for="internetBroadcast_{service.serviceId}">
-            Difusión en internet (+100%)
-          </Label>
-        </div>
-      </div>
-      <div class="flex gap-3 px-2">
-        <div class="flex items-center gap-2">
-          <Select.Root type="single" bind:value={narrativeMinutes}>
-            <Label>Minutos</Label>
-            <Input
-              id="narrativeMinutes_{service.serviceId}"
-              bind:value={narrativeMinutes}
-              type="number"
-              placeholder="Minutos"
-            />
-          </Select.Root>
-        </div>
-        <div class="flex items-center gap-2">
-          <Checkbox
-            id="ispriceSuggestion_{service.serviceId}"
-            bind:checked={isPriceSuggested}
-          />
-          <Label for="ispriceSuggestion_{service.serviceId}"
-            >Sugerir precio</Label
-          >
-          {#if isPriceSuggested}
-            <Input
-              class="w-40"
-              id="suggestedPrice_{service.serviceId}"
-              bind:value={priceSuggested}
-              type="number"
-              placeholder="Precio sugerido"
-            />
-          {/if}
-          <Checkbox
-            id="isExtraRoles_{service.serviceId}"
-            bind:checked={isExtraRoles}
-          />
-          <Label for="isExtraRoles_{service.serviceId}">Roles extra</Label>
-          {#if isExtraRoles}
-            <Input
-              class="w-20"
-              id="extraRoles_{service.serviceId}"
-              bind:value={extraRoles}
-              type="number"
-              placeholder="Roles extra"
-            />
-          {/if}
-        </div>
-        <Button
-          type="button"
-          class="col-span-2"
-          variant="outline"
-          bgColor="bg-[#22964F] text-white hover:bg-[#1a6d3b] hover:text-white"
-          onclick={() => {
-            handleAddPiece();
-          }}
-        >
-          Agregar
-        </Button>
-      </div>
-    </Accordion.Content>
-  </Accordion.Item>
+  <ServiceNarrative
+    bind:service={service as ServiceNarrativeType}
+    bind:nombrePieza={nombrePieza}
+    bind:isPriceSuggested={isPriceSuggested}
+    bind:priceSuggested={priceSuggested}
+    bind:isExtraRoles={isExtraRoles}
+    bind:extraRoles={extraRoles}
+    bind:nonCommercialContent={nonCommercialContent}
+    bind:lipSync={lipSync}
+    bind:internetBroadcast={internetBroadcast}
+    bind:narrativeMinutes={narrativeMinutes}
+    bind:selectedDate={selectedDate}
+    handleAddPiece={handleAddPiece}
+  />
 {/if}

@@ -17,31 +17,29 @@
 
 <Label for="selectedDate" class="px-1">Fecha</Label>
 <Popover.Root bind:open>
-<Popover.Trigger id="selectedDate">
+  <Popover.Trigger id="selectedDate">
     {#snippet child({ props })}
-    <Button
+      <Button
         {...props}
         variant="outline"
         class="w-32 justify-between font-normal"
-    >
+      >
         {selectedDate
-        ? selectedDate
-            .toDate(getLocalTimeZone())
-            .toLocaleDateString()
-        : 'Seleccionar fecha'}
+          ? selectedDate.toDate(getLocalTimeZone()).toLocaleDateString()
+          : 'Seleccionar fecha'}
         <ChevronDownIcon class="pe-2" />
-    </Button>
+      </Button>
     {/snippet}
-</Popover.Trigger>
-<Popover.Content class="w-auto overflow-hidden p-0" align="start">
+  </Popover.Trigger>
+  <Popover.Content class="w-auto overflow-hidden p-0" align="start">
     <Calendar
-    type="single"
-    bind:value={selectedDate}
-    minValue={today(getLocalTimeZone())}
-    onValueChange={() => {
+      type="single"
+      bind:value={selectedDate}
+      minValue={today(getLocalTimeZone())}
+      onValueChange={() => {
         open = false;
-    }}
-    captionLayout="dropdown"
+      }}
+      captionLayout="dropdown"
     />
-</Popover.Content>
+  </Popover.Content>
 </Popover.Root>

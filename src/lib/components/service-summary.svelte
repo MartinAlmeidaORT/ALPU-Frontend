@@ -3,7 +3,7 @@
   import * as Alert from '$lib/components/ui/alert/index.js';
   import type { CalculateContractQuery } from '$lib/graphql/types/graphql';
   import {
-  ServiceType,
+    ServiceType,
     UserState,
     type CampaignInput,
     type CampaignServiceInput,

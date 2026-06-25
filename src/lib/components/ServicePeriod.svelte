@@ -43,83 +43,82 @@
   function shouldShowForInteralUse(): boolean {
     return service.type == 'CAMERA';
   }
-
 </script>
+
 <Accordion.Item value={String(service.serviceId)}>
-<Accordion.Trigger
+  <Accordion.Trigger
     class="grid grid-cols-[1fr_repeat(5,70px)] gap-2 min-h-16 px-2 items-center"
->
-    <span class="truncate hover:underline cursor-pointer">{service.name}</span
-    >
+  >
+    <span class="truncate hover:underline cursor-pointer">{service.name}</span>
     {#each service.periods as servicePrice}
-    <Button
+      <Button
         variant="outline"
         bgColor="bg-[#1F5BB8] text-white hover:bg-[#1a4a94] hover:text-white"
         onclick={() => (selectedPeriod = servicePrice.interval)}
         class="flex-1"
-    >
+      >
         ${servicePrice.basePrice}
-    </Button>
+      </Button>
     {/each}
-</Accordion.Trigger>
-<Accordion.Content class="flex flex-col gap-4 text-balance">
+  </Accordion.Trigger>
+  <Accordion.Content class="flex flex-col gap-4 text-balance">
     {#if shouldShowSubsiguiente()}
-    <div
+      <div
         class="grid grid-cols-[1fr_repeat(5,70px)] gap-2 px-2 pb-3 mb-2 border-b border-border items-center"
-    >
+      >
         <span
-        class="truncate text-sm font-medium text-muted-foreground uppercase tracking-wider"
+          class="truncate text-sm font-medium text-muted-foreground uppercase tracking-wider"
         >
-        Subsiguiente
+          Subsiguiente
         </span>
         {#each service.periods as servicePrice}
-        <div class="text-center text-sm font-medium text-muted-foreground">
+          <div class="text-center text-sm font-medium text-muted-foreground">
             ${servicePrice.extraPrice}
-        </div>
+          </div>
         {/each}
-    </div>
+      </div>
     {/if}
     <div class="flex gap-3 px-2">
-    {#if shouldShowInteriorDiscount()}
+      {#if shouldShowInteriorDiscount()}
         <div class="flex items-center gap-2">
-        <Checkbox
+          <Checkbox
             id="discInterior_{service.serviceId}"
             bind:checked={isInterior}
-        />
-        <Label for="discInterior_{service.serviceId}"
+          />
+          <Label for="discInterior_{service.serviceId}"
             >Descuento interior (-70%)</Label
-        >
+          >
         </div>
-    {/if}
-    {#if shouldShowForInteralUse()}
+      {/if}
+      {#if shouldShowForInteralUse()}
         <div class="flex items-center gap-2">
-        <Checkbox
+          <Checkbox
             id="forInternalUse_{service.serviceId}"
             bind:checked={internalUse}
-        />
-        <Label for="forInternalUse_{service.serviceId}"
+          />
+          <Label for="forInternalUse_{service.serviceId}"
             >Para uso interno</Label
-        >
+          >
         </div>
-    {/if}
-    <div class="flex items-center gap-2">
+      {/if}
+      <div class="flex items-center gap-2">
         <Label for="nombrePieza_{service.serviceId}">Nombre</Label>
         <Input
-        id="nombrePieza_{service.serviceId}"
-        bind:value={nombrePieza}
-        type="text"
-        placeholder="Nombre de la pieza"
+          id="nombrePieza_{service.serviceId}"
+          bind:value={nombrePieza}
+          type="text"
+          placeholder="Nombre de la pieza"
         />
-    </div>
-    <Button
+      </div>
+      <Button
         type="button"
         class="col-span-2"
         variant="outline"
         bgColor="bg-[#22964F] text-white hover:bg-[#1a6d3b] hover:text-white"
         onclick={() => handleAddPiece()}
-    >
+      >
         Agregar
-    </Button>
+      </Button>
     </div>
-</Accordion.Content>
+  </Accordion.Content>
 </Accordion.Item>

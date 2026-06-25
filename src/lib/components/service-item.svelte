@@ -58,7 +58,10 @@
       });
       return;
     }
-    if (selectedDate && selectedDate.toString() === '' || selectedDate === undefined) {
+    if (
+      (selectedDate && selectedDate.toString() === '') ||
+      selectedDate === undefined
+    ) {
       toast.error('Error al agregar un medio', {
         description: 'Debe seleccionar una fecha',
       });
@@ -126,7 +129,7 @@
         break;
       case 'EVENT':
         options.ForMassBroadcast = broadcastInMassMedia;
-        options.date = selectedDate?.toString(); 
+        options.date = selectedDate?.toString();
         break;
       case 'OTHERS_VIDEO':
         options.period = selectedPeriod;
@@ -165,49 +168,49 @@
 </script>
 
 {#if service.__typename === 'ServicePeriod'}
- <ServicePeriod
+  <ServicePeriod
     bind:service={service as ServicePeriodType}
-    bind:selectedPeriod={selectedPeriod}
-    bind:isInterior={isInterior}
-    bind:internalUse={internalUse}
-    bind:nombrePieza={nombrePieza}
-    handleAddPiece={handleAddPiece}
+    bind:selectedPeriod
+    bind:isInterior
+    bind:internalUse
+    bind:nombrePieza
+    {handleAddPiece}
   />
 {:else if service.__typename === 'ServiceDate'}
   <ServiceDate
     bind:service={service as ServiceDateType}
-    bind:broadcastInMassMedia={broadcastInMassMedia}
-    bind:nombrePieza={nombrePieza}
-    bind:selectedDate={selectedDate}
-    handleAddPiece={handleAddPiece}
+    bind:broadcastInMassMedia
+    bind:nombrePieza
+    bind:selectedDate
+    {handleAddPiece}
   />
 {:else if service.__typename === 'ServiceIvr'}
   <ServiceIVR
     bind:service={service as ServiceIVRType}
-    bind:nombrePieza={nombrePieza}
-    bind:isPriceSuggested={isPriceSuggested}
-    bind:priceSuggested={priceSuggested}
-    bind:canIvrUpdate={canIvrUpdate}
-    bind:ivrUpdates={ivrUpdates}
-    bind:canIvrGetMoreMessages={canIvrGetMoreMessages}
-    bind:additionalIvrMessage={additionalIvrMessage}
-    bind:ivrMessage={ivrMessage}
-    bind:selectedDate={selectedDate}
-    handleAddPiece={handleAddPiece}
+    bind:nombrePieza
+    bind:isPriceSuggested
+    bind:priceSuggested
+    bind:canIvrUpdate
+    bind:ivrUpdates
+    bind:canIvrGetMoreMessages
+    bind:additionalIvrMessage
+    bind:ivrMessage
+    bind:selectedDate
+    {handleAddPiece}
   />
 {:else if service.__typename === 'ServiceNarrative'}
   <ServiceNarrative
     bind:service={service as ServiceNarrativeType}
-    bind:nombrePieza={nombrePieza}
-    bind:isPriceSuggested={isPriceSuggested}
-    bind:priceSuggested={priceSuggested}
-    bind:isExtraRoles={isExtraRoles}
-    bind:extraRoles={extraRoles}
-    bind:nonCommercialContent={nonCommercialContent}
-    bind:lipSync={lipSync}
-    bind:internetBroadcast={internetBroadcast}
-    bind:narrativeMinutes={narrativeMinutes}
-    bind:selectedDate={selectedDate}
-    handleAddPiece={handleAddPiece}
+    bind:nombrePieza
+    bind:isPriceSuggested
+    bind:priceSuggested
+    bind:isExtraRoles
+    bind:extraRoles
+    bind:nonCommercialContent
+    bind:lipSync
+    bind:internetBroadcast
+    bind:narrativeMinutes
+    bind:selectedDate
+    {handleAddPiece}
   />
 {/if}

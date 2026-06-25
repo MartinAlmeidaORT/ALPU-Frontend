@@ -59,7 +59,10 @@
               const result = await fetchBroadcaster({
                 email: email,
               });
-              if (result.data?.broadcasters && result.data?.broadcasters.length > 0) {
+              if (
+                result.data?.broadcasters &&
+                result.data?.broadcasters.length > 0
+              ) {
                 user = result.data.broadcasters;
               } else {
                 toast.error('No se encontró ningún broadcaster con ese email');

@@ -3,6 +3,7 @@
   import * as Alert from '$lib/components/ui/alert/index.js';
   import type { CalculateContractQuery } from '$lib/graphql/types/graphql';
   import {
+    ServiceType,
     UserState,
     type CampaignInput,
     type CampaignServiceInput,
@@ -110,9 +111,15 @@
                     <span class="text-sm text-[#1e293b]"
                       >Nombre de pieza: {piece.name}</span
                     >
-                    <span class="text-sm text-[#1e293b]"
-                      >Precio sin descuento: ${piece.price}</span
-                    >
+                    {#if service.serviceType === ServiceType.Ivr || service.serviceType === ServiceType.Narrative}
+                      <span class="text-sm text-[#1e293b]"
+                        >Precio sin descuento: ${service.beforeDiscount}</span
+                      >
+                    {:else}
+                      <span class="text-sm text-[#1e293b]"
+                        >Precio sin descuento: ${piece.price}</span
+                      >
+                    {/if}
                   </div>
                   {#if service.pieces.length > 1}
                     <Button

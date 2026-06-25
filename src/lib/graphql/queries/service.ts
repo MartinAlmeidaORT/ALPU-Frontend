@@ -32,7 +32,7 @@ const SERVICE_QUERY = graphql(`
   }
 `);
 
-const CALCULATE_CONTRACT_MUTATION = graphql(`
+const CALCULATE_CONTRACT_QUERY = graphql(`
   query CalculateContract($input: CampaignInput!) {
     calculateContract(input: $input) {
       total
@@ -61,6 +61,7 @@ const CALCULATE_CONTRACT_MUTATION = graphql(`
         }
         subTotal
         beforeDiscount
+        serviceType
       }
     }
   }
@@ -74,6 +75,6 @@ export async function calculateServicePrice(
   input: CampaignInput,
 ): Promise<OperationResult<CalculateContractQuery>> {
   return await createUrqlClient()
-    .query(CALCULATE_CONTRACT_MUTATION, { input })
+    .query(CALCULATE_CONTRACT_QUERY, { input })
     .toPromise();
 }

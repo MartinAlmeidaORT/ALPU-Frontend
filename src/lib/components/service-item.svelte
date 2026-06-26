@@ -59,15 +59,14 @@
       return;
     }
     if (
-      (selectedDate && selectedDate.toString() === '') ||
-      selectedDate === undefined
+      (service.type === 'NARRATIVE' || service.type === 'IVR' || service.type === 'EVENT') &&
+      (!selectedDate || selectedDate.toString() === '')
     ) {
       toast.error('Error al agregar un medio', {
         description: 'Debe seleccionar una fecha',
       });
       return;
     }
-    console.log(selectedDate);
 
     const options: any = {};
     switch (service.type) {

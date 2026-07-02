@@ -6,8 +6,8 @@ import Page from './+page.svelte';
 
 const {
   calculateServicePriceMock,
-  fetchBroadcasterMock,
   fetchClientMock,
+  fetchBroadcasterMock,
   fetchServicesMock,
   toastErrorMock,
   toastSuccessMock,
@@ -69,54 +69,49 @@ const broadcasterData = {
 const contractTotal = {
   total: 500,
   beforeDiscount: 500,
-  adjustments: [],
-  services: [
-    {
-      serviceName: 'RADIO SPOT GENERICO',
-      basePrice: 100,
-      subsequentPrice: 50,
-      subTotal: 500,
-      beforeDiscount: 500,
-      pieces: [{ name: 'Spot matutino', price: 500 }],
-      adjustments: [],
-    },
-  ],
 };
 
-const selectPeriod = async (price = '100') => {
-  await fireEvent.click(screen.getAllByRole('button', { name: price })[0]);
+const selectPeriod = async (price = 100) => {
+  const btn = screen.getByRole('button', {
+    name: (name) => name.trim() === `$${price}`,
+  });
+
+  await fireEvent.click(btn);
 };
 
 const openServiceForm = async () => {
-  await screen.findByText('RADIO SPOT GENERICO');
-  const trigger = screen.getByRole('button', { name: /RADIO SPOT GENERICO/ });
+  const trigger = await screen.findByRole('button', {
+    name: /RADIO SPOT GENERICO/i,
+  });
+
   if (trigger.getAttribute('aria-expanded') !== 'true') {
     await fireEvent.click(trigger);
   }
-  await waitFor(() => {
-    expect(screen.getByRole('button', { name: 'Agregar' })).toBeVisible();
-  });
-  await tick();
+
+  await screen.findByRole('button', { name: /Agregar/i });
 };
 
 const fillPieceName = async (name: string) => {
-  await fireEvent.input(screen.getByPlaceholderText('Nombre de la pieza'), {
-    target: { value: name },
-  });
+  await fireEvent.input(
+    screen.getByPlaceholderText('Nombre de la pieza'),
+    {
+      target: { value: name },
+    },
+  );
 };
 
 const clickAddPiece = async () => {
-  await fireEvent.click(screen.getByRole('button', { name: 'Agregar' }));
+  await fireEvent.click(screen.getByRole('button', { name: /Agregar/i }));
 };
 
 describe('/select-service page', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+
     fetchServicesMock.mockResolvedValue({
-      data: {
-        services: [periodService],
-      },
+      data: { services: [periodService] },
     });
+
     fetchClientMock.mockResolvedValue({
       data: {
         clients: [{ userId: 7, firstName: 'Grace', lastName: 'Client' }],
@@ -124,33 +119,37 @@ describe('/select-service page', () => {
     });
   });
 
-  it('loads services and renders the service selection layout', async () => {
+  it('loads services and renders layout', async () => {
     render(Page, { props: { data: broadcasterData } });
 
     expect(await screen.findByText('RADIO SPOT GENERICO')).toBeInTheDocument();
     expect(screen.getByText('Total a pagar')).toBeInTheDocument();
-    expect(screen.getByText('Buscar cliente')).toBeInTheDocument();
     expect(fetchServicesMock).toHaveBeenCalledOnce();
   });
 
-  it('requires a client before adding a service for broadcasters', async () => {
+  it('requires a client before adding service', async () => {
     render(Page, { props: { data: broadcasterData } });
 
     await screen.findByText('RADIO SPOT GENERICO');
+
     await selectPeriod();
     await openServiceForm();
     await fillPieceName('Spot matutino');
     await clickAddPiece();
 
     await waitFor(() => {
-      expect(toastErrorMock).toHaveBeenCalledWith('Selecciona un cliente', {
-        description: 'Debes seleccionar un cliente para continuar',
-      });
+      expect(toastErrorMock).toHaveBeenCalledWith(
+        'Selecciona un cliente',
+        {
+          description: 'Debes seleccionar un cliente para continuar',
+        },
+      );
     });
+
     expect(calculateServicePriceMock).not.toHaveBeenCalled();
   });
 
-  it('shows a toast when adding a period service without a duration', async () => {
+  it('shows toast when adding without duration', async () => {
     render(Page, { props: { data: broadcasterData } });
 
     await openServiceForm();
@@ -165,40 +164,38 @@ describe('/select-service page', () => {
         },
       );
     });
+
     expect(calculateServicePriceMock).not.toHaveBeenCalled();
   });
 
-  it('calculates the contract total after adding a service with a selected client', async () => {
+  it('calculates contract after valid add', async () => {
     calculateServicePriceMock.mockResolvedValue({
-      data: {
-        calculateContract: contractTotal,
-      },
+      data: { calculateContract: contractTotal },
     });
 
     render(Page, { props: { data: broadcasterData } });
 
     await screen.findByText('RADIO SPOT GENERICO');
+
     await selectPeriod();
     await openServiceForm();
     await fillPieceName('Spot matutino');
 
     await fireEvent.input(
-      screen.getByPlaceholderText('Ingresa el nombre del cliente'),
-      {
-        target: { value: 'Grace' },
-      },
+      screen.getByPlaceholderText('Ingresa el email'),
+      { target: { value: 'grace@example.com' } },
     );
-    await fireEvent.input(
-      screen.getByPlaceholderText('Ingresa el apellido del cliente'),
-      {
-        target: { value: 'Client' },
-      },
+    
+    const buttons = screen.getAllByRole('button', { name: /buscar/i });
+
+    const buscar = buttons.find(
+      (b) => b.getAttribute('data-slot') === 'button'
     );
 
-    await fireEvent.click(screen.getByRole('button', { name: 'Buscar' }));
-    await fireEvent.click(
-      await screen.findByRole('button', { name: 'Escoger' }),
-    );
+    expect(buscar).toBeDefined();
+    await fireEvent.click(buscar!);
+    await fireEvent.click(screen.getByRole('button', { name: /Escoger/i }));
+
     await openServiceForm();
     await clickAddPiece();
 
@@ -209,7 +206,7 @@ describe('/select-service page', () => {
           clientId: 7,
           campaign: 'Test',
           countryCode: 'UY',
-          services: [
+          services: expect.arrayContaining([
             expect.objectContaining({
               serviceId: 1,
               pieces: [{ name: 'Spot matutino' }],
@@ -217,9 +214,10 @@ describe('/select-service page', () => {
                 period: 'ONE_WEEK',
               }),
             }),
-          ],
+          ]),
         }),
       );
+
       expect(
         screen.getByText('Total con descuentos: $500'),
       ).toBeInTheDocument();

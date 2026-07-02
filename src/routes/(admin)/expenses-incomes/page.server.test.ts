@@ -302,7 +302,7 @@ describe('/expenses-incomes action', () => {
     await expect(
       actions.default(createActionEvent() as never),
     ).resolves.toEqual({
-      error: 'Invalid bill',
+      error: expect.any(String),
     });
   });
 

@@ -39,7 +39,7 @@ describe('SearchClientBroadcaster', () => {
       },
     });
 
-    expect(screen.getByText('Buscar cliente')).toBeInTheDocument();
+    expect(screen.getByText('Buscar Cliente')).toBeInTheDocument();
   });
 
   it('renders the broadcaster search form for clients', () => {
@@ -50,17 +50,25 @@ describe('SearchClientBroadcaster', () => {
       },
     });
 
-    expect(screen.getByText('Buscar broadcaster')).toBeInTheDocument();
+    expect(screen.getByText('Buscar Locutor')).toBeInTheDocument();
   });
 
   it('finds a client and stores the selected user id', async () => {
     fetchClientMock.mockResolvedValue({
       data: {
-        clients: [{ userId: 7, firstName: 'Grace', lastName: 'Client' }],
+        clients: [
+          {
+            userId: 7,
+            email: 'grace@test.com',
+            firstName: 'Grace',
+            lastName: 'Client',
+          },
+        ],
       },
     });
 
     let valorId: number | null = null;
+
     render(SearchClientBroadcaster, {
       props: {
         rol: 'Broadcaster',
@@ -68,37 +76,52 @@ describe('SearchClientBroadcaster', () => {
           return valorId;
         },
         set valorId(value) {
-          valorId = value as number | null;
+          valorId = value as number;
         },
       },
     });
 
-    await fireEvent.input(
-      screen.getByPlaceholderText('Ingresa el nombre del cliente'),
-      {
-        target: { value: 'Grace' },
-      },
-    );
-    await fireEvent.input(
-      screen.getByPlaceholderText('Ingresa el apellido del cliente'),
-      {
-        target: { value: 'Client' },
-      },
-    );
-    await fireEvent.click(screen.getByRole('button', { name: 'Buscar' }));
+    const input = screen.getByPlaceholderText(
+      'Ingresa el email',
+    ) as HTMLInputElement;
 
-    await waitFor(() => {
-      expect(fetchClientMock).toHaveBeenCalledWith({
-        firstName: 'Grace',
-        lastName: 'Client',
-      });
-      expect(screen.getByText(/Cliente encontrado:/)).toBeInTheDocument();
+    await fireEvent.input(input, {
+      target: {
+        value: 'grace@test.com',
+      },
     });
 
-    await fireEvent.click(screen.getByRole('button', { name: 'Escoger' }));
+    expect(input.value).toBe('grace@test.com');
+
+    const buscar = screen
+      .getAllByRole('button', { name: 'Buscar' })
+      .find((button) => button.getAttribute('data-slot') === 'button');
+
+    expect(buscar).toBeDefined();
+
+    await fireEvent.click(buscar!);
+
+    await waitFor(() =>
+      expect(fetchClientMock).toHaveBeenCalledWith({
+        email: 'grace@test.com',
+      }),
+    );
+
+    expect(
+      await screen.findByText('Cliente encontrado'),
+    ).toBeInTheDocument();
+
+    await fireEvent.click(
+      await screen.findByRole('button', {
+        name: 'Escoger',
+      }),
+    );
 
     expect(valorId).toBe(7);
-    expect(toastSuccessMock).toHaveBeenCalledWith('Escogido: Grace Client');
+
+    expect(toastSuccessMock).toHaveBeenCalledWith(
+      'Usuario seleccionado: Grace Client',
+    );
   });
 
   it('shows a toast when no client matches the search', async () => {
@@ -116,22 +139,29 @@ describe('SearchClientBroadcaster', () => {
     });
 
     await fireEvent.input(
-      screen.getByPlaceholderText('Ingresa el nombre del cliente'),
+      screen.getByPlaceholderText('Ingresa el email'),
       {
-        target: { value: 'Missing' },
+        target: {
+          value: 'missing@test.com',
+        },
       },
     );
-    await fireEvent.input(
-      screen.getByPlaceholderText('Ingresa el apellido del cliente'),
-      {
-        target: { value: 'User' },
-      },
-    );
-    await fireEvent.click(screen.getByRole('button', { name: 'Buscar' }));
+
+    const buscar = screen
+      .getAllByRole('button', { name: 'Buscar' })
+      .find((button) => button.getAttribute('data-slot') === 'button');
+
+    expect(buscar).toBeDefined();
+
+    await fireEvent.click(buscar!);
 
     await waitFor(() => {
+      expect(fetchClientMock).toHaveBeenCalledWith({
+        email: 'missing@test.com',
+      });
+
       expect(toastErrorMock).toHaveBeenCalledWith(
-        'No se encontró ningún cliente con ese nombre y apellido',
+        'No se encontró ningún cliente con ese email',
       );
     });
   });
@@ -151,26 +181,29 @@ describe('SearchClientBroadcaster', () => {
     });
 
     await fireEvent.input(
-      screen.getByPlaceholderText('Ingresa el nombre del cliente'),
+      screen.getByPlaceholderText('Ingresa el email'),
       {
-        target: { value: 'Missing' },
+        target: {
+          value: 'missing@test.com',
+        },
       },
     );
-    await fireEvent.input(
-      screen.getByPlaceholderText('Ingresa el apellido del cliente'),
-      {
-        target: { value: 'User' },
-      },
-    );
-    await fireEvent.click(screen.getByRole('button', { name: 'Buscar' }));
+
+    const buscar = screen
+      .getAllByRole('button', { name: 'Buscar' })
+      .find((button) => button.getAttribute('data-slot') === 'button');
+
+    expect(buscar).toBeDefined();
+
+    await fireEvent.click(buscar!);
 
     await waitFor(() => {
       expect(fetchBroadcasterMock).toHaveBeenCalledWith({
-        firstName: 'Missing',
-        lastName: 'User',
+        email: 'missing@test.com',
       });
+
       expect(toastErrorMock).toHaveBeenCalledWith(
-        'No se encontró ningún broadcaster con ese nombre y apellido',
+        'No se encontró ningún broadcaster con ese email',
       );
     });
   });

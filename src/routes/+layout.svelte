@@ -8,8 +8,7 @@
   import type { PageData } from './$types';
   import Button from '$lib/components/ui/button/button.svelte';
   import * as AlertDialog from '$lib/components/ui/alert-dialog/index.js';
-  import { onDestroy, onMount } from 'svelte';
-  import type { Client } from '@urql/svelte';
+  import { onDestroy } from 'svelte';
   import { createUrqlClient } from '$lib/graphql/client';
   import {
     NOTIFICATIONS_QUERY,
@@ -19,7 +18,6 @@
   } from '$lib/graphql/queries/notifications';
   import { ScrollArea } from '$lib/components/ui/scroll-area/index.js';
   import { Separator } from '$lib/components/ui/separator/index.js';
-  import { invalidateAll } from '$app/navigation';
 
   let {
     data,

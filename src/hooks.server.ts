@@ -3,7 +3,6 @@ import { redirect, type Handle } from '@sveltejs/kit';
 
 export const handle: Handle = async ({ event, resolve }) => {
   const session = event.cookies.get('session_id');
-
   const isLoginPage = event.route.id?.includes('login');
   const isProtected = event.route.id?.includes('(protected)');
   const isAdminProtected = event.route.id?.includes('(admin)');
@@ -20,8 +19,7 @@ export const handle: Handle = async ({ event, resolve }) => {
   if ((isProtected || isAdminProtected || isUserProtected) && !session) {
     throw redirect(303, '/login');
   }
-
-  if (isLoginPage && session === null) {
+  if (isLoginPage && session !== undefined) {
     throw redirect(303, '/logout');
   }
 

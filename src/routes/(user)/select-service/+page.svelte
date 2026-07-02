@@ -12,8 +12,6 @@
   import type {
     CampaignInput,
     CampaignServiceInput,
-    PieceInput,
-    User,
   } from '$lib/graphql/schema';
   import type {
     ServicesQuery,
@@ -22,6 +20,7 @@
   import ServiceItem from '$lib/components/service-item.svelte';
   import ServiceSummary from '$lib/components/service-summary.svelte';
   import SearchClientBroadcaster from '$lib/components/search-client-broadcaster.svelte';
+  import SearchAgency from '$lib/components/search-agency.svelte';
   let {
     data,
   }: {
@@ -271,7 +270,16 @@
     </div>
 
     <div class="flex-1 min-w-[300px] w-full">
-      <SearchClientBroadcaster rol={data.rol} bind:valorId={userSelectedId} />
+    <div class="flex w-full gap-1">
+      <div class="flex-1">
+        <SearchClientBroadcaster rol={data.rol} bind:valorId={userSelectedId} />
+      </div>
+      {#if data.rol === 'Broadcaster'}
+        <div class="flex-1">
+          <SearchAgency bind:valorId={userSelectedId} />
+        </div>
+      {/if}
+    </div>
       <ServiceSummary
         rol={data.rol}
         activeUserId={data.user?.userId}

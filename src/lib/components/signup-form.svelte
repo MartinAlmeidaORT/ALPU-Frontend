@@ -17,7 +17,6 @@
     CountriesQuery,
     DepartmentsQuery,
   } from '$lib/graphql/types/graphql';
-  import { goto, invalidateAll } from '$app/navigation';
 
   let {
     form,
@@ -31,35 +30,39 @@
   let messages: string[] | null = $state(null);
   let countriesFetch = $state<OperationResult<CountriesQuery> | null>(null);
   let departmentsFetch = $state<OperationResult<DepartmentsQuery> | null>(null);
-  // Tip de antes: quitamos el espacio en blanco 'UY ' para evitar fallos de mapeo
-  let selectedCountryCode: string = $state('UY');
-  let selectedDepartmentId: string | undefined = $state(
-    'Selecciona departamento',
-  );
-  let selectedCountryName: string | undefined = $state('Selecciona un país');
+  let selectedCountryCode: string | undefined = $state(undefined);
+  let selectedDepartmentId: string | undefined = $state(undefined);
+  let formElement: HTMLFormElement | undefined = undefined;
 
   $effect(() => {
-    fetchDepartments(selectedCountryCode).then((result) => {
+    if (selectedCountryCode) {
+      fetchDepartments(selectedCountryCode).then((result) => {
       departmentsFetch = result;
-    });
+      });
+    }
   });
+
+  let selectedCountryName = $derived(
+    countriesFetch?.data?.countries.find(
+      (c) => c.countryCode === selectedCountryCode
+    )?.name ?? 'Seleccionar pais'
+  );
+
+  let selectedDepartmentName: string | undefined = $derived(
+    departmentsFetch?.data?.departments.find(
+      (d) => d.departmentId === Number(selectedDepartmentId),
+    )?.name ?? 'Seleccionar departamento',
+  );
 
   $effect(() => {
     if (countriesFetch?.data?.countries) {
       const country = countriesFetch.data.countries.find(
         (c) => c.countryCode === selectedCountryCode,
       );
-      selectedCountryName = country ? country.name : 'Selecciona un país';
+      selectedCountryName = country ? country.name : 'Seleccionar';
     }
   });
-  let selectedDepartmentName: string | undefined = $derived(
-    departmentsFetch?.data?.departments.find(
-      (d) => d.departmentId === Number(selectedDepartmentId),
-    )?.name ?? 'Selecciona departamento',
-  );
-
   onMount(async () => {
-    departmentsFetch = await fetchDepartments(selectedCountryCode);
     countriesFetch = await fetchCountries();
   });
 
@@ -69,18 +72,44 @@
     if (!hasUserChooseAccountType) messages = null;
   }
 
-  function handleSubmit() {
-    return async ({ result, update }: any) => {
-      messages = null;
-      if (result.type === 'failure') {
-        messages = result.data.messages;
-      } else {
-        invalidateAll();
-        hasUserChooseAccountType = false;
-      }
+function handleSubmit({ cancel }: { cancel: () => void }) {
+    if (!selectedCountryCode) {
+      messages = ['Selecciona un país de la lista.'];
+      cancel(); 
+      return;
+    }
+    if (!selectedDepartmentId) {
+      messages = ['Selecciona un departamento de la lista.'];
+      cancel();
+      return;
+    }
+
+  return async ({ result, update }: any) => {
+    console.log('handleSubmit result:', result);
+    messages = null;
+    if (result.type === 'failure') {
+      messages = result.data?.messages || ['Ocurrió un error'];
       await update();
-    };
-  }
+    } else if (result.type === 'success' || result.type === 'redirect') {
+      cleanForm();
+      await update();
+    } else {
+      await update();
+    }
+  };
+};
+function cleanForm() {
+    hasUserChooseAccountType = false;
+    accountType = null;
+    messages = null;
+    selectedCountryCode = undefined;
+    selectedDepartmentId = undefined;
+    departmentsFetch = null; 
+
+    if (formElement) {
+      formElement.reset();
+    }
+}
 </script>
 
 <Card.Root {...restProps}>
@@ -114,7 +143,7 @@
       >
     </Card.Header>
     <Card.Content>
-      <form method="POST" action="/auth/signup" use:enhance={handleSubmit}>
+      <form method="POST" action="/auth/signup" use:enhance={handleSubmit} bind:this={formElement}>
         <input type="hidden" name="accountType" value={accountType} />
         <Field.Group columns={2}>
           <Field.Field>
@@ -127,7 +156,7 @@
               required
               minlength={3}
               maxlength={50}
-              pattern="^[A-Za-zÁÉÍÓÚáéíóúÑñ]+(?:[ -][A-Za-zÁÉÍÓÚáéíóúÑñ]+)*$"
+              pattern="^[A-Za-zÁÉÍÓÚáéíóúÑñ]+(?:[ \-][A-Za-zÁÉÍÓÚáéíóúÑñ]+)*$"
               oninvalid={(e) => {
                 const input = e.target as HTMLInputElement;
                 if (input.validity.patternMismatch) {
@@ -149,7 +178,7 @@
               required
               minlength={3}
               maxlength={50}
-              pattern="^[A-Za-zÁÉÍÓÚáéíóúÑñ]+(?:[ -][A-Za-zÁÉÍÓÚáéíóúÑñ]+)*$"
+              pattern="^[A-Za-zÁÉÍÓÚáéíóúÑñ]+(?:[ \-][A-Za-zÁÉÍÓÚáéíóúÑñ]+)*$"
               oninvalid={(e) => {
                 const input = e.target as HTMLInputElement;
                 if (input.validity.patternMismatch) {
@@ -213,26 +242,23 @@
             </Field.Field>
           {/if}
           <Field.Field>
-            <Field.Label for="city">Ciudad</Field.Label>
-            <Input
-              id="city"
-              name="city"
-              type="text"
-              placeholder="Ciudad"
-              required
-              minlength={4}
-              maxlength={100}
-              pattern="^[A-Za-zÁÉÍÓÚáéíóúÑñ]+(?:[ -][A-Za-zÁÉÍÓÚáéíóúÑñ]+)*$"
-              oninvalid={(e) => {
-                const input = e.target as HTMLInputElement;
-                if (input.validity.patternMismatch) {
-                  input.setCustomValidity('Solo se permiten letras');
-                }
-              }}
-              oninput={(e) => {
-                (e.target as HTMLInputElement).setCustomValidity('');
-              }}
-            />
+            <Field.Label for="pais">Pais</Field.Label>
+            <Select.Root
+              name="countryCode"
+              type="single"
+              bind:value={selectedCountryCode}
+            >
+              <Select.Trigger id="countryCode" name="countryCode">
+                <span>{selectedCountryName}</span>
+              </Select.Trigger>
+              <Select.Content>
+                {#each countriesFetch?.data?.countries as country}
+                  <Select.Item value={country.countryCode}>
+                    {country.name}
+                  </Select.Item>
+                {/each}
+              </Select.Content>
+            </Select.Root>
           </Field.Field>
           <Field.Field>
             <Field.Label for="department">Departamento</Field.Label>
@@ -240,7 +266,6 @@
               name="departmentId"
               type="single"
               bind:value={selectedDepartmentId}
-              required
             >
               <Select.Trigger id="departmentId" name="departmentId">
                 <span>{selectedDepartmentName}</span>
@@ -255,6 +280,28 @@
             </Select.Root>
           </Field.Field>
           <Field.Field>
+            <Field.Label for="city">Ciudad</Field.Label>
+            <Input
+              id="city"
+              name="city"
+              type="text"
+              placeholder="Ciudad"
+              required
+              minlength={4}
+              maxlength={100}
+              pattern="^[A-Za-zÁÉÍÓÚáéíóúÑñ]+(?:[ \-][A-Za-zÁÉÍÓÚáéíóúÑñ]+)*$"
+              oninvalid={(e) => {
+                const input = e.target as HTMLInputElement;
+                if (input.validity.patternMismatch) {
+                  input.setCustomValidity('Solo se permiten letras');
+                }
+              }}
+              oninput={(e) => {
+                (e.target as HTMLInputElement).setCustomValidity('');
+              }}
+            />
+          </Field.Field>
+          <Field.Field>
             <Field.Label for="street">Calle</Field.Label>
             <Input
               id="street"
@@ -265,26 +312,6 @@
               minlength={4}
               maxlength={100}
             />
-          </Field.Field>
-          <Field.Field>
-            <Field.Label for="pais">Pais</Field.Label>
-            <Select.Root
-              name="countryCode"
-              type="single"
-              bind:value={selectedCountryCode}
-              required
-            >
-              <Select.Trigger id="countryCode" name="countryCode">
-                <span>{selectedCountryName}</span>
-              </Select.Trigger>
-              <Select.Content>
-                {#each countriesFetch?.data?.countries as country}
-                  <Select.Item value={country.countryCode}>
-                    {country.name}
-                  </Select.Item>
-                {/each}
-              </Select.Content>
-            </Select.Root>
           </Field.Field>
         </Field.Group>
         <Field.Group class="mt-4" columns={2}>

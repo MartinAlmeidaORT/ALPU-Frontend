@@ -26,9 +26,7 @@ const countriesResult = {
 
 const departmentsResult = {
   data: {
-    departments: [
-      { departmentId: 1, name: 'Montevideo' },
-    ],
+    departments: [{ departmentId: 1, name: 'Montevideo' }],
   },
 };
 
@@ -68,11 +66,30 @@ describe('SignupGoogleForm (clean version)', () => {
     const countryTrigger = await screen.findByRole('button', {
       name: /Seleccionar país/i,
     });
-    await fireEvent.click(countryTrigger);
 
-    expect(
-      await screen.findByRole('option', { name: 'Uruguay' }),
-    ).toBeInTheDocument();
+    countryTrigger.focus();
+
+    // 2. Simular que el usuario presiona la barra espaciadora o la flecha hacia abajo
+    await fireEvent.keyDown(countryTrigger, {
+      key: ' ',
+      code: 'Space',
+      keyCode: 32,
+    });
+    await fireEvent.keyUp(countryTrigger, {
+      key: ' ',
+      code: 'Space',
+      keyCode: 32,
+    });
+
+    // Ahora el menú se inyectará en el DOM asíncronamente; lo atrapamos con un waitFor común:
+    let countryOption;
+    await waitFor(() => {
+      // Buscamos cualquier elemento que contenga "Uruguay" en su texto plano
+      countryOption = screen.getByText(
+        (content, element) => element.textContent.trim() === 'Uruguay',
+      );
+      expect(countryOption).toBeInTheDocument();
+    });
   });
 
   it('prefills google data', async () => {

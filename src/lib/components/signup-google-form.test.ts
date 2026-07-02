@@ -69,7 +69,6 @@ describe('SignupGoogleForm (clean version)', () => {
 
     countryTrigger.focus();
 
-    // 2. Simular que el usuario presiona la barra espaciadora o la flecha hacia abajo
     await fireEvent.keyDown(countryTrigger, {
       key: ' ',
       code: 'Space',
@@ -81,12 +80,10 @@ describe('SignupGoogleForm (clean version)', () => {
       keyCode: 32,
     });
 
-    // Ahora el menú se inyectará en el DOM asíncronamente; lo atrapamos con un waitFor común:
     let countryOption;
     await waitFor(() => {
-      // Buscamos cualquier elemento que contenga "Uruguay" en su texto plano
       countryOption = screen.getByText(
-        (content, element) => element.textContent.trim() === 'Uruguay',
+        (content, element) => element?.textContent.trim() === 'Uruguay',
       );
       expect(countryOption).toBeInTheDocument();
     });
@@ -126,10 +123,35 @@ describe('SignupGoogleForm (clean version)', () => {
 
     await fireEvent.click(screen.getByRole('button', { name: 'Agencia' }));
 
-    await screen.findByText('Uruguay');
+    await waitFor(() => {
+      expect(fetchCountriesMock).toHaveBeenCalledTimes(1);
+    });
 
-    // ⚠️ depende del Select real (puede necesitar ajuste)
-    await fireEvent.click(screen.getByText('Uruguay'));
+    const countryTrigger = await screen.findByRole('button', {
+      name: /Seleccionar país/i,
+    });
+
+    countryTrigger.focus();
+    await fireEvent.keyDown(countryTrigger, {
+      key: ' ',
+      code: 'Space',
+      keyCode: 32,
+    });
+    await fireEvent.keyUp(countryTrigger, {
+      key: ' ',
+      code: 'Space',
+      keyCode: 32,
+    });
+    await fireEvent.keyDown(countryTrigger, {
+      key: ' ',
+      code: 'Enter',
+      keyCode: 32,
+    });
+    await fireEvent.keyUp(countryTrigger, {
+      key: ' ',
+      code: 'Enter',
+      keyCode: 32,
+    });
 
     await waitFor(() => {
       expect(fetchDepartmentsMock).toHaveBeenCalled();

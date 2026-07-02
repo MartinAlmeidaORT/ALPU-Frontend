@@ -37,15 +37,15 @@
   $effect(() => {
     if (selectedCountryCode) {
       fetchDepartments(selectedCountryCode).then((result) => {
-      departmentsFetch = result;
+        departmentsFetch = result;
       });
     }
   });
 
   let selectedCountryName = $derived(
     countriesFetch?.data?.countries.find(
-      (c) => c.countryCode === selectedCountryCode
-    )?.name ?? 'Seleccionar pais'
+      (c) => c.countryCode === selectedCountryCode,
+    )?.name ?? 'Seleccionar país',
   );
 
   let selectedDepartmentName: string | undefined = $derived(
@@ -59,7 +59,7 @@
       const country = countriesFetch.data.countries.find(
         (c) => c.countryCode === selectedCountryCode,
       );
-      selectedCountryName = country ? country.name : 'Seleccionar';
+      selectedCountryName = country ? country.name : 'Seleccionar país';
     }
   });
   onMount(async () => {
@@ -72,10 +72,10 @@
     if (!hasUserChooseAccountType) messages = null;
   }
 
-function handleSubmit({ cancel }: { cancel: () => void }) {
+  function handleSubmit({ cancel }: { cancel: () => void }) {
     if (!selectedCountryCode) {
       messages = ['Selecciona un país de la lista.'];
-      cancel(); 
+      cancel();
       return;
     }
     if (!selectedDepartmentId) {
@@ -84,32 +84,32 @@ function handleSubmit({ cancel }: { cancel: () => void }) {
       return;
     }
 
-  return async ({ result, update }: any) => {
-    console.log('handleSubmit result:', result);
-    messages = null;
-    if (result.type === 'failure') {
-      messages = result.data?.messages || ['Ocurrió un error'];
-      await update();
-    } else if (result.type === 'success' || result.type === 'redirect') {
-      cleanForm();
-      await update();
-    } else {
-      await update();
-    }
-  };
-};
-function cleanForm() {
+    return async ({ result, update }: any) => {
+      console.log('handleSubmit result:', result);
+      messages = null;
+      if (result.type === 'failure') {
+        messages = result.data?.messages || ['Ocurrió un error'];
+        await update();
+      } else if (result.type === 'success' || result.type === 'redirect') {
+        cleanForm();
+        await update();
+      } else {
+        await update();
+      }
+    };
+  }
+  function cleanForm() {
     hasUserChooseAccountType = false;
     accountType = null;
     messages = null;
     selectedCountryCode = undefined;
     selectedDepartmentId = undefined;
-    departmentsFetch = null; 
+    departmentsFetch = null;
 
     if (formElement) {
       formElement.reset();
     }
-}
+  }
 </script>
 
 <Card.Root {...restProps}>
@@ -143,7 +143,12 @@ function cleanForm() {
       >
     </Card.Header>
     <Card.Content>
-      <form method="POST" action="/auth/signup" use:enhance={handleSubmit} bind:this={formElement}>
+      <form
+        method="POST"
+        action="/auth/signup"
+        use:enhance={handleSubmit}
+        bind:this={formElement}
+      >
         <input type="hidden" name="accountType" value={accountType} />
         <Field.Group columns={2}>
           <Field.Field>

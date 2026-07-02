@@ -2,8 +2,10 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/svelte';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import SignupForm from './signup-form.svelte';
 
-const fetchCountriesMock = vi.fn();
-const fetchDepartmentsMock = vi.fn();
+const { fetchCountriesMock, fetchDepartmentsMock } = vi.hoisted(() => ({
+  fetchCountriesMock: vi.fn(),
+  fetchDepartmentsMock: vi.fn(),
+}));
 
 vi.mock('$lib/graphql/queries/country', () => ({
   fetchCountries: fetchCountriesMock,
@@ -24,9 +26,7 @@ const countriesResult = {
 
 const departmentsResult = {
   data: {
-    departments: [
-      { departmentId: 1, name: 'Montevideo' },
-    ],
+    departments: [{ departmentId: 1, name: 'Montevideo' }],
   },
 };
 
@@ -41,7 +41,9 @@ describe('SignupForm', () => {
   it('renders account chooser', () => {
     render(SignupForm, { form: null });
 
-    expect(screen.getByText(/tipo de cuenta deseas crear/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/tipo de cuenta deseas crear/i),
+    ).toBeInTheDocument();
   });
 
   it('loads countries on mount', async () => {
@@ -51,7 +53,32 @@ describe('SignupForm', () => {
       expect(fetchCountriesMock).toHaveBeenCalledTimes(1);
     });
 
-    expect(await screen.findByText('Uruguay')).toBeInTheDocument();
+    await fireEvent.click(screen.getByRole('button', { name: 'Agencia' }));
+
+    const countryTrigger = await screen.findByRole('button', {
+      name: /Seleccionar país/i,
+    });
+
+    countryTrigger.focus();
+
+    await fireEvent.keyDown(countryTrigger, {
+      key: ' ',
+      code: 'Space',
+      keyCode: 32,
+    });
+    await fireEvent.keyUp(countryTrigger, {
+      key: ' ',
+      code: 'Space',
+      keyCode: 32,
+    });
+
+    let countryOption;
+    await waitFor(() => {
+      countryOption = screen.getByText(
+        (content, element) => element?.textContent.trim() === 'Uruguay',
+      );
+      expect(countryOption).toBeInTheDocument();
+    });
   });
 
   it('shows signup form after selecting account type', async () => {
@@ -67,11 +94,35 @@ describe('SignupForm', () => {
 
     await fireEvent.click(screen.getByRole('button', { name: 'Agencia' }));
 
-    // espera países
-    await screen.findByText('Uruguay');
+    await waitFor(() => {
+      expect(fetchCountriesMock).toHaveBeenCalledTimes(1);
+    });
 
-    // selecciona país (ajusta según tu Select real)
-    await fireEvent.click(screen.getByText('Uruguay'));
+    const countryTrigger = await screen.findByRole('button', {
+      name: /Seleccionar país/i,
+    });
+
+    countryTrigger.focus();
+    await fireEvent.keyDown(countryTrigger, {
+      key: ' ',
+      code: 'Space',
+      keyCode: 32,
+    });
+    await fireEvent.keyUp(countryTrigger, {
+      key: ' ',
+      code: 'Space',
+      keyCode: 32,
+    });
+    await fireEvent.keyDown(countryTrigger, {
+      key: ' ',
+      code: 'Enter',
+      keyCode: 32,
+    });
+    await fireEvent.keyUp(countryTrigger, {
+      key: ' ',
+      code: 'Enter',
+      keyCode: 32,
+    });
 
     await waitFor(() => {
       expect(fetchDepartmentsMock).toHaveBeenCalled();
@@ -83,7 +134,25 @@ describe('SignupForm', () => {
 
     await fireEvent.click(screen.getByRole('button', { name: 'Agencia' }));
 
-    await screen.findByText('Uruguay');
+    await waitFor(() => {
+      expect(fetchCountriesMock).toHaveBeenCalledTimes(1);
+    });
+
+    const countryTrigger = await screen.findByRole('button', {
+      name: /Seleccionar país/i,
+    });
+
+    countryTrigger.focus();
+    await fireEvent.keyDown(countryTrigger, {
+      key: ' ',
+      code: 'Space',
+      keyCode: 32,
+    });
+    await fireEvent.keyUp(countryTrigger, {
+      key: ' ',
+      code: 'Space',
+      keyCode: 32,
+    });
 
     // completar campos mínimos requeridos (si HTML validation lo permite)
     await fireEvent.input(screen.getByPlaceholderText('Nombre'), {

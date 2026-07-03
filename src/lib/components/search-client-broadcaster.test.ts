@@ -39,7 +39,7 @@ describe('SearchClientBroadcaster', () => {
       },
     });
 
-    expect(screen.getByText('Buscar Cliente')).toBeInTheDocument();
+    expect(screen.getByText('Buscar')).toBeInTheDocument();
   });
 
   it('renders the broadcaster search form for clients', () => {
@@ -50,7 +50,7 @@ describe('SearchClientBroadcaster', () => {
       },
     });
 
-    expect(screen.getByText('Buscar Locutor')).toBeInTheDocument();
+    expect(screen.getByText('Buscar')).toBeInTheDocument();
   });
 
   it('finds a client and stores the selected user id', async () => {
@@ -82,7 +82,7 @@ describe('SearchClientBroadcaster', () => {
     });
 
     const input = screen.getByPlaceholderText(
-      'Ingresa el email',
+      'Ingresar email',
     ) as HTMLInputElement;
 
     await fireEvent.input(input, {
@@ -139,7 +139,7 @@ describe('SearchClientBroadcaster', () => {
     });
 
     await fireEvent.input(
-      screen.getByPlaceholderText('Ingresa el email'),
+      screen.getByPlaceholderText('Ingresar email'),
       {
         target: {
           value: 'missing@test.com',
@@ -181,7 +181,7 @@ describe('SearchClientBroadcaster', () => {
     });
 
     await fireEvent.input(
-      screen.getByPlaceholderText('Ingresa el email'),
+      screen.getByPlaceholderText('Ingresar email'),
       {
         target: {
           value: 'missing@test.com',

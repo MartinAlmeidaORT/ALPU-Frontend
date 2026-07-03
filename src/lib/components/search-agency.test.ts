@@ -37,7 +37,7 @@ const clients = [
 ];
 
 const searchAgency = async (agencyName: string) => {
-  await fireEvent.input(screen.getByPlaceholderText('Ingresa el nombre de la agencia'), {
+  await fireEvent.input(screen.getByPlaceholderText('Ingresar agencia'), {
     target: { value: agencyName },
   });
   await fireEvent.click(screen.getAllByRole('button', { name: 'Buscar' }).at(-1)!);
@@ -51,9 +51,9 @@ describe('SearchAgency', () => {
   it('renders the agency search input and button', () => {
     render(SearchAgencyHarness);
 
-    expect(screen.getByText('Buscar Agencia')).toBeInTheDocument();
+    expect(screen.getByText('Buscar')).toBeInTheDocument();
     expect(
-      screen.getByPlaceholderText('Ingresa el nombre de la agencia'),
+      screen.getByPlaceholderText('Ingresar agencia'),
     ).toBeInTheDocument();
     expect(screen.getAllByRole('button', { name: 'Buscar' }).length).toBeGreaterThan(0);
   });
@@ -93,7 +93,7 @@ describe('SearchAgency', () => {
 
     expect(screen.getByLabelText('selected-agency-id')).toHaveTextContent('12');
     expect(toastSuccessMock).toHaveBeenCalledWith('Usuario seleccionado: Ada Lovelace');
-    expect(screen.getByPlaceholderText('Ingresa el nombre de la agencia')).toHaveValue('');
+    expect(screen.getByPlaceholderText('Ingresar agencia')).toHaveValue('');
   });
 
   it('shows an error toast when no agency is found', async () => {

@@ -25,17 +25,12 @@
 </script>
 
 <div class="bg-white rounded-lg p-4 text-center border-2 border-[#cad8e4]">
-  {#if rol === 'Broadcaster'}
-    <h1 class="text-xl font-bold mb-2">Buscar Cliente</h1>
-  {:else if rol === 'Client'}
-    <h1 class="text-xl font-bold mb-2">Buscar Locutor</h1>
-  {/if}
   <div class="flex gap-2">
     <Label for="email" class="sr-only">Email</Label>
     <Input
       id="email"
       type="email"
-      placeholder="Ingresa el email"
+      placeholder="Ingresar email"
       class="flex-1"
       bind:value={email}
     />

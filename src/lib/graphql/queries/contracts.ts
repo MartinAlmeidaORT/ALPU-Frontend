@@ -5,6 +5,7 @@ export const CONTRACTS_QUERY = graphql(`
     contracts(first: $first, after: $after, order: [{ contractId: DESC }]) {
       nodes {
         contractId
+        contractSerial
         broadcaster {
           firstName
           lastName
@@ -41,6 +42,7 @@ export const CONTRACTS_FILTERED_QUERY = graphql(`
     ) {
       nodes {
         contractId
+        contractSerial
         broadcaster {
           firstName
           lastName
@@ -111,6 +113,7 @@ export const GENERATE_CONTRACT_MUTATION = graphql(`
           lastName
         }
         contractId
+        contractSerial
       }
       pdfAmazonS3Url
     }

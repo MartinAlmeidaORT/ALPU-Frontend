@@ -21,6 +21,7 @@
   import ServiceSummary from '$lib/components/service-summary.svelte';
   import SearchClientBroadcaster from '$lib/components/search-client-broadcaster.svelte';
   import SearchAgency from '$lib/components/search-agency.svelte';
+  import CountryPicker from '$lib/components/CountryPicker.svelte';
   let {
     data,
   }: {
@@ -56,6 +57,7 @@
   let additionalIvrMessage = $state(0);
   let broadcastInMassMedia = $state(false);
   let fetchServicesResult = $state<OperationResult<ServicesQuery> | null>(null);
+  let selectedContractCountryCode = $state<string>('');
 
   onMount(async () => {
     fetchServicesResult = await fetchServices();
@@ -130,7 +132,7 @@
       clientId: data.rol === 'Client' ? data.user?.userId : userSelectedId,
       campaign: campaignName,
       services: totalServices,
-      countryCode: 'UY', // Aquí podrías agregar lógica para determinar el país si es necesario
+      countryCode: selectedContractCountryCode, // Aquí podrías agregar lógica para determinar el país si es necesario
     };
 
     const result = await calculateServicePrice(input);
@@ -180,7 +182,7 @@
       clientId: data.rol === 'Client' ? data.user?.userId : userSelectedId,
       campaign: campaignName,
       services: totalServices,
-      countryCode: 'UY',
+      countryCode: selectedContractCountryCode,
     };
 
     const result = await calculateServicePrice(input);
@@ -210,11 +212,11 @@
 
       const input: CampaignInput = {
         broadcasterId:
-          data.rol === 'Broadcaster' ? data.user?.userId : userSelectedId,
+        data.rol === 'Broadcaster' ? data.user?.userId : userSelectedId,
         clientId: data.rol === 'Client' ? data.user?.userId : userSelectedId,
         campaign: campaignName,
         services: totalServices,
-        countryCode: 'UY',
+        countryCode: selectedContractCountryCode,
       };
 
       const result = await calculateServicePrice(input);
@@ -270,19 +272,28 @@
     </div>
 
     <div class="flex-1 min-w-[300px] w-full">
-    <div class="flex w-full gap-1">
-      <div class="flex-1">
-        <SearchClientBroadcaster rol={data.rol} bind:valorId={userSelectedId} />
-      </div>
-      {#if data.rol === 'Broadcaster'}
-        <div class="flex-1">
-          <SearchAgency bind:valorId={userSelectedId} />
+      <div class="flex w-full gap-4">
+        <div class="flex-1 ">
+          <CountryPicker bind:countryCode={selectedContractCountryCode} />
         </div>
-      {/if}
-    </div>
+
+        <div class="flex-1">
+          <SearchClientBroadcaster
+            rol={data.rol}
+            bind:valorId={userSelectedId}
+          />
+        </div>
+
+        {#if data.rol === 'Broadcaster'}
+          <div class="flex-1">
+            <SearchAgency bind:valorId={userSelectedId} />
+          </div>
+        {/if}
+      </div>
       <ServiceSummary
         rol={data.rol}
         activeUserId={data.user?.userId}
+        bind:countryCode={selectedContractCountryCode}
         bind:valorId={userSelectedId}
         bind:campaignName
         bind:services={totalServices}

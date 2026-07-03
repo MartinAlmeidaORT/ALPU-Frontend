@@ -182,7 +182,7 @@ describe('/select-service page', () => {
     await fillPieceName('Spot matutino');
 
     await fireEvent.input(
-      screen.getByPlaceholderText('Ingresa el email'),
+      screen.getByPlaceholderText('Ingresar email'),
       { target: { value: 'grace@example.com' } },
     );
     

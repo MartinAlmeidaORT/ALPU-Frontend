@@ -19,6 +19,7 @@
   import { toast } from 'svelte-sonner';
   let token = getContext('token') as string;
   let { contract }: { contract: TableContract } = $props();
+  import { goto } from '$app/navigation';
 
   const getMenuItems = (state: string) => {
     switch (state) {
@@ -27,21 +28,25 @@
           { label: 'Aprobar', action: 'approve' },
           { label: 'Cancelar', action: 'cancel' },
           { label: 'Ver', action: 'ver' },
+          { label: 'Reestructurar', action: 'reestructurar' },
         ];
-      case 'APPROVED':
-        return [{ label: 'Ver', action: 'ver' }];
       case 'ACTIVE':
         return [
           { label: 'Cancelar', action: 'cancel' },
           { label: 'Ver', action: 'ver' },
+          { label: 'Reestructurar', action: 'reestructurar' },
         ];
       case 'PAID':
         return [
           { label: 'Cancelar', action: 'cancel' },
           { label: 'Ver', action: 'ver' },
+          { label: 'Reestructurar', action: 'reestructurar' },
         ];
       case 'CANCELED':
-        return [{ label: 'Ver', action: 'ver' }];
+          return [
+          { label: 'Ver', action: 'ver' },
+          { label: 'Reestructurar', action: 'reestructurar' },
+        ];
       default:
         return [];
     }
@@ -57,6 +62,9 @@
         break;
       case 'ver':
         await viewContract(contractId);
+        break;
+      case 'reestructurar':
+        await restructureContract(contractId);
         break;
       default:
         toast.error('Acción no reconocida');
@@ -110,6 +118,16 @@
       window.open('/contract-preview', '_blank');
     } catch (error) {
       toast.error('Error al obtener el contrato');
+    }
+  }
+
+  async function restructureContract(contractId: string) {
+    try {
+      cancelContract(contractId);
+      sessionStorage.setItem('contractId', contractId);
+      goto('/select-service');
+    } catch (error) {
+      toast.error('Error al reestructurar el contrato');
     }
   }
 </script>

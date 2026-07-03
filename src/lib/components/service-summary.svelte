@@ -2,6 +2,7 @@
   import { Button } from '$lib/components/ui/button/index.js';
   import * as Alert from '$lib/components/ui/alert/index.js';
   import type { CalculateContractQuery } from '$lib/graphql/types/graphql';
+  import { onMount } from 'svelte';
   import {
     ServiceType,
     UserState,
@@ -15,6 +16,7 @@
   import ServicePriceDetails from './ServicePriceDetails.svelte';
   let token = getContext('token') as string;
   let userState = getContext('userState') as string;
+  let contractId: string | null = '';
   const urqlClient = createUrqlClient(token);
 
   // Props
@@ -27,6 +29,7 @@
     rol,
     activeUserId,
     valorId = $bindable(),
+    countryCode = $bindable(),
     campaignName = $bindable('Test'),
     services = $bindable([]),
   }: {
@@ -39,18 +42,31 @@
     onRemovePiece?: (serviceIndex: number, pieceIndex: number) => void;
     valorId?: string | number | null | undefined;
     campaignName?: string;
+    countryCode?: string;
     services?: CampaignServiceInput[];
   } = $props();
 
+  onMount(() => {
+    contractId = sessionStorage.getItem('contractId');
+  });
   let input = $derived<CampaignInput>({
+    contractId: Number(contractId),
     broadcasterId: rol === 'Broadcaster' ? activeUserId : valorId,
     clientId: rol === 'Client' ? activeUserId : valorId,
     campaign: campaignName,
     services: services,
-    countryCode: 'UY',
+    countryCode: countryCode,
   });
+  if (contractId)
+  {
+    sessionStorage.removeItem('contractId');
+  }
 
   async function generateContract(input: CampaignInput) {
+    if (input.countryCode === undefined || input.countryCode === '' || input.countryCode === 'Seleccionr país') {
+      errorMessages = 'Por favor, selecciona un país para el contrato.';
+      return;
+    }
     const result = await urqlClient
       .mutation(GENERATE_CONTRACT_MUTATION, { input })
       .toPromise();

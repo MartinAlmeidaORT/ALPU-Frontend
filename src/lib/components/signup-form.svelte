@@ -85,7 +85,6 @@
     }
 
     return async ({ result, update }: any) => {
-      console.log('handleSubmit result:', result);
       messages = null;
       if (result.type === 'failure') {
         messages = result.data?.messages || ['Ocurrió un error'];

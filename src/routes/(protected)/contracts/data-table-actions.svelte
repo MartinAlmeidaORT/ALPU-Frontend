@@ -35,7 +35,11 @@
           { label: 'Cancelar', action: 'cancel' },
           { label: 'Ver', action: 'ver' },
         ];
-
+      case 'PAID':
+        return [
+          { label: 'Cancelar', action: 'cancel' },
+          { label: 'Ver', action: 'ver' },
+        ];
       case 'CANCELED':
         return [{ label: 'Ver', action: 'ver' }];
       default:

@@ -12,8 +12,10 @@
   import { toast } from 'svelte-sonner';
   let {
     valorId = $bindable(),
+    disabled = false,
   }: {
     valorId?: string | number | null | undefined;
+    disabled?: boolean;
   } = $props();
   let agencyName = $state('');
   let user:
@@ -36,6 +38,7 @@
       <AlertDialog.Trigger>
         <Button
           bgColor="bg-blue-500 text-white hover:bg-blue-600"
+          disabled={disabled}
           onclick={async () => {
             user = null;
             const result = await fetchAgency({agency: agencyName,});

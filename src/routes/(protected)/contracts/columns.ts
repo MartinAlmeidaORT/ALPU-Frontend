@@ -7,6 +7,7 @@ import { createRawSnippet } from 'svelte';
 import DataTableActions from './data-table-actions.svelte';
 
 export type TableContract = {
+  contractId: string;
   contractSerial: string;
   broadcaster: {
     firstName: string;

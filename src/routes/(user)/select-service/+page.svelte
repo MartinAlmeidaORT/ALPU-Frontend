@@ -58,6 +58,7 @@
   let broadcastInMassMedia = $state(false);
   let fetchServicesResult = $state<OperationResult<ServicesQuery> | null>(null);
   let selectedContractCountryCode = $state<string>('');
+  let contractSerial = sessionStorage.getItem('contractSerial')
 
   onMount(async () => {
     fetchServicesResult = await fetchServices();
@@ -281,12 +282,16 @@
           <SearchClientBroadcaster
             rol={data.rol}
             bind:valorId={userSelectedId}
+            disabled={contractSerial == undefined? false : true}
           />
         </div>
 
         {#if data.rol === 'Broadcaster'}
           <div class="flex-1">
-            <SearchAgency bind:valorId={userSelectedId} />
+            <SearchAgency 
+            bind:valorId={userSelectedId} 
+            disabled={contractSerial == undefined? false : true} 
+            />
           </div>
         {/if}
       </div>

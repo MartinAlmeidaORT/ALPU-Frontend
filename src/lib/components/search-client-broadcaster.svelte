@@ -13,9 +13,11 @@
   let {
     rol,
     valorId = $bindable(),
+    disabled = false,
   }: {
     rol: string | null | undefined;
     valorId?: string | number | null | undefined;
+    disabled?: boolean;
   } = $props();
   let email = $state('');
   let user:
@@ -38,6 +40,7 @@
       <AlertDialog.Trigger>
         <Button
           bgColor="bg-blue-500 text-white hover:bg-blue-600"
+          disabled={disabled}
           onclick={async () => {
             user = null;
             if (rol === 'Broadcaster') {

@@ -16,7 +16,7 @@
   import ServicePriceDetails from './ServicePriceDetails.svelte';
   let token = getContext('token') as string;
   let userState = getContext('userState') as string;
-  let contractId: string | null = '';
+  let contractSerial: string | null = '';
   const urqlClient = createUrqlClient(token);
 
   // Props
@@ -45,22 +45,18 @@
     countryCode?: string;
     services?: CampaignServiceInput[];
   } = $props();
-
-  onMount(() => {
-    contractId = sessionStorage.getItem('contractId');
-  });
+  contractSerial = sessionStorage.getItem('contractSerial');
+  if (contractSerial == 'undefined') {
+    contractSerial = null;
+  }
   let input = $derived<CampaignInput>({
-    contractId: Number(contractId),
+    contractSerial: sessionStorage.getItem('contractSerial'),
     broadcasterId: rol === 'Broadcaster' ? activeUserId : valorId,
     clientId: rol === 'Client' ? activeUserId : valorId,
     campaign: campaignName,
     services: services,
     countryCode: countryCode,
   });
-  if (contractId)
-  {
-    sessionStorage.removeItem('contractId');
-  }
 
   async function generateContract(input: CampaignInput) {
     if (input.countryCode === undefined || input.countryCode === '' || input.countryCode === 'Seleccionr país') {
@@ -80,9 +76,14 @@
         'contractId',
         result.data?.generateContract?.contract?.contractId,
       );
+      if (contractSerial)
+      {
+        sessionStorage.removeItem('contractSerial');
+      }
       goto('/contract-preview');
     }
   }
+
 </script>
 
 <div

@@ -52,7 +52,7 @@
     }
   };
 
-  const handleAction = async (action: string, contractId: string) => {
+  const handleAction = async (action: string, contractId: string, contractSerial: string) => {
     switch (action) {
       case 'cancel':
         await cancelContract(contractId);
@@ -64,7 +64,7 @@
         await viewContract(contractId);
         break;
       case 'reestructurar':
-        await restructureContract(contractId);
+        await restructureContract(contractId, contractSerial);
         break;
       default:
         toast.error('Acción no reconocida');
@@ -114,17 +114,17 @@
           pdfUrl: result.data.contractPdfDownloadUrl.pdfAmazonS3Url,
         }),
       );
-      sessionStorage.setItem('contractId', contractId);
       window.open('/contract-preview', '_blank');
     } catch (error) {
       toast.error('Error al obtener el contrato');
     }
   }
 
-  async function restructureContract(contractId: string) {
+  async function restructureContract(contractId: string, contractSerial: string) {
     try {
-      cancelContract(contractId);
-      sessionStorage.setItem('contractId', contractId);
+      await cancelContract(contractId);
+      sessionStorage.setItem('contractSerial', contractSerial);
+      console.log('contractSerial set to:', contractSerial);
       goto('/select-service');
     } catch (error) {
       toast.error('Error al reestructurar el contrato');
@@ -151,7 +151,7 @@
       <DropdownMenu.Label>Acciones</DropdownMenu.Label>
       {#each getMenuItems(contract.state) as item (item.action)}
         <DropdownMenu.Item
-          onclick={() => handleAction(item.action, String(contract.contractId))}
+          onclick={() => handleAction(item.action, String(contract.contractId), String(contract.contractSerial))}
         >
           {item.label}
         </DropdownMenu.Item>

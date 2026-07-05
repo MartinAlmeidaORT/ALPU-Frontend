@@ -1,10 +1,11 @@
 import { createUrqlClient } from '$lib/graphql/client.js';
 import { LOGIN_MUTATION } from '$lib/graphql/mutations/auth';
 import { UserState } from '$lib/graphql/schema';
+import { createUserSession } from '$lib/server/auth/standalone';
 import { fail, redirect } from '@sveltejs/kit';
 
 export const actions = {
-  default: async ({ request, cookies, locals }) => {
+  default: async ({ request, cookies }): Promise<void> => {
     let userPending: UserState | null = null;
     let resultData;
     try {
@@ -44,13 +45,8 @@ export const actions = {
       });
     }
 
-    if (userPending == UserState.Enabled) {
-      cookies.set('session_id', JSON.stringify(resultData), {
-        path: '/',
-        httpOnly: true,
-        sameSite: 'strict',
-        maxAge: 60 * 60 * 24, // 1 day
-      });
+    if (userPending === UserState.Enabled) {
+      createUserSession(cookies, resultData.token);
       throw redirect(302, '/contracts');
     }
     throw redirect(303, '/login?pendingState=true');

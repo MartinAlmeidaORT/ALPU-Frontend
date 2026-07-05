@@ -4,6 +4,6 @@ export const load: PageServerLoad = async ({ locals }) => {
   return {
     user: locals.user,
     token: locals.token,
-    rol: locals.rol,
+    rol: locals.user?.role,
   };
 };

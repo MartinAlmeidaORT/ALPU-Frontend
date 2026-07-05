@@ -20,6 +20,7 @@
   let token = getContext('token') as string;
   let { contract }: { contract: TableContract } = $props();
   import { goto } from '$app/navigation';
+  import { page } from '$app/state';
 
   const getMenuItems = (state: string) => {
     switch (state) {
@@ -43,7 +44,7 @@
           { label: 'Reestructurar', action: 'reestructurar' },
         ];
       case 'CANCELED':
-          return [
+        return [
           { label: 'Ver', action: 'ver' },
           { label: 'Reestructurar', action: 'reestructurar' },
         ];
@@ -52,7 +53,11 @@
     }
   };
 
-  const handleAction = async (action: string, contractId: string, contractSerial: string) => {
+  const handleAction = async (
+    action: string,
+    contractId: string,
+    contractSerial: string,
+  ) => {
     switch (action) {
       case 'cancel':
         await cancelContract(contractId);
@@ -76,7 +81,7 @@
       contractId: Number(contractId),
       newState: ContractState.Canceled,
     };
-    const urqlClient: Client = createUrqlClient(token);
+    const urqlClient: Client = createUrqlClient($page.token);
     const result = await urqlClient
       .mutation(CANCEL_CONTRACT_QUERY, { input })
       .toPromise();
@@ -120,7 +125,10 @@
     }
   }
 
-  async function restructureContract(contractId: string, contractSerial: string) {
+  async function restructureContract(
+    contractId: string,
+    contractSerial: string,
+  ) {
     try {
       await cancelContract(contractId);
       sessionStorage.setItem('contractSerial', contractSerial);
@@ -151,7 +159,12 @@
       <DropdownMenu.Label>Acciones</DropdownMenu.Label>
       {#each getMenuItems(contract.state) as item (item.action)}
         <DropdownMenu.Item
-          onclick={() => handleAction(item.action, String(contract.contractId), String(contract.contractSerial))}
+          onclick={() =>
+            handleAction(
+              item.action,
+              String(contract.contractId),
+              String(contract.contractSerial),
+            )}
         >
           {item.label}
         </DropdownMenu.Item>

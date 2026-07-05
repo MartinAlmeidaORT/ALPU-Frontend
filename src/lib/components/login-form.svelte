@@ -5,7 +5,7 @@
   import { Button } from '$lib/components/ui/button/index.js';
   import { Input } from '$lib/components/ui/input/index.js';
   import { enhance } from '$app/forms';
-  import { redirectToGoogle } from '$lib/auth/google';
+  import { redirectToGoogle } from '$lib/browser/auth/google';
 
   let {
     form,

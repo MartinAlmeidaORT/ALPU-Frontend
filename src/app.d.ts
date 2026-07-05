@@ -1,4 +1,4 @@
-import type { User } from '$lib/graphql/schema';
+import type { User } from '$lib/components/types';
 import type { Client } from '@urql/core';
 // See https://svelte.dev/docs/kit/types#app.d.ts
 // for information about these interfaces
@@ -8,11 +8,8 @@ declare global {
       urql: Client;
       user: User | null | undefined;
       token: string | null | undefined;
-      rol: string | null | undefined;
-      userState: string | null | undefined;
     }
     // interface Error {}
-    // interface Locals {}
     // interface PageData {}
     // interface PageState {}
     // interface Platform {}

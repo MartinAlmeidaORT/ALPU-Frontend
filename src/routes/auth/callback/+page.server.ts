@@ -1,9 +1,10 @@
 import { createUrqlClient } from '$lib/graphql/client';
 import { GOOGLE_AUTH_MUTATION } from '$lib/graphql/mutations/auth';
 import { UserState } from '$lib/graphql/schema';
+import { createUserSession } from '$lib/server/auth/standalone';
 import { redirect } from '@sveltejs/kit';
 
-export async function load({ cookies, url }) {
+export async function load({ cookies, url }): Promise<void> {
   let requiresRegistration: boolean | null = null;
   let userPending: UserState | null = null;
   let resultData;
@@ -42,12 +43,7 @@ export async function load({ cookies, url }) {
     throw redirect(303, '/login/signup-google');
   }
   if (userPending === UserState.Enabled) {
-    cookies.set('session_id', JSON.stringify(resultData), {
-      path: '/',
-      httpOnly: true,
-      sameSite: 'lax',
-      maxAge: 60 * 60 * 24, // 1 day
-    });
+    createUserSession(cookies, resultData.token);
     throw redirect(303, '/contracts');
   }
   throw redirect(303, '/login?pendingState=true');

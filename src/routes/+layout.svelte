@@ -5,7 +5,7 @@
   import { navigationMenuTriggerStyle } from '$lib/components/ui/navigation-menu/navigation-menu-trigger.svelte';
   import { IsMobile } from '$lib/components/hooks/is-mobile.svelte.js';
   import { Toaster } from '$lib/components/ui/sonner';
-  import type { PageData } from './$types';
+  import type { LayoutData } from './$types';
   import Button from '$lib/components/ui/button/button.svelte';
   import * as AlertDialog from '$lib/components/ui/alert-dialog/index.js';
   import { onDestroy } from 'svelte';
@@ -18,12 +18,13 @@
   } from '$lib/graphql/queries/notifications';
   import { ScrollArea } from '$lib/components/ui/scroll-area/index.js';
   import { Separator } from '$lib/components/ui/separator/index.js';
+  import ActiveUser from '$lib/components/custom/user/ActiveUser.svelte';
 
   let {
     data,
     children,
   }: {
-    data: PageData;
+    data: LayoutData;
     children: any;
   } = $props();
 
@@ -93,23 +94,6 @@
   function handleLogout() {
     logoutFormRef?.submit();
   }
-
-  const rol = $derived.by(() => {
-    switch (data.rol) {
-      case 'Broadcaster':
-        return 'Locutor';
-      case 'Client':
-        return 'Cliente';
-      case 'Accountant':
-        return 'Contador';
-      case 'Supervisor':
-        return 'Supervisor';
-      case 'Administrator':
-        return 'Administrador';
-      default:
-        return data.rol;
-    }
-  });
 </script>
 
 <nav
@@ -128,7 +112,7 @@
         <NavigationMenu.List class="flex-wrap items-center">
           {#if isAuth}
             <NavigationMenu.Item>
-              {#if data.rol === 'Broadcaster' || data.rol === 'Client'}
+              {#if data.user?.role === 'Broadcaster' || data.user?.role === 'Client'}
                 <NavigationMenu.Link>
                   {#snippet child()}
                     <a
@@ -138,7 +122,7 @@
                   {/snippet}
                 </NavigationMenu.Link>
               {/if}
-              {#if data.rol === 'Accountant' || data.rol === 'Supervisor'}
+              {#if data.user?.role === 'Accountant' || data.user?.role === 'Supervisor'}
                 <NavigationMenu.Link>
                   {#snippet child()}
                     <a
@@ -156,7 +140,7 @@
                   {/snippet}
                 </NavigationMenu.Link>
               {/if}
-              {#if data.rol === 'Administrator' || data.rol === 'Supervisor'}
+              {#if data.user?.role === 'Administrator' || data.user?.role === 'Supervisor'}
                 <NavigationMenu.Link>
                   {#snippet child()}
                     <a href="/user" class={navigationMenuTriggerStyle()}
@@ -180,28 +164,9 @@
     <!-- Derecha: usuario + campanita + logout -->
     <div class="flex-1 flex items-center justify-end gap-3">
       {#if isAuth}
-        <!-- Chip de usuario -->
-        <div
-          class="flex items-center gap-2.5 rounded-full border border-border/60 bg-muted/40 px-2.5 py-1.5"
-        >
-          <div
-            class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground text-[11px] font-semibold select-none"
-          >
-            {(data.user.firstName?.[0] ?? 'U').toUpperCase()}
-          </div>
-          <span class="text-sm font-medium leading-none whitespace-nowrap">
-            {data.user.firstName || 'Usuario'}
-          </span>
-          <span class="text-muted-foreground/60 leading-none select-none"
-            >·</span
-          >
-          <span
-            class="text-xs text-muted-foreground leading-none whitespace-nowrap"
-          >
-            {rol}
-          </span>
-        </div>
-
+        {#if data.user}
+          <ActiveUser user={data.user} />
+        {/if}
         <!-- Campanita de notificaciones -->
         <AlertDialog.Root>
           <AlertDialog.Trigger>

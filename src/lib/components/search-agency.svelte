@@ -2,7 +2,7 @@
   import { Button } from '$lib/components/ui/button/index.js';
   import { Input } from '$lib/components/ui/input/index.js';
   import Label from './ui/label/label.svelte';
-  import { fetchClient, fetchBroadcaster } from '$lib/graphql/queries/user';
+  import { fetchClient, fetchBroadcaster, fetchAgency } from '$lib/graphql/queries/user';
   import * as AlertDialog from '$lib/components/ui/alert-dialog/index.js';
   import X from '@lucide/svelte/icons/x';
   import type {
@@ -11,15 +11,13 @@
   } from '$lib/graphql/types/graphql';
   import { toast } from 'svelte-sonner';
   let {
-    rol,
     valorId = $bindable(),
     disabled = false,
   }: {
-    rol: string | null | undefined;
     valorId?: string | number | null | undefined;
     disabled?: boolean;
   } = $props();
-  let email = $state('');
+  let agencyName = $state('');
   let user:
     | (BroadcastersQuery['broadcasters'] | ClientsQuery['clients'])
     | null = $state(null);
@@ -28,13 +26,13 @@
 
 <div class="bg-white rounded-lg p-4 text-center border-2 border-[#cad8e4]">
   <div class="flex gap-2">
-    <Label for="email" class="sr-only">Email</Label>
+    <Label for="agency_name" class="sr-only">Nombre de Agencia</Label>
     <Input
-      id="email"
-      type="email"
-      placeholder="Ingresar email"
+      id="agency_name"
+      type="text"
+      placeholder="Ingresar agencia"
       class="flex-1"
-      bind:value={email}
+      bind:value={agencyName}
     />
     <AlertDialog.Root bind:open={openAlertDialog}>
       <AlertDialog.Trigger>
@@ -43,27 +41,11 @@
           disabled={disabled}
           onclick={async () => {
             user = null;
-            if (rol === 'Broadcaster') {
-              const result = await fetchClient({
-                email: email,
-              });
-              if (result.data?.clients && result.data?.clients.length > 0) {
-                user = result.data.clients;
-              } else {
-                toast.error('No se encontró ningún cliente con ese email');
-              }
+            const result = await fetchAgency({agency: agencyName,});
+            if (result.data?.clients && result.data?.clients.length > 0) {
+            user = result.data.clients;
             } else {
-              const result = await fetchBroadcaster({
-                email: email,
-              });
-              if (
-                result.data?.broadcasters &&
-                result.data?.broadcasters.length > 0
-              ) {
-                user = result.data.broadcasters;
-              } else {
-                toast.error('No se encontró ningún broadcaster con ese email');
-              }
+            toast.error('No se encontró ninguna agencia con ese nombre');
             }
           }}
         >
@@ -78,13 +60,9 @@
             <X class="h-4 w-4" />
           </AlertDialog.Cancel>
           <AlertDialog.Header>
-            {#if rol === 'Broadcaster'}
-              <AlertDialog.Title>Cliente encontrado</AlertDialog.Title>
-            {:else if rol === 'Client'}
-              <AlertDialog.Title>Locutor encontrado</AlertDialog.Title>
-            {/if}
+            <AlertDialog.Title>Agencia encontrada</AlertDialog.Title>
             <AlertDialog.Description>
-              Este fue el usuario encontrado con el email ingresado.
+              Este fue el usuario encontrado con el nombre de agencia ingresado.
               <div class="mt-6 text-left">
                 {#each user as client}
                   <div class="flex justify-between items-center p-2 border-b">
@@ -97,7 +75,7 @@
                           `Usuario seleccionado: ${client.firstName} ${client.lastName}`,
                         );
                         openAlertDialog = false;
-                        email = '';
+                        agencyName = '';
                       }}
                     >
                       Escoger

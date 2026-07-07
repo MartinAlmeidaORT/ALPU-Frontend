@@ -7,7 +7,8 @@ import { createRawSnippet } from 'svelte';
 import DataTableActions from './data-table-actions.svelte';
 
 export type TableContract = {
-  contractId: number;
+  contractId: string;
+  contractSerial: string;
   broadcaster: {
     firstName: string;
     lastName: string;
@@ -26,7 +27,7 @@ export type TableContract = {
 
 export const columns: ColumnDef<TableContract>[] = [
   {
-    accessorKey: 'contractId',
+    accessorKey: 'contractSerial',
     header: () => {
       const contractHeaderSnippet = createRawSnippet(() => ({
         render: () => `<div class="text-start">ID Contrato</div>`,
@@ -34,7 +35,7 @@ export const columns: ColumnDef<TableContract>[] = [
       return renderSnippet(contractHeaderSnippet);
     },
     cell: ({ row }) => {
-      return `#${row.original.contractId}`;
+      return row.original.contractSerial;
     },
   },
   {

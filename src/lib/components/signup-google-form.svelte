@@ -47,14 +47,17 @@
   let messages: string[] | null = $state(null);
   let departmentsFetch = $state<OperationResult<DepartmentsQuery> | null>(null);
   let countriesFetch = $state<OperationResult<CountriesQuery> | null>(null);
-  let selectedCountryCode: string = $state('UY ');
+  let selectedCountryCode: string | undefined = $state(undefined);
   let selectedDepartmentId: string | undefined = $state();
   let selectedCountryName: string | undefined = $state();
+  let formElement: HTMLFormElement | undefined = undefined;
 
   $effect(() => {
-    fetchDepartments(selectedCountryCode).then((result) => {
-      departmentsFetch = result;
-    });
+    if (selectedCountryCode) {
+      fetchDepartments(selectedCountryCode).then((result) => {
+        departmentsFetch = result;
+      });
+    }
   });
 
   $effect(() => {
@@ -62,18 +65,17 @@
       const country = countriesFetch.data.countries.find(
         (c) => c.countryCode === selectedCountryCode,
       );
-      selectedCountryName = country ? country.name : 'Selecciona un país';
+      selectedCountryName = country ? country.name : 'Seleccionar país';
     }
   });
 
   let selectedDepartmentName: string | undefined = $derived(
     departmentsFetch?.data?.departments?.find(
       (d) => d.departmentId === Number(selectedDepartmentId),
-    )?.name ?? 'Selecciona un departamento',
+    )?.name ?? 'Seleccionar departamento',
   );
 
   onMount(async () => {
-    departmentsFetch = await fetchDepartments(selectedCountryCode);
     countriesFetch = await fetchCountries();
   });
 
@@ -83,18 +85,45 @@
     if (!hasUserChooseAccountType) messages = null;
   }
 
-  function handleSubmit() {
-    return async ({ result, update }: any) => {
-      messages = null;
+  function handleSubmit({ cancel }: { cancel: () => void })  {
+    if (!selectedCountryCode) {
+      messages = ['Selecciona un país de la lista.'];
+      cancel(); 
+      return;
+    }
+    if (!selectedDepartmentId) {
+      messages = ['Selecciona un departamento de la lista.'];
+      cancel();
+      return;
+    }
 
+    return async ({ result, update }: any) => {
+      console.log('handleSubmit result:', result);
+      messages = null;
       if (result.type === 'failure') {
-        messages = result.data.messages || [
-          'Ocurrió un error inesperado. Inténtalo de nuevo.',
-        ];
+        messages = result.data?.messages || ['Ocurrió un error'];
+        await update();
+      } else if (result.type === 'success' || result.type === 'redirect') {
+        cleanForm();
+        await update();
+      } else {
+        await update();
       }
-      await update();
     };
   }
+
+  function cleanForm() {
+    hasUserChooseAccountType = false;
+    accountType = null;
+    messages = null;
+    selectedCountryCode = undefined;
+    selectedDepartmentId = undefined;
+    departmentsFetch = null; 
+
+    if (formElement) {
+      formElement.reset();
+    }
+}
 </script>
 
 <Card.Root {...restProps}>
@@ -132,6 +161,7 @@
         method="POST"
         action="/login/signup-google"
         use:enhance={handleSubmit}
+        bind:this={formElement}
       >
         <input type="hidden" name="accountType" value={accountType} />
         <Field.Group columns={2}>
@@ -146,7 +176,7 @@
               required
               minlength={3}
               maxlength={50}
-              pattern="^[A-Za-zÁÉÍÓÚáéíóúÑñ]+(?:[ -][A-Za-zÁÉÍÓÚáéíóúÑñ]+)*$"
+              pattern="^[A-Za-zÁÉÍÓÚáéíóúÑñ]+(?:[ \-][A-Za-zÁÉÍÓÚáéíóúÑñ]+)*$"
               oninvalid={(e) => {
                 const input = e.target as HTMLInputElement;
                 if (input.validity.patternMismatch) {
@@ -169,7 +199,7 @@
               required
               minlength={3}
               maxlength={50}
-              pattern="^[A-Za-zÁÉÍÓÚáéíóúÑñ]+(?:[ -][A-Za-zÁÉÍÓÚáéíóúÑñ]+)*$"
+              pattern="^[A-Za-zÁÉÍÓÚáéíóúÑñ]+(?:[ \-][A-Za-zÁÉÍÓÚáéíóúÑñ]+)*$"
               oninvalid={(e) => {
                 const input = e.target as HTMLInputElement;
                 if (input.validity.patternMismatch) {
@@ -205,39 +235,6 @@
               />
             </Field.Field>
           {/if}
-
-          <Field.Field>
-            <Field.Label for="city">Ciudad</Field.Label>
-            <Input
-              id="city"
-              name="city"
-              type="text"
-              placeholder="Ciudad"
-              required
-              minlength={4}
-              maxlength={100}
-              pattern="^[A-Za-zÁÉÍÓÚáéíóúÑñ]+(?:[ -][A-Za-zÁÉÍÓÚáéíóúÑñ]+)*$"
-              oninvalid={(e) => {
-                const input = e.target as HTMLInputElement;
-                if (input.validity.patternMismatch) {
-                  input.setCustomValidity('Solo se permiten letras');
-                }
-              }}
-              oninput={(e) => {
-                (e.target as HTMLInputElement).setCustomValidity('');
-              }}
-            />
-          </Field.Field>
-          <Field.Field>
-            <Field.Label for="street">Calle</Field.Label>
-            <Input
-              id="street"
-              name="street"
-              type="text"
-              placeholder="Calle"
-              required
-            />
-          </Field.Field>
           <Field.Field>
             <Field.Label for="pais">Pais</Field.Label>
             <Select.Root
@@ -251,7 +248,7 @@
               </Select.Trigger>
               <Select.Content>
                 {#each countriesFetch?.data?.countries as country}
-                  <Select.Item value={country.countryCode}>
+                  <Select.Item value={country.countryCode} role="option">
                     {country.name}
                   </Select.Item>
                 {/each}
@@ -277,6 +274,38 @@
                 {/each}
               </Select.Content>
             </Select.Root>
+          </Field.Field>
+          <Field.Field>
+            <Field.Label for="city">Ciudad</Field.Label>
+            <Input
+              id="city"
+              name="city"
+              type="text"
+              placeholder="Ciudad"
+              required
+              minlength={4}
+              maxlength={100}
+              pattern="^[A-Za-zÁÉÍÓÚáéíóúÑñ]+(?:[ \-][A-Za-zÁÉÍÓÚáéíóúÑñ]+)*$"
+              oninvalid={(e) => {
+                const input = e.target as HTMLInputElement;
+                if (input.validity.patternMismatch) {
+                  input.setCustomValidity('Solo se permiten letras');
+                }
+              }}
+              oninput={(e) => {
+                (e.target as HTMLInputElement).setCustomValidity('');
+              }}
+            />
+          </Field.Field>
+          <Field.Field>
+            <Field.Label for="street">Calle</Field.Label>
+            <Input
+              id="street"
+              name="street"
+              type="text"
+              placeholder="Calle"
+              required
+            />
           </Field.Field>
         </Field.Group>
         <Field.Group class="mt-4" columns={2}>

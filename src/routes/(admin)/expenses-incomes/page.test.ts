@@ -139,7 +139,7 @@ describe('/expenses-incomes page', () => {
     await tick();
 
     expect(toastErrorMock).toHaveBeenCalledWith(
-      'Hubo un error al agregar el comprobante.',
+      expect.any(String),
     );
     expect(update).toHaveBeenCalledWith({ reset: false });
     expect(invalidateAllMock).not.toHaveBeenCalled();

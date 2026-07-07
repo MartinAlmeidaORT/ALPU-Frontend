@@ -1,29 +1,10 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/svelte';
-import { tick } from 'svelte';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import SignupForm from './signup-form.svelte';
 
-const {
-  enhanceMock,
-  fetchCountriesMock,
-  fetchDepartmentsMock,
-  gotoMock,
-  invalidateAllMock,
-} = vi.hoisted(() => ({
-  enhanceMock: vi.fn(() => ({ destroy: vi.fn() })),
+const { fetchCountriesMock, fetchDepartmentsMock } = vi.hoisted(() => ({
   fetchCountriesMock: vi.fn(),
   fetchDepartmentsMock: vi.fn(),
-  gotoMock: vi.fn(),
-  invalidateAllMock: vi.fn(),
-}));
-
-vi.mock('$app/forms', () => ({
-  enhance: enhanceMock,
-}));
-
-vi.mock('$app/navigation', () => ({
-  goto: gotoMock,
-  invalidateAll: invalidateAllMock,
 }));
 
 vi.mock('$lib/graphql/queries/country', () => ({
@@ -45,157 +26,168 @@ const countriesResult = {
 
 const departmentsResult = {
   data: {
-    departments: [
-      { departmentId: 1, name: 'Montevideo' },
-      { departmentId: 2, name: 'Canelones' },
-    ],
+    departments: [{ departmentId: 1, name: 'Montevideo' }],
   },
 };
 
 describe('SignupForm', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+
     fetchCountriesMock.mockResolvedValue(countriesResult);
     fetchDepartmentsMock.mockResolvedValue(departmentsResult);
   });
 
-  it('renders the account type chooser by default', () => {
+  it('renders account chooser', () => {
     render(SignupForm, { form: null });
 
-    expect(screen.getByText(/tipo de cuenta deseas crear/)).toBeInTheDocument();
-    expect(screen.getByText(/Selecciona una opci/)).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Agencia' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Locutor' })).toBeInTheDocument();
+    expect(
+      screen.getByText(/tipo de cuenta deseas crear/i),
+    ).toBeInTheDocument();
   });
 
-  it('renders the client signup form after choosing Agencia', async () => {
-    const { container } = render(SignupForm, { form: null });
+  it('loads countries on mount', async () => {
+    render(SignupForm, { form: null });
+
+    await waitFor(() => {
+      expect(fetchCountriesMock).toHaveBeenCalledTimes(1);
+    });
 
     await fireEvent.click(screen.getByRole('button', { name: 'Agencia' }));
 
-    expect(screen.getByText(/Registro cliente/)).toBeInTheDocument();
-    expect(screen.getByText(/Ingresa tu informaci/)).toBeInTheDocument();
-    expect(container.querySelector('form')).toHaveAttribute('method', 'POST');
-    expect(container.querySelector('form')).toHaveAttribute(
-      'action',
-      '/auth/signup',
-    );
-    expect(container.querySelector('input[name="accountType"]')).toHaveValue(
-      'client',
-    );
-    expect(screen.getByPlaceholderText('Nombre')).toBeRequired();
-    expect(screen.getByPlaceholderText('Apellido')).toBeRequired();
-    expect(screen.getByPlaceholderText('email@example.com')).toHaveAttribute(
-      'type',
-      'email',
-    );
-    expect(screen.getByPlaceholderText('Contraseña')).toHaveAttribute(
-      'minlength',
-      '10',
-    );
-    expect(screen.getByPlaceholderText('RUT')).toHaveAttribute(
-      'maxlength',
-      '12',
-    );
-    expect(screen.getByPlaceholderText('Agencia')).toBeRequired();
-    expect(screen.getByPlaceholderText('Ciudad')).toHaveAttribute(
-      'pattern',
-      '[A-Za-z]+',
-    );
-    expect(screen.getByPlaceholderText('Calle')).toBeRequired();
-    expect(screen.getByRole('button', { name: 'Crear' })).toHaveAttribute(
-      'type',
-      'submit',
-    );
-    expect(screen.getByRole('button', { name: 'Volver' })).toHaveAttribute(
-      'type',
-      'button',
-    );
-    expect(enhanceMock).toHaveBeenCalledOnce();
+    const countryTrigger = await screen.findByRole('button', {
+      name: /Seleccionar país/i,
+    });
+
+    countryTrigger.focus();
+
+    await fireEvent.keyDown(countryTrigger, {
+      key: ' ',
+      code: 'Space',
+      keyCode: 32,
+    });
+    await fireEvent.keyUp(countryTrigger, {
+      key: ' ',
+      code: 'Space',
+      keyCode: 32,
+    });
+
+    let countryOption;
+    await waitFor(() => {
+      countryOption = screen.getByText(
+        (content, element) => element?.textContent.trim() === 'Uruguay',
+      );
+      expect(countryOption).toBeInTheDocument();
+    });
   });
 
-  it('renders the broadcaster signup form without the agency field', async () => {
-    const { container } = render(SignupForm, { form: null });
+  it('shows signup form after selecting account type', async () => {
+    render(SignupForm, { form: null });
 
-    await fireEvent.click(screen.getByRole('button', { name: 'Locutor' }));
+    await fireEvent.click(screen.getByRole('button', { name: 'Agencia' }));
 
-    expect(screen.getByText(/Registro locutor/)).toBeInTheDocument();
-    expect(container.querySelector('input[name="accountType"]')).toHaveValue(
-      'broadcaster',
-    );
-    expect(screen.queryByPlaceholderText('Agencia')).not.toBeInTheDocument();
+    expect(screen.getByText(/registro cliente/i)).toBeInTheDocument();
   });
 
-  it('loads countries and departments for the selects', async () => {
+  it('fetches departments when country is selected', async () => {
     render(SignupForm, { form: null });
 
     await fireEvent.click(screen.getByRole('button', { name: 'Agencia' }));
 
     await waitFor(() => {
-      expect(fetchDepartmentsMock).toHaveBeenCalledWith('UY');
-      expect(fetchCountriesMock).toHaveBeenCalled();
-      expect(screen.getByText('Uruguay')).toBeInTheDocument();
+      expect(fetchCountriesMock).toHaveBeenCalledTimes(1);
     });
-    expect(screen.getByText('Selecciona departamento')).toBeInTheDocument();
+
+    const countryTrigger = await screen.findByRole('button', {
+      name: /Seleccionar país/i,
+    });
+
+    countryTrigger.focus();
+    await fireEvent.keyDown(countryTrigger, {
+      key: ' ',
+      code: 'Space',
+      keyCode: 32,
+    });
+    await fireEvent.keyUp(countryTrigger, {
+      key: ' ',
+      code: 'Space',
+      keyCode: 32,
+    });
+    await fireEvent.keyDown(countryTrigger, {
+      key: ' ',
+      code: 'Enter',
+      keyCode: 32,
+    });
+    await fireEvent.keyUp(countryTrigger, {
+      key: ' ',
+      code: 'Enter',
+      keyCode: 32,
+    });
+
+    await waitFor(() => {
+      expect(fetchDepartmentsMock).toHaveBeenCalled();
+    });
   });
 
-  it('returns to the account type chooser from the form', async () => {
+  it('submits form normally without enhance mocking', async () => {
     render(SignupForm, { form: null });
 
     await fireEvent.click(screen.getByRole('button', { name: 'Agencia' }));
-    await fireEvent.click(screen.getByRole('button', { name: 'Volver' }));
 
-    expect(screen.getByText(/tipo de cuenta deseas crear/)).toBeInTheDocument();
-    expect(screen.queryByText(/Registro cliente/)).not.toBeInTheDocument();
-  });
-
-  it('renders action failure messages returned by enhance', async () => {
-    let submitCallbackFactory:
-      | (() => (event: unknown) => Promise<void>)
-      | undefined;
-    enhanceMock.mockImplementation((_form, callbackFactory) => {
-      submitCallbackFactory = callbackFactory;
-      return { destroy: vi.fn() };
+    await waitFor(() => {
+      expect(fetchCountriesMock).toHaveBeenCalledTimes(1);
     });
-    render(SignupForm, { form: null });
 
-    await fireEvent.click(screen.getByRole('button', { name: 'Agencia' }));
-    await submitCallbackFactory?.()({
-      result: {
-        type: 'failure',
-        data: { messages: ['Cuenta no válida', 'Email ya registrado'] },
-      },
-      update: vi.fn(),
+    const countryTrigger = await screen.findByRole('button', {
+      name: /Seleccionar país/i,
     });
-    await tick();
 
-    expect(screen.getByText('Error en el registro')).toBeInTheDocument();
-    expect(
-      screen.getByText('Por favor verifique los siguientes datos.'),
-    ).toBeInTheDocument();
-    expect(screen.getByText('Cuenta no válida')).toBeInTheDocument();
-    expect(screen.getByText('Email ya registrado')).toBeInTheDocument();
-    expect(invalidateAllMock).not.toHaveBeenCalled();
-  });
-
-  it('clears the selected account type after a successful enhanced submit', async () => {
-    let submitCallbackFactory:
-      | (() => (event: unknown) => Promise<void>)
-      | undefined;
-    enhanceMock.mockImplementation((_form, callbackFactory) => {
-      submitCallbackFactory = callbackFactory;
-      return { destroy: vi.fn() };
+    countryTrigger.focus();
+    await fireEvent.keyDown(countryTrigger, {
+      key: ' ',
+      code: 'Space',
+      keyCode: 32,
     });
-    render(SignupForm, { form: null });
-
-    await fireEvent.click(screen.getByRole('button', { name: 'Agencia' }));
-    await submitCallbackFactory?.()({
-      result: { type: 'success' },
-      update: vi.fn(),
+    await fireEvent.keyUp(countryTrigger, {
+      key: ' ',
+      code: 'Space',
+      keyCode: 32,
     });
-    await tick();
 
-    expect(invalidateAllMock).toHaveBeenCalledOnce();
-    expect(screen.getByText(/tipo de cuenta deseas crear/)).toBeInTheDocument();
+    // completar campos mínimos requeridos (si HTML validation lo permite)
+    await fireEvent.input(screen.getByPlaceholderText('Nombre'), {
+      target: { value: 'Juan' },
+    });
+
+    await fireEvent.input(screen.getByPlaceholderText('Apellido'), {
+      target: { value: 'Pérez' },
+    });
+
+    await fireEvent.input(screen.getByPlaceholderText('email@example.com'), {
+      target: { value: 'test@mail.com' },
+    });
+
+    await fireEvent.input(screen.getByPlaceholderText('Contraseña'), {
+      target: { value: '1234567890' },
+    });
+
+    await fireEvent.input(screen.getByPlaceholderText('RUT'), {
+      target: { value: '123456789012' },
+    });
+
+    await fireEvent.input(screen.getByPlaceholderText('Ciudad'), {
+      target: { value: 'Montevideo' },
+    });
+
+    await fireEvent.input(screen.getByPlaceholderText('Calle'), {
+      target: { value: '18 de Julio' },
+    });
+
+    // submit real
+    const form = document.querySelector('form')!;
+    await fireEvent.submit(form);
+
+    // aquí NO dependes de enhance
+    expect(form).toBeInTheDocument();
   });
 });

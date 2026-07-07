@@ -19,6 +19,7 @@
   import { toast } from 'svelte-sonner';
   let token = getContext('token') as string;
   let { contract }: { contract: TableContract } = $props();
+  import { goto } from '$app/navigation';
 
   const getMenuItems = (state: string) => {
     switch (state) {
@@ -27,23 +28,31 @@
           { label: 'Aprobar', action: 'approve' },
           { label: 'Cancelar', action: 'cancel' },
           { label: 'Ver', action: 'ver' },
+          { label: 'Reestructurar', action: 'reestructurar' },
         ];
-      case 'APPROVED':
-        return [{ label: 'Ver', action: 'ver' }];
       case 'ACTIVE':
         return [
           { label: 'Cancelar', action: 'cancel' },
           { label: 'Ver', action: 'ver' },
+          { label: 'Reestructurar', action: 'reestructurar' },
         ];
-
+      case 'PAID':
+        return [
+          { label: 'Cancelar', action: 'cancel' },
+          { label: 'Ver', action: 'ver' },
+          { label: 'Reestructurar', action: 'reestructurar' },
+        ];
       case 'CANCELED':
-        return [{ label: 'Ver', action: 'ver' }];
+          return [
+          { label: 'Ver', action: 'ver' },
+          { label: 'Reestructurar', action: 'reestructurar' },
+        ];
       default:
         return [];
     }
   };
 
-  const handleAction = async (action: string, contractId: string) => {
+  const handleAction = async (action: string, contractId: string, contractSerial: string) => {
     switch (action) {
       case 'cancel':
         await cancelContract(contractId);
@@ -53,6 +62,9 @@
         break;
       case 'ver':
         await viewContract(contractId);
+        break;
+      case 'reestructurar':
+        await restructureContract(contractId, contractSerial);
         break;
       default:
         toast.error('Acción no reconocida');
@@ -102,10 +114,20 @@
           pdfUrl: result.data.contractPdfDownloadUrl.pdfAmazonS3Url,
         }),
       );
-      sessionStorage.setItem('contractId', contractId);
       window.open('/contract-preview', '_blank');
     } catch (error) {
       toast.error('Error al obtener el contrato');
+    }
+  }
+
+  async function restructureContract(contractId: string, contractSerial: string) {
+    try {
+      await cancelContract(contractId);
+      sessionStorage.setItem('contractSerial', contractSerial);
+      console.log('contractSerial set to:', contractSerial);
+      goto('/select-service');
+    } catch (error) {
+      toast.error('Error al reestructurar el contrato');
     }
   }
 </script>
@@ -129,7 +151,7 @@
       <DropdownMenu.Label>Acciones</DropdownMenu.Label>
       {#each getMenuItems(contract.state) as item (item.action)}
         <DropdownMenu.Item
-          onclick={() => handleAction(item.action, String(contract.contractId))}
+          onclick={() => handleAction(item.action, String(contract.contractId), String(contract.contractSerial))}
         >
           {item.label}
         </DropdownMenu.Item>

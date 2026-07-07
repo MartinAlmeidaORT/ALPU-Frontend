@@ -5,7 +5,18 @@ import type { BroadcastersQuery, ClientsQuery } from '../types/graphql';
 
 const CLIENT_QUERY = graphql(`
   query clients($email: String!) {
-    clients(where: { email: { eq: $email } }) {
+    clients(where: { email: { eq: $email } userState: { eq: ENABLED } }) {
+      userId
+      firstName
+      lastName
+      email
+    }
+  }
+`);
+
+const AGENCY_QUERY = graphql(`
+  query agencies($agency: String!) {
+    clients(where: { agency: { name: { eq: $agency } } userState: { eq: ENABLED } }) {
       userId
       firstName
       lastName
@@ -16,7 +27,7 @@ const CLIENT_QUERY = graphql(`
 
 const BROADCASTER_QUERY = graphql(`
   query broadcasters($email: String!) {
-    broadcasters(where: { email: { eq: $email } }) {
+    broadcasters(where: { email: { eq: $email } userState: { eq: ENABLED } }) {
       userId
       firstName
       lastName
@@ -104,3 +115,15 @@ export async function fetchBroadcaster(input: {
     })
     .toPromise();
 }
+
+export async function fetchAgency(input: {
+  agency: string;
+}): Promise<OperationResult<ClientsQuery>> {
+  return await createUrqlClient()
+    .query(AGENCY_QUERY, {
+      agency: input.agency,
+    })
+    .toPromise();
+}
+
+

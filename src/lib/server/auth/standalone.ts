@@ -22,7 +22,7 @@ export function decodeToken(token: string, locals: App.Locals): void {
     try {
       const decodedUser = jwt.decode(token);
       locals.user = {
-        id: decodedUser.sub,
+        id: Number(decodedUser.sub),
         email: decodedUser.email,
         firstName: decodedUser.first_name,
         lastName: decodedUser.last_name,

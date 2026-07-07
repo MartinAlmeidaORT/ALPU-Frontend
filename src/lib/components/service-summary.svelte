@@ -2,45 +2,38 @@
   import { Button } from '$lib/components/ui/button/index.js';
   import * as Alert from '$lib/components/ui/alert/index.js';
   import type { CalculateContractQuery } from '$lib/graphql/types/graphql';
-  import { onMount } from 'svelte';
   import {
-    ServiceType,
     UserState,
     type CampaignInput,
     type CampaignServiceInput,
   } from '$lib/graphql/schema';
   import { createUrqlClient } from '$lib/graphql/client';
-  import { getContext } from 'svelte';
   import { goto, invalidateAll } from '$app/navigation';
   import { GENERATE_CONTRACT_MUTATION } from '$lib/graphql/queries/contracts';
   import ServicePriceDetails from './ServicePriceDetails.svelte';
-  let token = getContext('token') as string;
-  let userState = getContext('userState') as string;
+  import { page } from '$app/state';
   let contractSerial: string | null = '';
-  const urqlClient = createUrqlClient(token);
+  const urqlClient = createUrqlClient(page.data.token);
 
-  // Props
   let {
     totalContrato = null,
     errorMessages = null,
     onRemoveService = () => {},
     onRemoveAllServices = () => {},
     onRemovePiece = () => {},
-    rol,
     activeUserId,
     valorId = $bindable(),
     countryCode = $bindable(),
     campaignName = $bindable('Test'),
     services = $bindable([]),
   }: {
-    rol: string | null | undefined;
     activeUserId?: number | null | undefined;
     totalContrato?: CalculateContractQuery['calculateContract'] | null;
     errorMessages?: string | null;
     onRemoveService?: (index: number) => void;
     onRemoveAllServices?: () => void;
     onRemovePiece?: (serviceIndex: number, pieceIndex: number) => void;
-    valorId?: string | number | null | undefined;
+    valorId?: number | null | undefined;
     campaignName?: string;
     countryCode?: string;
     services?: CampaignServiceInput[];
@@ -51,15 +44,20 @@
   }
   let input = $derived<CampaignInput>({
     contractSerial: sessionStorage.getItem('contractSerial'),
-    broadcasterId: rol === 'Broadcaster' ? activeUserId : valorId,
-    clientId: rol === 'Client' ? activeUserId : valorId,
+    broadcasterId:
+      page.data.user?.role === 'Broadcaster' ? activeUserId : valorId,
+    clientId: page.data.user?.role === 'Client' ? activeUserId : valorId,
     campaign: campaignName,
     services: services,
     countryCode: countryCode,
   });
 
   async function generateContract(input: CampaignInput) {
-    if (input.countryCode === undefined || input.countryCode === '' || input.countryCode === 'Seleccionr país') {
+    if (
+      input.countryCode === undefined ||
+      input.countryCode === '' ||
+      input.countryCode === 'Seleccionar país'
+    ) {
       errorMessages = 'Por favor, selecciona un país para el contrato.';
       return;
     }
@@ -76,14 +74,12 @@
         'contractId',
         result.data?.generateContract?.contract?.contractId,
       );
-      if (contractSerial)
-      {
+      if (contractSerial) {
         sessionStorage.removeItem('contractSerial');
       }
       goto('/contract-preview');
     }
   }
-
 </script>
 
 <div
@@ -119,13 +115,13 @@
       <div class="col-span-2 space-y-2">
         {#each totalContrato.services as service, serviceIndex (serviceIndex)}
           <ServicePriceDetails
-            service={service}
+            {service}
             onRemoveService={() => onRemoveService(serviceIndex)}
-            onRemovePiece={(pieceIndex) => onRemovePiece(serviceIndex, pieceIndex)}
+            onRemovePiece={(pieceIndex) =>
+              onRemovePiece(serviceIndex, pieceIndex)}
           ></ServicePriceDetails>
         {/each}
       </div>
-
     </div>
 
     {#if totalContrato !== null}
@@ -141,7 +137,7 @@
             bgColor="bg-[#22964F] text-white hover:bg-[#1a6d3b] hover:text-white"
             onclick={() => generateContract(input)}
             class="mt-4 flex-1"
-            disabled={userState !== UserState.Enabled}
+            disabled={page.data.user?.state !== UserState.Enabled}
           >
             Generar contrato
           </Button>

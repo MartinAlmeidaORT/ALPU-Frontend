@@ -8,7 +8,6 @@
   } from '$lib/graphql/queries/service';
   import { toast } from 'svelte-sonner';
   import { onMount } from 'svelte';
-  import { setContext } from 'svelte';
   import type {
     CampaignInput,
     CampaignServiceInput,
@@ -27,8 +26,6 @@
   }: {
     data: PageData;
   } = $props();
-  setContext('token', data.token);
-  setContext('userState', data.userState);
   type ServiceSelected = {
     service: NonNullable<ServicesQuery['services']>[number];
     selectedPrice?: number;
@@ -58,7 +55,7 @@
   let broadcastInMassMedia = $state(false);
   let fetchServicesResult = $state<OperationResult<ServicesQuery> | null>(null);
   let selectedContractCountryCode = $state<string>('');
-  let contractSerial = sessionStorage.getItem('contractSerial')
+  let contractSerial = sessionStorage.getItem('contractSerial');
 
   onMount(async () => {
     fetchServicesResult = await fetchServices();
@@ -67,7 +64,7 @@
 
   function validateCampaignInput(): boolean {
     if (
-      data.rol === 'Broadcaster' &&
+      data.user?.role === 'Broadcaster' &&
       (userSelectedId === null || userSelectedId === undefined)
     ) {
       toast.error('Selecciona un cliente', {
@@ -77,7 +74,7 @@
     }
 
     if (
-      data.rol === 'Client' &&
+      data.user?.role === 'Client' &&
       (userSelectedId === null || userSelectedId === undefined)
     ) {
       toast.error('Selecciona un broadcaster', {
@@ -129,8 +126,8 @@
 
     const input: CampaignInput = {
       broadcasterId:
-        data.rol === 'Broadcaster' ? data.user?.userId : userSelectedId,
-      clientId: data.rol === 'Client' ? data.user?.userId : userSelectedId,
+        data.user?.role === 'Broadcaster' ? data.user?.id : userSelectedId,
+      clientId: data.user?.role === 'Client' ? data.user?.id : userSelectedId,
       campaign: campaignName,
       services: totalServices,
       countryCode: selectedContractCountryCode, // Aquí podrías agregar lógica para determinar el país si es necesario
@@ -179,8 +176,8 @@
 
     const input: CampaignInput = {
       broadcasterId:
-        data.rol === 'Broadcaster' ? data.user?.userId : userSelectedId,
-      clientId: data.rol === 'Client' ? data.user?.userId : userSelectedId,
+        data.user?.role === 'Broadcaster' ? data.user?.id : userSelectedId,
+      clientId: data.user?.role === 'Client' ? data.user?.id : userSelectedId,
       campaign: campaignName,
       services: totalServices,
       countryCode: selectedContractCountryCode,
@@ -213,8 +210,8 @@
 
       const input: CampaignInput = {
         broadcasterId:
-        data.rol === 'Broadcaster' ? data.user?.userId : userSelectedId,
-        clientId: data.rol === 'Client' ? data.user?.userId : userSelectedId,
+          data.user?.role === 'Broadcaster' ? data.user?.id : userSelectedId,
+        clientId: data.user?.role === 'Client' ? data.user?.id : userSelectedId,
         campaign: campaignName,
         services: totalServices,
         countryCode: selectedContractCountryCode,
@@ -274,30 +271,28 @@
 
     <div class="flex-1 min-w-[300px] w-full">
       <div class="flex w-full gap-4">
-        <div class="flex-1 ">
+        <div class="flex-1">
           <CountryPicker bind:countryCode={selectedContractCountryCode} />
         </div>
 
         <div class="flex-1">
           <SearchClientBroadcaster
-            rol={data.rol}
+            rol={data.user?.role}
             bind:valorId={userSelectedId}
-            disabled={contractSerial == undefined? false : true}
+            disabled={contractSerial == undefined ? false : true}
           />
         </div>
 
-        {#if data.rol === 'Broadcaster'}
+        {#if data.user?.role === 'Broadcaster'}
           <div class="flex-1">
-            <SearchAgency 
-            bind:valorId={userSelectedId} 
-            disabled={contractSerial == undefined? false : true} 
+            <SearchAgency
+              bind:valorId={userSelectedId}
+              disabled={contractSerial == undefined ? false : true}
             />
           </div>
         {/if}
       </div>
       <ServiceSummary
-        rol={data.rol}
-        activeUserId={data.user?.userId}
         bind:countryCode={selectedContractCountryCode}
         bind:valorId={userSelectedId}
         bind:campaignName

@@ -3,15 +3,14 @@
   import { Button } from '$lib/components/ui/button/index.js';
   import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
   import type { TableUser } from './columns';
-  import { getContext } from 'svelte';
   import { APPROVE_USER_MUTATION } from '$lib/graphql/queries/user';
   import { UserState, type UpdateUserStateInput } from '$lib/graphql/schema';
   import type { Client } from '@urql/svelte';
   import { createUrqlClient } from '$lib/graphql/client';
   import { invalidateAll } from '$app/navigation';
   import { toast } from 'svelte-sonner';
+  import { page } from '$app/state';
 
-  let token = getContext('token') as string;
   let { user }: { user: TableUser } = $props();
 
   const getMenuItems = (state: string) => {
@@ -29,7 +28,7 @@
         userId: Number(userId),
         newState: UserState.Enabled,
       };
-      const urqlClient: Client = createUrqlClient(token);
+      const urqlClient: Client = createUrqlClient(page.data.token);
       const result = await urqlClient
         .mutation(APPROVE_USER_MUTATION, { input })
         .toPromise();

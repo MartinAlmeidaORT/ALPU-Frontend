@@ -13,6 +13,7 @@ export interface User {
 export interface BaseService {
   id: number;
   pieces: Piece[];
+  type: string;
 }
 
 export interface Piece {
@@ -32,7 +33,7 @@ export interface ServiceNarrativeUI extends BaseService {
   isPriceSuggested: number | null;
   isExtraRoles: number | null;
   isLipSync: boolean;
-  date: CalendarDate | null;
+  date: CalendarDate | undefined;
 }
 
 export interface ServiceIvrUI extends BaseService {
@@ -41,10 +42,10 @@ export interface ServiceIvrUI extends BaseService {
   isInterior: boolean;
   priceOverride: number | null;
   updates: number | null;
-  date: CalendarDate | null;
+  date: CalendarDate | undefined;
 }
 
 export interface ServiceEventUI extends BaseService {
-  ForMassBroadcast: boolean;
-  date: CalendarDate | null;
+  forMassBroadcast: boolean;
+  date: CalendarDate | undefined;
 }

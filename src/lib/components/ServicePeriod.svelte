@@ -25,6 +25,7 @@
     period: null,
     isInterior: false,
     isInternalUse: false,
+    type: service.type,
   });
   let pieceName = $state<string>('');
 

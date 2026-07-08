@@ -21,14 +21,7 @@
   import SearchClientBroadcaster from '$lib/components/search-client-broadcaster.svelte';
   import SearchAgency from '$lib/components/search-agency.svelte';
   import CountryPicker from '$lib/components/CountryPicker.svelte';
-  let contract = $state<CampaignInput>({
-    campaign: '',
-    contractSerial: '',
-    countryCode: '',
-    broadcasterId: 0,
-    clientId: 0,
-    services: [],
-  });
+  let contract = $state<CampaignInput>(resetContract());
   let {
     data,
   }: {
@@ -42,6 +35,7 @@
   let fetchServicesResult = $state<OperationResult<ServicesQuery> | null>(null);
   let services = $derived(fetchServicesResult?.data?.services ?? []);
   let contractSerial = sessionStorage.getItem('contractSerial');
+  
   onDestroy(() => {
     sessionStorage.removeItem('contractSerial');
   });
@@ -53,8 +47,24 @@
     } else if (data.user?.role === 'Client') {
       contract.clientId = data.user?.id;
     }
-    
   });
+
+  function resetContract() : CampaignInput {
+    return {
+      campaign: '',
+      contractSerial: '',
+      countryCode: '',
+      broadcasterId: 0,
+      clientId: 0,
+      services: [],
+    }
+  }
+
+  function resetFieldData() {
+    contract = resetContract();
+    errorMessages = null;
+    contractDetails = null;
+  }
 
   function validateCampaignInput(): boolean {
     if (contract.clientId === null || contract.clientId === undefined){
@@ -73,48 +83,12 @@
     return true;
   }
 
-  async function handleAddPiece(service : CampaignServiceInput) {
-    if (isPriceSuggested && priceSuggested != null) {
-      if (svc.basePrice && svc.basePrice > priceSuggested) {
-        errorMessages = 'Precio sugerido no puede ser menor al precio base';
-        return;
-      }
-    }
-    if (svc.__typename === 'ServicePeriod') {
-      if (options.period == '') {
-        toast.error('Selecciona una duración para el servicio', {
-          description: 'Debes seleccionar una duración para continuar',
-        });
-        return;
-      }
-    }
-    if (!validateCampaignInput()) {
-      return;
-    }
-
-    // Buscar si ya existe un servicio con el mismo serviceId
-    const existingServiceIndex = totalServices.findIndex(
-      (s) => s.serviceId === svc.serviceId,
-    );
-
-    if (existingServiceIndex !== -1) {
-      // Agregar la pieza al servicio existente
-      totalServices[existingServiceIndex].pieces?.push({ name: pieceName });
-    } else {
-      // Crear un nuevo servicio con la pieza
-      totalServices.push({
-        serviceId: svc.serviceId,
-        options: options,
-        pieces: [{ name: pieceName }],
-      });
-    }
-
-    totalServices = totalServices; // Trigger reactivity
-
-   
+  async function calculateService(service : CampaignServiceInput) {
+    contract.services = contract.services.filter((s) => s.serviceId !== service.serviceId)
+    contract.services.push(service);
     const result = await calculateServicePrice(contract);
-    if (result == null) {
-      return;
+    if (!result.error) {
+      contractDetails = result.data?.calculateContract ?? null;
     }
     checkDurationErrors();
   }
@@ -150,8 +124,6 @@
         await removeService(serviceIndex);
         return;
       }
-
-      contract.services = contract.services; 
 
       if (!validateCampaignInput()) {
         return;
@@ -202,8 +174,7 @@
         {#each services as service (service.serviceId)}
           <ServiceItem
             {service}
-            onAddPiece={(pieceName, svc, options) =>
-              handleAddPiece(pieceName, svc, options)}
+            calculateService={calculateService}
           />
         {/each}
       </Accordion.Root>
@@ -242,8 +213,8 @@
         {/if}
       </div>
       <ServiceSummary
-        bind:services={contract.services}
-        totalContrato={contractDetails}
+        contract={contract}
+        contractDetails={contractDetails}
         {errorMessages}
         onRemoveService={(i) => removeService(i)}
         onRemoveAllServices={() => removeAllServices()}

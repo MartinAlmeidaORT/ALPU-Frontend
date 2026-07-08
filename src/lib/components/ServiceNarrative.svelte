@@ -8,6 +8,8 @@
   import type { ServiceNarrative } from '$lib/graphql/schema';
   import DatePicker from './DatePicker.svelte';
   import type { BaseService, ServiceNarrativeUI } from './types';
+  import { validateDate } from '$lib/browser/utils';
+  import { toast } from 'svelte-sonner';
 
   let {
     service = $bindable(),
@@ -17,7 +19,7 @@
   type ServiceNarrativeData = {
     service: ServiceNarrative;
     handleAddPiece: (pieceName: string, baseService: BaseService) => void;
-    handleAddService: (serviceUi: ServiceNarrative) => void;
+    handleAddService: (serviceUi: ServiceNarrativeUI) => void;
   };
   let serviceUi = $state<ServiceNarrativeUI>({
     id: service.serviceId,
@@ -28,12 +30,44 @@
     isPriceSuggested: 0,
     isExtraRoles: 0,
     isLipSync: false,
-    date: null,
+    date: undefined,
+    type: service.type,
   });
   let isPriceSuggested = $state<boolean>(false);
   let isExtraRoles = $state<boolean>(false);
   let pieceName = $state<string>('');
 
+  function confirmService() {
+    if (validateNarrative()) {
+      handleAddPiece(pieceName, serviceUi);
+      handleAddService(serviceUi);
+    }
+  }
+
+  function validateNarrative() {
+    if (!validateDate(serviceUi.date)) {
+      return false;
+    }
+    if (isPriceSuggested && (serviceUi.isPriceSuggested === null || serviceUi.isPriceSuggested <= service.basePrice)) {
+      toast.error('Error al agregar un medio', {
+        description: 'Debe ingresar un precio sugerido válido y mayor al mínimo',
+      });
+      return false;
+    }
+    if (serviceUi.narrativeMinutes === null || serviceUi.narrativeMinutes <= 0) {
+      toast.error('Error al agregar un medio', {
+        description: 'Debe ingresar una cantidad válida de minutos',
+      });
+      return false;
+    }
+    if (isExtraRoles && (serviceUi.isExtraRoles === null || serviceUi.isExtraRoles <= 0)) {
+      toast.error('Error al agregar un medio', {
+        description: 'Debe ingresar una cantidad válida de roles adicionales',
+      });
+      return false;
+    }
+    return true;
+  }
 </script>
 
 <Accordion.Item value={String(service.serviceId)}>
@@ -127,7 +161,7 @@
         variant="outline"
         bgColor="bg-[#22964F] text-white hover:bg-[#1a6d3b] hover:text-white"
         onclick={() => {
-          handleAddPiece();
+          confirmService();
         }}
       >
         Agregar

@@ -7,34 +7,69 @@
   import { Textarea } from '$lib/components/ui/textarea/index.js';
   import type { ServiceIvr } from '$lib/graphql/schema';
   import DatePicker from './DatePicker.svelte';
-  import type { CalendarDate } from '@internationalized/date';
+  import type { ServiceIvrUI, BaseService } from './types';
+  import { validateDate } from '$lib/browser/utils';
+  import { toast } from 'svelte-sonner';
 
   let {
     service = $bindable(),
-    nombrePieza = $bindable(),
-    isPriceSuggested = $bindable(),
-    priceSuggested = $bindable(),
-    canIvrUpdate = $bindable(),
-    ivrUpdates = $bindable(),
-    canIvrGetMoreMessages = $bindable(),
-    additionalIvrMessage = $bindable(),
-    ivrMessage = $bindable(),
-    selectedDate = $bindable(),
     handleAddPiece = () => {},
+    handleAddService = () => {},
   }: ServiceIvrData = $props();
   type ServiceIvrData = {
     service: ServiceIvr;
-    nombrePieza: string;
-    isPriceSuggested: boolean;
-    priceSuggested: number | null;
-    canIvrUpdate: boolean;
-    ivrUpdates: number;
-    canIvrGetMoreMessages: boolean;
-    additionalIvrMessage: number;
-    ivrMessage: string;
-    selectedDate: CalendarDate | undefined;
-    handleAddPiece: () => void;
+    handleAddPiece: (pieceName: string, baseService: BaseService) => void;
+    handleAddService: (serviceUi: ServiceIvrUI) => void;
   };
+
+  let serviceUi = $state<ServiceIvrUI>({
+    id: service.serviceId,
+    pieces: [],
+    messageText: '',
+    additionalMessages: 0,
+    isInterior: false,
+    priceOverride: null,
+    updates: null,
+    date: undefined,
+    type: service.type,
+  });
+  let pieceName = $state<string>('');
+
+  let isPriceSuggested = $state<boolean>(false);
+  let areAdditionalMessages = $state<boolean>(false);
+  let hasUpdates = $state<boolean>(false);
+
+    function confirmService() {
+      if (validateIvr()) {
+        handleAddPiece(pieceName, serviceUi);
+        handleAddService(serviceUi);
+      }
+    }
+
+    function validateIvr() {
+      if (!validateDate(serviceUi.date)) {
+        return false;
+      }
+      if (isPriceSuggested && (serviceUi.priceOverride === null || serviceUi.priceOverride <= service.basePrice)) {
+        toast.error('Error al agregar un medio', {
+          description: 'Debe ingresar un precio sugerido válido y mayor al mínimo',
+        });
+        return false;
+      }
+      if (areAdditionalMessages && (serviceUi.additionalMessages === null || serviceUi.additionalMessages < 0)) {
+        toast.error('Error al agregar un medio', {
+          description: 'Debe ingresar una cantidad válida de mensajes adicionales',
+        });
+        return false;
+      }
+      if (hasUpdates && (serviceUi.updates === null || serviceUi.updates < 0)) {
+        toast.error('Error al agregar un medio', {
+          description: 'Debe ingresar una cantidad válida de actualizaciones',
+        });
+        return false;
+      }
+      return true;
+    }
 </script>
 
 <Accordion.Item value={String(service.serviceId)}>
@@ -57,45 +92,45 @@
           <Input
             class="w-25"
             id="suggestedPrice_{service.serviceId}"
-            bind:value={priceSuggested}
+            bind:value={serviceUi.priceOverride}
             type="number"
           />
         {/if}
         <Checkbox
           id="canIvrUpdate{service.serviceId}"
-          bind:checked={canIvrUpdate}
+          bind:checked={hasUpdates}
         />
         <Label for="canIvrUpdate{service.serviceId}">Actualizar IVR</Label>
-        {#if canIvrUpdate}
+        {#if hasUpdates}
           <Input
             class="w-20"
             id="Updates{service.serviceId}"
-            bind:value={ivrUpdates}
+            bind:value={serviceUi.updates}
             type="number"
           />
         {/if}
         <Checkbox
           id="canIvrGetMoreMessages{service.serviceId}"
-          bind:checked={canIvrGetMoreMessages}
+          bind:checked={areAdditionalMessages}
         />
         <Label for="canIvrGetMoreMessages{service.serviceId}"
           >Mensajes adicionales</Label
         >
-        {#if canIvrGetMoreMessages}
+        {#if areAdditionalMessages}
           <Input
             class="w-20"
             id="additionalIvrMessages{service.serviceId}"
-            bind:value={additionalIvrMessage}
+            bind:value={serviceUi.additionalMessages}
             type="number"
           />
         {/if}
-        <DatePicker bind:selectedDate />
+        <DatePicker bind:selectedDate={serviceUi.date} />
       </div>
       <div class="flex items-center gap-2">
         <Label for="nombrePieza_{service.serviceId}">Nombre</Label>
         <Input
           id="nombrePieza_{service.serviceId}"
-          bind:value={nombrePieza}
+          bind:value={pieceName}
           type="text"
           placeholder="Nombre de la pieza"
         />
@@ -105,7 +140,7 @@
         class="col-span-2"
         variant="outline"
         bgColor="bg-[#22964F] text-white hover:bg-[#1a6d3b] hover:text-white"
-        onclick={() => handleAddPiece()}
+        onclick={() => confirmService()}
       >
         Agregar
       </Button>
@@ -114,7 +149,7 @@
       <Label for="ivrMessage_{service.serviceId}" class="py-2">Mensaje</Label>
       <Textarea
         id="ivrMessage_{service.serviceId}"
-        bind:value={ivrMessage}
+        bind:value={serviceUi.messageText}
         placeholder="Ingrese su mensaje"
       />
     </div>

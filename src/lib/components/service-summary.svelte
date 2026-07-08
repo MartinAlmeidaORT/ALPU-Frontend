@@ -3,9 +3,7 @@
   import * as Alert from '$lib/components/ui/alert/index.js';
   import type { CalculateContractQuery } from '$lib/graphql/types/graphql';
   import {
-    UserState,
     type CampaignInput,
-    type CampaignServiceInput,
   } from '$lib/graphql/schema';
   import { createUrqlClient } from '$lib/graphql/client';
   import { goto, invalidateAll } from '$app/navigation';
@@ -16,39 +14,24 @@
   const urqlClient = createUrqlClient(page.data.token);
 
   let {
-    totalContrato = null,
+    contractDetails = null,
     errorMessages = null,
     onRemoveService = () => {},
     onRemoveAllServices = () => {},
     onRemovePiece = () => {},
-    valorId = $bindable(),
-    countryCode = $bindable(),
-    campaignName = $bindable('Test'),
-    services = $bindable([]),
+    contract = $bindable(),
   }: {
-    totalContrato?: CalculateContractQuery['calculateContract'] | null;
+    contractDetails?: CalculateContractQuery['calculateContract'] | null;
     errorMessages?: string | null;
     onRemoveService?: (index: number) => void;
     onRemoveAllServices?: () => void;
     onRemovePiece?: (serviceIndex: number, pieceIndex: number) => void;
-    valorId?: number | null | undefined;
-    campaignName?: string;
-    countryCode?: string;
-    services?: CampaignServiceInput[];
+    contract: CampaignInput;
   } = $props();
   contractSerial = sessionStorage.getItem('contractSerial');
   if (contractSerial == 'undefined') {
     contractSerial = null;
   }
-  console.log(page.data)
-  let input = $derived<CampaignInput>({
-    contractSerial: sessionStorage.getItem('contractSerial'),
-    broadcasterId: page.data.user?.role === 'Broadcaster' ? page.data.user?.id : valorId,
-    clientId: page.data.user?.role === 'Client' ? page.data.user?.id : valorId,
-    campaign: campaignName,
-    services: services,
-    countryCode: countryCode,
-  });
 
   async function generateContract(input: CampaignInput) {
     if (
@@ -91,7 +74,7 @@
 
   <h1 class="text-2xl font-bold mb-4">Total a pagar</h1>
 
-  {#if !totalContrato}
+  {#if !contractDetails}
     <span>No ha seleccionado ningún servicio.</span>
   {:else}
     <div class="grid grid-cols-3 gap-2 max-h-96 overflow-y-auto">
@@ -99,7 +82,7 @@
         class="space-y-2 border border-[#cad8e4] rounded p-2 flex flex-col text-left"
       >
         <span class="font-bold text-[#1e293b]">Descuentos del contrato</span>
-        {#each totalContrato.adjustments as adjustment}
+        {#each contractDetails.adjustments as adjustment}
           <div class="flex bg-[#ffffff] rounded gap-2">
             <span class="text-sm text-[#1e293b]"
               >{adjustment.name} de un total de $ {Math.abs(
@@ -111,7 +94,7 @@
       </div>
 
       <div class="col-span-2 space-y-2">
-        {#each totalContrato.services as service, serviceIndex (serviceIndex)}
+        {#each contractDetails.services as service, serviceIndex (serviceIndex)}
           <ServicePriceDetails
             {service}
             onRemoveService={() => onRemoveService(serviceIndex)}
@@ -122,18 +105,18 @@
       </div>
     </div>
 
-    {#if totalContrato !== null}
+    {#if contractDetails !== null}
       <div class="border-t-2 pt-4 mt-4">
         <div class="flex gap-2 justify-between">
           <h1 class="text-2xl font-bold">
-            Total con descuentos: ${totalContrato.total}
+            Total con descuentos: ${contractDetails.total}
           </h1>
         </div>
         <div class="flex gap-2">
           <Button
             type="button"
             bgColor="bg-[#22964F] text-white hover:bg-[#1a6d3b] hover:text-white"
-            onclick={() => generateContract(input)}
+            onclick={() => generateContract(contract)}
             class="mt-4 flex-1"
           >
             Generar contrato

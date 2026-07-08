@@ -75,7 +75,7 @@ const renderSummary = (
     props: {
       rol: 'Broadcaster',
       activeUserId: 1,
-      totalContrato: overrides.totalContrato ?? null,
+      contractDetails: overrides.totalContrato ?? null,
       errorMessages: overrides.errorMessages ?? null,
       onRemoveService: overrides.onRemoveService ?? vi.fn(),
       onRemoveAllServices: overrides.onRemoveAllServices ?? vi.fn(),

@@ -7,7 +7,7 @@
   import * as Select from '$lib/components/ui/select/index.js';
   import type { ServiceNarrative } from '$lib/graphql/schema';
   import DatePicker from './DatePicker.svelte';
-  import type { BaseService } from './types';
+  import type { BaseService, ServiceNarrativeUI } from './types';
 
   let {
     service = $bindable(),
@@ -19,7 +19,19 @@
     handleAddPiece: (pieceName: string, baseService: BaseService) => void;
     handleAddService: (serviceUi: ServiceNarrative) => void;
   };
-
+  let serviceUi = $state<ServiceNarrativeUI>({
+    id: service.serviceId,
+    pieces: [],
+    isNonCommercialContent: false,
+    isInternetBroadcast: false,
+    narrativeMinutes: 0,
+    isPriceSuggested: 0,
+    isExtraRoles: 0,
+    isLipSync: false,
+    date: null,
+  });
+  let isPriceSuggested = $state<boolean>(false);
+  let isExtraRoles = $state<boolean>(false);
   let pieceName = $state<string>('');
 
 </script>
@@ -37,7 +49,7 @@
         <Label for="nombrePieza_{service.serviceId}">Nombre</Label>
         <Input
           id="nombrePieza_{service.serviceId}"
-          bind:value={nombrePieza}
+          bind:value={pieceName}
           type="text"
           placeholder="Nombre de la pieza"
         />
@@ -45,20 +57,20 @@
       <div class="flex items-center gap-2">
         <Checkbox
           id="nonCommercialContent_{service.serviceId}"
-          bind:checked={nonCommercialContent}
+          bind:checked={serviceUi.isNonCommercialContent}
         />
         <Label for="nonCommercialContent_{service.serviceId}">
           Contenido no comercial (-20%)
         </Label>
       </div>
       <div class="flex items-center gap-2">
-        <Checkbox id="lypSinc_{service.serviceId}" bind:checked={lipSync} />
+        <Checkbox id="lypSinc_{service.serviceId}" bind:checked={serviceUi.isLipSync} />
         <Label for="lypSinc_{service.serviceId}">Sincro labial (+20%)</Label>
       </div>
       <div class="flex items-center gap-2">
         <Checkbox
           id="internetBroadcast_{service.serviceId}"
-          bind:checked={internetBroadcast}
+          bind:checked={serviceUi.isInternetBroadcast}
         />
         <Label for="internetBroadcast_{service.serviceId}">
           Difusión en internet (+100%)
@@ -67,11 +79,11 @@
     </div>
     <div class="flex gap-3 px-2">
       <div class="flex items-center gap-2">
-        <Select.Root type="single" bind:value={narrativeMinutes}>
+        <Select.Root type="single" bind:value={serviceUi.narrativeMinutes}>
           <Label>Minutos</Label>
           <Input
             id="narrativeMinutes_{service.serviceId}"
-            bind:value={narrativeMinutes}
+            bind:value={serviceUi.narrativeMinutes}
             type="number"
             placeholder="Minutos"
           />
@@ -88,7 +100,7 @@
           <Input
             class="w-40"
             id="suggestedPrice_{service.serviceId}"
-            bind:value={priceSuggested}
+            bind:value={serviceUi.isPriceSuggested}
             type="number"
             placeholder="Precio sugerido"
           />
@@ -102,12 +114,12 @@
           <Input
             class="w-20"
             id="extraRoles_{service.serviceId}"
-            bind:value={extraRoles}
+            bind:value={serviceUi.isExtraRoles}
             type="number"
             placeholder="Roles extra"
           />
         {/if}
-        <DatePicker bind:selectedDate />
+        <DatePicker bind:selectedDate={serviceUi.date} />
       </div>
       <Button
         type="button"

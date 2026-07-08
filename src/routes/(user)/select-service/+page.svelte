@@ -21,40 +21,26 @@
   import SearchClientBroadcaster from '$lib/components/search-client-broadcaster.svelte';
   import SearchAgency from '$lib/components/search-agency.svelte';
   import CountryPicker from '$lib/components/CountryPicker.svelte';
+  let contract = $state<CampaignInput>({
+    campaign: '',
+    contractSerial: '',
+    countryCode: '',
+    broadcasterId: 0,
+    clientId: 0,
+    services: [],
+  });
   let {
     data,
   }: {
     data: PageData;
   } = $props();
-  type ServiceSelected = {
-    service: NonNullable<ServicesQuery['services']>[number];
-    selectedPrice?: number;
-    selectedDurationId?: string;
-  } | null;
 
-  let userSelectedId = $state<number | null>(null);
-  let campaignName = $state('Test');
-  let serviceSelected: ServiceSelected = $state(null);
   let errorMessages = $state<string | null>(null);
-  let nombrePieza = $state('');
-  let totalServices = $state<CampaignServiceInput[]>([]);
-  let totalContrato = $state<
+  let contractDetails = $state<
     CalculateContractQuery['calculateContract'] | null
   >(null);
-  let isInterior = $state(false);
-  let isPriceSuggested = $state(false);
-  let priceSuggested = $state(null);
-  let nonCommercialContent = $state(false);
-  let internetBroadcast = $state(false);
-  let lipSync = $state(false);
-  let narrativeRoles = $state('0');
-  let narrativeMinutes = $state('');
-  let ivrMessage = $state('');
-  let ivrUpdates = $state(0);
-  let additionalIvrMessage = $state(0);
-  let broadcastInMassMedia = $state(false);
   let fetchServicesResult = $state<OperationResult<ServicesQuery> | null>(null);
-  let selectedContractCountryCode = $state<string>('');
+  let services = $derived(fetchServicesResult?.data?.services ?? []);
   let contractSerial = sessionStorage.getItem('contractSerial');
   onDestroy(() => {
     sessionStorage.removeItem('contractSerial');
@@ -62,34 +48,32 @@
 
   onMount(async () => {
     fetchServicesResult = await fetchServices();
+    if (data.user?.role === 'Broadcaster') {
+      contract.broadcasterId = data.user?.id;
+    } else if (data.user?.role === 'Client') {
+      contract.clientId = data.user?.id;
+    }
+    
   });
-  let services = $derived(fetchServicesResult?.data?.services ?? []);
 
   function validateCampaignInput(): boolean {
-    if (
-      data.user?.role === 'Broadcaster' &&
-      (userSelectedId === null || userSelectedId === undefined)
-    ) {
+    if (contract.clientId === null || contract.clientId === undefined){
       toast.error('Selecciona un cliente', {
         description: 'Debes seleccionar un cliente para continuar',
       });
       return false;
     }
 
-    if (
-      data.user?.role === 'Client' &&
-      (userSelectedId === null || userSelectedId === undefined)
-    ) {
+    if (contract.broadcasterId === null || contract.broadcasterId === undefined) {
       toast.error('Selecciona un broadcaster', {
         description: 'Debes seleccionar un broadcaster para continuar',
       });
       return false;
     }
-
     return true;
   }
 
-  async function handleAddPiece(pieceName: string, svc: any, options: any) {
+  async function handleAddPiece(service : CampaignServiceInput) {
     if (isPriceSuggested && priceSuggested != null) {
       if (svc.basePrice && svc.basePrice > priceSuggested) {
         errorMessages = 'Precio sugerido no puede ser menor al precio base';
@@ -127,113 +111,66 @@
 
     totalServices = totalServices; // Trigger reactivity
 
-    const input: CampaignInput = {
-      broadcasterId:
-        data.user?.role === 'Broadcaster' ? data.user?.id : userSelectedId,
-      clientId: data.user?.role === 'Client' ? data.user?.id : userSelectedId,
-      campaign: campaignName,
-      services: totalServices,
-      countryCode: selectedContractCountryCode, // Aquí podrías agregar lógica para determinar el país si es necesario
-    };
-
-    const result = await calculateServicePrice(input);
+   
+    const result = await calculateServicePrice(contract);
     if (result == null) {
       return;
     }
-    totalContrato = result.data?.calculateContract ?? null;
-    serviceSelected = null;
-    isInterior = false;
-    isPriceSuggested = false;
-    priceSuggested = null;
-    nombrePieza = '';
-    nonCommercialContent = false;
-    internetBroadcast = false;
-    lipSync = false;
-    narrativeRoles = '0';
-    narrativeMinutes = '';
-    ivrMessage = '';
-    ivrUpdates = 0;
-    additionalIvrMessage = 0;
-    broadcastInMassMedia = false;
     checkDurationErrors();
   }
 
   async function removeAllServices() {
-    totalServices = [];
-    totalContrato = null;
+    contract.services = [];
+    contractDetails = null;
     errorMessages = null;
     checkDurationErrors();
   }
 
   async function removeService(index: number) {
-    totalServices = totalServices.filter((_, i) => i !== index);
-
-    if (totalServices.length === 0) {
-      totalContrato = null;
-      return;
-    }
+    contract.services = contract.services.filter((_, i) => i !== index);
 
     if (!validateCampaignInput()) {
       return;
     }
 
-    const input: CampaignInput = {
-      broadcasterId:
-        data.user?.role === 'Broadcaster' ? data.user?.id : userSelectedId,
-      clientId: data.user?.role === 'Client' ? data.user?.id : userSelectedId,
-      campaign: campaignName,
-      services: totalServices,
-      countryCode: selectedContractCountryCode,
-    };
-
-    const result = await calculateServicePrice(input);
+    const result = await calculateServicePrice(contract);
     if (result != null) {
-      totalContrato = result.data?.calculateContract ?? null;
+      contractDetails = result.data?.calculateContract ?? null;
     }
     checkDurationErrors();
   }
 
   async function removePiece(serviceIndex: number, pieceIndex: number) {
-    if (totalServices[serviceIndex].pieces) {
-      totalServices[serviceIndex].pieces = totalServices[
+    if (contract.services[serviceIndex].pieces) {
+      contract.services[serviceIndex].pieces = contract.services[
         serviceIndex
       ].pieces!.filter((_, i) => i !== pieceIndex);
 
-      // Si el servicio no tiene piezas, eliminar el servicio completo
-      if (totalServices[serviceIndex].pieces!.length === 0) {
+      if (contract.services[serviceIndex].pieces!.length === 0) {
         await removeService(serviceIndex);
         return;
       }
 
-      totalServices = totalServices; // Trigger reactivity
+      contract.services = contract.services; 
 
       if (!validateCampaignInput()) {
         return;
       }
 
-      const input: CampaignInput = {
-        broadcasterId:
-          data.user?.role === 'Broadcaster' ? data.user?.id : userSelectedId,
-        clientId: data.user?.role === 'Client' ? data.user?.id : userSelectedId,
-        campaign: campaignName,
-        services: totalServices,
-        countryCode: selectedContractCountryCode,
-      };
-
-      const result = await calculateServicePrice(input);
+      const result = await calculateServicePrice(contract);
       if (result != null) {
-        totalContrato = result.data?.calculateContract ?? null;
+        contractDetails = result.data?.calculateContract ?? null;
       }
     }
   }
 
   async function checkDurationErrors() {
-    if (totalServices.length === 0) {
+    if (contract.services.length === 0) {
       errorMessages = null;
       return;
     }
-    const firstPeriod = totalServices[0].options?.period;
-    const allSamePeriod = totalServices.every(
+    const firstPeriod = contract.services[0].options?.period;
+    const allSamePeriod = contract.services.every(
       (service) => service.options?.period === firstPeriod,
     );
 
@@ -275,32 +212,38 @@
     <div class="flex-1 min-w-[300px] w-full">
       <div class="flex w-full gap-4">
         <div class="flex-1">
-          <CountryPicker bind:countryCode={selectedContractCountryCode} />
+          <CountryPicker bind:countryCode={contract.countryCode} />
         </div>
-
-        <div class="flex-1">
-          <SearchClientBroadcaster
-            rol={data.user?.role}
-            bind:valorId={userSelectedId}
-            disabled={contractSerial == undefined ? false : true}
-          />
-        </div>
+        {#if data.user?.role === 'Broadcaster'}
+          <div class="flex-1">
+            <SearchClientBroadcaster
+              rol={data.user?.role}
+              bind:valorId={contract.clientId}
+              disabled={contractSerial == undefined ? false : true}
+            />
+          </div>
+        {:else if (data.user?.role === 'Client')}
+          <div class="flex-1">
+            <SearchClientBroadcaster
+              rol={data.user?.role}
+              bind:valorId={contract.broadcasterId}
+              disabled={contractSerial == undefined ? false : true}
+            />
+          </div>
+        {/if}
 
         {#if data.user?.role === 'Broadcaster'}
           <div class="flex-1">
             <SearchAgency
-              bind:valorId={userSelectedId}
+              bind:valorId={contract.clientId}
               disabled={contractSerial == undefined ? false : true}
             />
           </div>
         {/if}
       </div>
       <ServiceSummary
-        bind:countryCode={selectedContractCountryCode}
-        bind:valorId={userSelectedId}
-        bind:campaignName
-        bind:services={totalServices}
-        {totalContrato}
+        bind:services={contract.services}
+        totalContrato={contractDetails}
         {errorMessages}
         onRemoveService={(i) => removeService(i)}
         onRemoveAllServices={() => removeAllServices()}

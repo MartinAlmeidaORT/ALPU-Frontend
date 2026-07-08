@@ -1,5 +1,5 @@
-import type { Interval } from "$lib/graphql/schema";
-import type { CalendarDate } from "@internationalized/date";
+import type { Interval } from '$lib/graphql/schema';
+import type { CalendarDate } from '@internationalized/date';
 
 export interface User {
   id: number;
@@ -15,11 +15,11 @@ export interface BaseService {
   pieces: Piece[];
 }
 
-export interface Piece{
+export interface Piece {
   name: string;
 }
 
-export interface ServicePeriodUi extends BaseService {
+export interface ServicePeriodUI extends BaseService {
   period: Interval | null;
   isInterior: boolean;
   isInternalUse: boolean;
@@ -32,5 +32,19 @@ export interface ServiceNarrativeUI extends BaseService {
   isPriceSuggested: number | null;
   isExtraRoles: number | null;
   isLipSync: boolean;
+  date: CalendarDate | null;
+}
+
+export interface ServiceIvrUI extends BaseService {
+  messageText: string;
+  additionalMessages: number;
+  isInterior: boolean;
+  priceOverride: number | null;
+  updates: number | null;
+  date: CalendarDate | null;
+}
+
+export interface ServiceEventUI extends BaseService {
+  ForMassBroadcast: boolean;
   date: CalendarDate | null;
 }

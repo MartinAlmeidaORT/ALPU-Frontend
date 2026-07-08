@@ -5,7 +5,7 @@
   import Label from '$lib/components/ui/label/label.svelte';
   import { Input } from '$lib/components/ui/input/index.js';
   import type { ServicePeriod } from '$lib/graphql/schema';
-  import type { BaseService, ServicePeriodUi } from './types';
+  import type { BaseService, ServicePeriodUI } from './types';
   import { toast } from 'svelte-sonner';
 
   let {
@@ -15,11 +15,11 @@
   }: ServicePeriodData = $props();
   type ServicePeriodData = {
     service: ServicePeriod;
-    handleAddService: (serviceUi: ServicePeriodUi) => void;
+    handleAddService: (serviceUi: ServicePeriodUI) => void;
     handleAddPiece: (pieceName: string, baseService: BaseService) => void;
   };
 
-  let serviceUi = $state<ServicePeriodUi>({
+  let serviceUi = $state<ServicePeriodUI>({
     id: service.serviceId,
     pieces: [],
     period: null,

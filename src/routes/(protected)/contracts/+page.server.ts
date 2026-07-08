@@ -16,7 +16,6 @@ export async function load({
     const state = url.searchParams.get('state') || undefined;
     const after = url.searchParams.get('after') || null;
     let result;
-
     if (state) {
       result = await locals.urql
         .query(

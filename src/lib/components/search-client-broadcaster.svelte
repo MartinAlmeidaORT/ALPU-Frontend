@@ -16,7 +16,7 @@
     disabled = false,
   }: {
     rol: string | null | undefined;
-    valorId?: string | number | null | undefined;
+    valorId?: number | null | undefined;
     disabled?: boolean;
   } = $props();
   let email = $state('');

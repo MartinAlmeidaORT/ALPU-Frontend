@@ -1,27 +1,20 @@
 <script lang="ts">
-  import { Button } from '$lib/components/ui/button/index.js';
-  import { Input } from '$lib/components/ui/input/index.js';
-  import { Checkbox } from '$lib/components/ui/checkbox/index.js';
-  import * as Accordion from '$lib/components/ui/accordion/index.js';
-  import { Textarea } from '$lib/components/ui/textarea/index.js';
-  import Label from '$lib/components/ui/label/label.svelte';
-  import * as Select from '$lib/components/ui/select/index.js';
+
   import type { ServicesQuery } from '$lib/graphql/types/graphql';
   import { toast } from 'svelte-sonner';
   import type { CalendarDate } from '@internationalized/date';
-  import DatePicker from './DatePicker.svelte';
   import ServicePeriod from './ServicePeriod.svelte';
   import type { ServicePeriod as ServicePeriodType } from '$lib/graphql/schema';
   import type { ServiceDate as ServiceDateType } from '$lib/graphql/schema';
   import type { ServiceIvr as ServiceIVRType } from '$lib/graphql/schema';
   import type { ServiceNarrative as ServiceNarrativeType } from '$lib/graphql/schema';
+  import type { BaseService } from '$lib/components/types';
 
   import ServiceDate from './ServiceDate.svelte';
   import ServiceIVR from './ServiceIVR.svelte';
   import ServiceNarrative from './ServiceNarrative.svelte';
   type Service = NonNullable<ServicesQuery['services']>[number];
 
-  // Props
   let {
     service,
     onAddPiece = () => {},
@@ -30,34 +23,16 @@
     onAddPiece?: (pieceName: string, svc: Service, options: any) => void;
   } = $props();
 
-  // Local state
-  let isInterior = $state(false);
-  let isPriceSuggested = $state(false);
-  let priceSuggested: number | null = $state(null);
-  let nombrePieza = $state('');
-  let nonCommercialContent = $state(false);
-  let internetBroadcast = $state(false);
-  let lipSync = $state(false);
-  let narrativeRoles = $state('0');
-  let narrativeMinutes = $state('');
-  let broadcastInMassMedia = $state(false);
-  let selectedPeriod = $state('');
-  let internalUse = $state(false);
-  let additionalIvrMessage = $state(0);
-  let canIvrUpdate = $state(false);
-  let canIvrGetMoreMessages = $state(false);
-  let ivrMessage = $state('');
-  let ivrUpdates = $state(0);
-  let extraRoles = $state(0);
-  let isExtraRoles = $state(false);
-  let selectedDate = $state<CalendarDate | undefined>();
-  function handleAddPiece() {
-    if (!nombrePieza || nombrePieza.trim() === '') {
+  function handleAddPiece(BaseService: BaseService, pieceName: string) {
+    if (!pieceName || pieceName.trim() === '') {
       toast.error('Error al agregar un medio', {
         description: 'La pieza debe tener un nombre',
       });
       return;
     }
+    BaseService.pieces.push({ name: pieceName });
+
+    /////////////////////////////////////////////
     if (
       (service.type === 'NARRATIVE' || service.type === 'IVR' || service.type === 'EVENT') &&
       (!selectedDate || selectedDate.toString() === '')
@@ -169,10 +144,6 @@
 {#if service.__typename === 'ServicePeriod'}
   <ServicePeriod
     bind:service={service as ServicePeriodType}
-    bind:selectedPeriod
-    bind:isInterior
-    bind:internalUse
-    bind:nombrePieza
     {handleAddPiece}
   />
 {:else if service.__typename === 'ServiceDate'}

@@ -5,23 +5,28 @@
   import Label from '$lib/components/ui/label/label.svelte';
   import { Input } from '$lib/components/ui/input/index.js';
   import type { ServicePeriod } from '$lib/graphql/schema';
+  import type { BaseService, ServicePeriodUi } from './types';
+  import { toast } from 'svelte-sonner';
 
   let {
     service = $bindable(),
-    selectedPeriod = $bindable(),
-    isInterior = $bindable(),
-    internalUse = $bindable(),
-    nombrePieza = $bindable(),
+    handleAddService = () => {},
     handleAddPiece = () => {},
   }: ServicePeriodData = $props();
   type ServicePeriodData = {
     service: ServicePeriod;
-    selectedPeriod: string;
-    isInterior: boolean;
-    internalUse: boolean;
-    nombrePieza: string;
-    handleAddPiece: () => void;
+    handleAddService: (serviceUi: ServicePeriodUi) => void;
+    handleAddPiece: (pieceName: string, baseService: BaseService) => void;
   };
+
+  let serviceUi = $state<ServicePeriodUi>({
+    id: service.serviceId,
+    pieces: [],
+    period: null,
+    isInterior: false,
+    isInternalUse: false,
+  });
+  let pieceName = $state<string>('');
 
   function shouldShowSubsiguiente(): boolean {
     return !(
@@ -43,6 +48,17 @@
   function shouldShowForInteralUse(): boolean {
     return service.type == 'CAMERA';
   }
+
+  function confirmService() {
+    handleAddPiece(pieceName, serviceUi);
+    if (!serviceUi.period) {
+      toast.error('Error al agregar un medio', {
+        description: 'Debe seleccionar un periodo',
+      });
+      return;
+    }
+    handleAddService(serviceUi);
+  }
 </script>
 
 <Accordion.Item value={String(service.serviceId)}>
@@ -54,7 +70,7 @@
       <Button
         variant="outline"
         bgColor="bg-[#1F5BB8] text-white hover:bg-[#1a4a94] hover:text-white"
-        onclick={() => (selectedPeriod = servicePrice.interval)}
+        onclick={() => (serviceUi.period = servicePrice.interval)}
         class="flex-1"
       >
         ${servicePrice.basePrice}
@@ -83,7 +99,7 @@
         <div class="flex items-center gap-2">
           <Checkbox
             id="discInterior_{service.serviceId}"
-            bind:checked={isInterior}
+            bind:checked={serviceUi.isInterior}
           />
           <Label for="discInterior_{service.serviceId}"
             >Descuento interior (-70%)</Label
@@ -94,7 +110,7 @@
         <div class="flex items-center gap-2">
           <Checkbox
             id="forInternalUse_{service.serviceId}"
-            bind:checked={internalUse}
+            bind:checked={serviceUi.isInternalUse}
           />
           <Label for="forInternalUse_{service.serviceId}"
             >Para uso interno</Label
@@ -105,7 +121,7 @@
         <Label for="nombrePieza_{service.serviceId}">Nombre</Label>
         <Input
           id="nombrePieza_{service.serviceId}"
-          bind:value={nombrePieza}
+          bind:value={pieceName}
           type="text"
           placeholder="Nombre de la pieza"
         />
@@ -115,7 +131,7 @@
         class="col-span-2"
         variant="outline"
         bgColor="bg-[#22964F] text-white hover:bg-[#1a6d3b] hover:text-white"
-        onclick={() => handleAddPiece()}
+        onclick={() => confirmService()}
       >
         Agregar
       </Button>

@@ -7,36 +7,21 @@
   import * as Select from '$lib/components/ui/select/index.js';
   import type { ServiceNarrative } from '$lib/graphql/schema';
   import DatePicker from './DatePicker.svelte';
-  import type { CalendarDate } from '@internationalized/date';
+  import type { BaseService } from './types';
 
   let {
     service = $bindable(),
-    nombrePieza = $bindable(),
-    isPriceSuggested = $bindable(),
-    priceSuggested = $bindable(),
-    isExtraRoles = $bindable(),
-    extraRoles = $bindable(),
-    nonCommercialContent = $bindable(),
-    lipSync = $bindable(),
-    internetBroadcast = $bindable(),
-    narrativeMinutes = $bindable(),
-    selectedDate = $bindable(),
     handleAddPiece = () => {},
+    handleAddService = () => {},
   }: ServiceNarrativeData = $props();
   type ServiceNarrativeData = {
     service: ServiceNarrative;
-    nombrePieza: string;
-    isPriceSuggested: boolean;
-    priceSuggested: number | null;
-    isExtraRoles: boolean;
-    extraRoles: number | null;
-    nonCommercialContent: boolean;
-    lipSync: boolean;
-    internetBroadcast: boolean;
-    narrativeMinutes: string | undefined;
-    selectedDate: CalendarDate | undefined;
-    handleAddPiece: () => void;
+    handleAddPiece: (pieceName: string, baseService: BaseService) => void;
+    handleAddService: (serviceUi: ServiceNarrative) => void;
   };
+
+  let pieceName = $state<string>('');
+
 </script>
 
 <Accordion.Item value={String(service.serviceId)}>

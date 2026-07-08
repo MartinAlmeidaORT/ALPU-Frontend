@@ -7,7 +7,7 @@
     calculateServicePrice,
   } from '$lib/graphql/queries/service';
   import { toast } from 'svelte-sonner';
-  import { onMount } from 'svelte';
+  import { onDestroy, onMount } from 'svelte';
   import type {
     CampaignInput,
     CampaignServiceInput,
@@ -56,6 +56,9 @@
   let fetchServicesResult = $state<OperationResult<ServicesQuery> | null>(null);
   let selectedContractCountryCode = $state<string>('');
   let contractSerial = sessionStorage.getItem('contractSerial');
+  onDestroy(() => {
+    sessionStorage.removeItem('contractSerial');
+  });
 
   onMount(async () => {
     fetchServicesResult = await fetchServices();

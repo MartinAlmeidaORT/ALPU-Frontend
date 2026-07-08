@@ -21,13 +21,11 @@
     onRemoveService = () => {},
     onRemoveAllServices = () => {},
     onRemovePiece = () => {},
-    activeUserId,
     valorId = $bindable(),
     countryCode = $bindable(),
     campaignName = $bindable('Test'),
     services = $bindable([]),
   }: {
-    activeUserId?: number | null | undefined;
     totalContrato?: CalculateContractQuery['calculateContract'] | null;
     errorMessages?: string | null;
     onRemoveService?: (index: number) => void;
@@ -42,11 +40,11 @@
   if (contractSerial == 'undefined') {
     contractSerial = null;
   }
+  console.log(page.data)
   let input = $derived<CampaignInput>({
     contractSerial: sessionStorage.getItem('contractSerial'),
-    broadcasterId:
-      page.data.user?.role === 'Broadcaster' ? activeUserId : valorId,
-    clientId: page.data.user?.role === 'Client' ? activeUserId : valorId,
+    broadcasterId: page.data.user?.role === 'Broadcaster' ? page.data.user?.id : valorId,
+    clientId: page.data.user?.role === 'Client' ? page.data.user?.id : valorId,
     campaign: campaignName,
     services: services,
     countryCode: countryCode,
@@ -137,7 +135,6 @@
             bgColor="bg-[#22964F] text-white hover:bg-[#1a6d3b] hover:text-white"
             onclick={() => generateContract(input)}
             class="mt-4 flex-1"
-            disabled={page.data.user?.state !== UserState.Enabled}
           >
             Generar contrato
           </Button>

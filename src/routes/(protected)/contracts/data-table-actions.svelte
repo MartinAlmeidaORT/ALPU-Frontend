@@ -130,7 +130,6 @@
     try {
       await cancelContract(contractId);
       sessionStorage.setItem('contractSerial', contractSerial);
-      console.log('contractSerial set to:', contractSerial);
       goto('/select-service');
     } catch (error) {
       toast.error('Error al reestructurar el contrato');

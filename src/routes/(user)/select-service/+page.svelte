@@ -8,10 +8,7 @@
   } from '$lib/graphql/queries/service';
   import { toast } from 'svelte-sonner';
   import { onDestroy, onMount } from 'svelte';
-  import type {
-    CampaignInput,
-    CampaignServiceInput,
-  } from '$lib/graphql/schema';
+  import type { CampaignServiceInput } from '$lib/graphql/schema';
   import type {
     ServicesQuery,
     CalculateContractQuery,
@@ -21,13 +18,14 @@
   import SearchClientBroadcaster from '$lib/components/search-client-broadcaster.svelte';
   import SearchAgency from '$lib/components/search-agency.svelte';
   import CountryPicker from '$lib/components/CountryPicker.svelte';
-  let contract = $state<CampaignInput>(resetContract());
+  import { Contract, BaseServiceUI } from '$lib/components/Contract.svelte';
   let {
     data,
   }: {
     data: PageData;
   } = $props();
 
+  let contract = $state<Contract>(new Contract());
   let errorMessages = $state<string | null>(null);
   let contractDetails = $state<
     CalculateContractQuery['calculateContract'] | null
@@ -35,7 +33,7 @@
   let fetchServicesResult = $state<OperationResult<ServicesQuery> | null>(null);
   let services = $derived(fetchServicesResult?.data?.services ?? []);
   let contractSerial = sessionStorage.getItem('contractSerial');
-  
+
   onDestroy(() => {
     sessionStorage.removeItem('contractSerial');
   });
@@ -49,32 +47,18 @@
     }
   });
 
-  function resetContract() : CampaignInput {
-    return {
-      campaign: '',
-      contractSerial: '',
-      countryCode: '',
-      broadcasterId: 0,
-      clientId: 0,
-      services: [],
-    }
-  }
-
-  function resetFieldData() {
-    contract = resetContract();
-    errorMessages = null;
-    contractDetails = null;
-  }
-
   function validateCampaignInput(): boolean {
-    if (contract.clientId === null || contract.clientId === undefined){
+    if (contract.clientId === null || contract.clientId === undefined) {
       toast.error('Selecciona un cliente', {
         description: 'Debes seleccionar un cliente para continuar',
       });
       return false;
     }
 
-    if (contract.broadcasterId === null || contract.broadcasterId === undefined) {
+    if (
+      contract.broadcasterId === null ||
+      contract.broadcasterId === undefined
+    ) {
       toast.error('Selecciona un broadcaster', {
         description: 'Debes seleccionar un broadcaster para continuar',
       });
@@ -83,14 +67,52 @@
     return true;
   }
 
-  async function calculateService(service : CampaignServiceInput) {
-    contract.services = contract.services.filter((s) => s.serviceId !== service.serviceId)
-    contract.services.push(service);
-    const result = await calculateServicePrice(contract);
+  async function checkDurationErrors() {
+    if (contract.services.length === 0) {
+      errorMessages = null;
+      return;
+    }
+    const periodOf = (s: BaseServiceUI) =>
+      'period' in s ? s.period : undefined;
+    const firstPeriod = periodOf(contract.services[0]);
+    const allSamePeriod = contract.services.every(
+      (service) => periodOf(service) === firstPeriod,
+    );
+
+    if (!allSamePeriod) {
+      errorMessages =
+        'Está agregando servicios con duraciones distintas. Esto queda a criterio del usuario y puede afectar el contrato';
+    } else {
+      errorMessages = null;
+    }
+  }
+
+  async function recalculate() {
+    if (!validateCampaignInput()) {
+      return;
+    }
+    const result = await calculateServicePrice(contract.toInput());
     if (!result.error) {
       contractDetails = result.data?.calculateContract ?? null;
     }
     checkDurationErrors();
+  }
+
+  // async function calculateService(service: CampaignServiceInput) {
+  //   contract.services = contract.services.filter(
+  //     (s) => s.serviceId !== service.serviceId,
+  //   );
+  //   contract.services.push(service);
+  //   const result = await calculateServicePrice(contract);
+  //   if (!result.error) {
+  //     contractDetails = result.data?.calculateContract ?? null;
+  //   }
+  //   checkDurationErrors();
+  // }
+
+  async function addService(service: BaseServiceUI) {
+    contract.addOrUpdateService(service);
+    await recalculate();
   }
 
   async function removeAllServices() {
@@ -101,57 +123,23 @@
   }
 
   async function removeService(index: number) {
-    contract.services = contract.services.filter((_, i) => i !== index);
-
-    if (!validateCampaignInput()) {
-      return;
-    }
-
-    const result = await calculateServicePrice(contract);
-    if (result != null) {
-      contractDetails = result.data?.calculateContract ?? null;
-    }
+    contract.removeService(index);
     checkDurationErrors();
+    await recalculate();
   }
 
   async function removePiece(serviceIndex: number, pieceIndex: number) {
-    if (contract.services[serviceIndex].pieces) {
-      contract.services[serviceIndex].pieces = contract.services[
-        serviceIndex
-      ].pieces!.filter((_, i) => i !== pieceIndex);
+    const service = contract.services[serviceIndex];
+    if (!service) return;
 
-      if (contract.services[serviceIndex].pieces!.length === 0) {
-        await removeService(serviceIndex);
-        return;
-      }
+    contract.removePiece(serviceIndex, pieceIndex);
 
-      if (!validateCampaignInput()) {
-        return;
-      }
-
-      const result = await calculateServicePrice(contract);
-      if (result != null) {
-        contractDetails = result.data?.calculateContract ?? null;
-      }
-    }
-  }
-
-  async function checkDurationErrors() {
-    if (contract.services.length === 0) {
-      errorMessages = null;
+    if (service.pieces.length === 0) {
+      await removeService(serviceIndex);
       return;
     }
-    const firstPeriod = contract.services[0].options?.period;
-    const allSamePeriod = contract.services.every(
-      (service) => service.options?.period === firstPeriod,
-    );
 
-    if (!allSamePeriod) {
-      errorMessages =
-        'Está agregando servicios con duraciones distintas. Esto queda a criterio del usuario y puede afectar el contrato';
-    } else {
-      errorMessages = null;
-    }
+    await recalculate();
   }
 </script>
 
@@ -172,10 +160,7 @@
       </div>
       <Accordion.Root type="single" class="w-full" value="item-1">
         {#each services as service (service.serviceId)}
-          <ServiceItem
-            {service}
-            calculateService={calculateService}
-          />
+          <ServiceItem {service} onAddService={addService} />
         {/each}
       </Accordion.Root>
     </div>
@@ -193,7 +178,7 @@
               disabled={contractSerial == undefined ? false : true}
             />
           </div>
-        {:else if (data.user?.role === 'Client')}
+        {:else if data.user?.role === 'Client'}
           <div class="flex-1">
             <SearchClientBroadcaster
               rol={data.user?.role}
@@ -213,8 +198,8 @@
         {/if}
       </div>
       <ServiceSummary
-        contract={contract}
-        contractDetails={contractDetails}
+        {contract}
+        {contractDetails}
         {errorMessages}
         onRemoveService={(i) => removeService(i)}
         onRemoveAllServices={() => removeAllServices()}

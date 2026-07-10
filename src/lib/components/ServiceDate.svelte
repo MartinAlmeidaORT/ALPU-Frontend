@@ -6,8 +6,8 @@
   import { Input } from '$lib/components/ui/input/index.js';
   import type { ServiceDate } from '$lib/graphql/schema';
   import DatePicker from './DatePicker.svelte';
-  import type { BaseService, ServiceEventUI } from './types';
   import { validateDate } from '$lib/browser/utils';
+  import { ServiceEventUI, BaseServiceUI } from './Contract.svelte';
 
   let {
     service = $bindable(),
@@ -16,17 +16,11 @@
   }: ServiceDateData = $props();
   type ServiceDateData = {
     service: ServiceDate;
-    handleAddPiece: (pieceName: string, baseService: BaseService) => void;
+    handleAddPiece: (pieceName: string, baseService: BaseServiceUI) => void;
     handleAddService: (serviceUi: ServiceEventUI) => void;
   };
 
-  let serviceUi = $state<ServiceEventUI>({
-    id: service.serviceId,
-    pieces: [],
-    forMassBroadcast: false,
-    date: undefined,
-    type: service.type,
-  });
+  let serviceUi = $state<ServiceEventUI>(new ServiceEventUI(service));
   let pieceName = $state<string>('');
 
   function confirmService() {
@@ -35,7 +29,6 @@
       handleAddService(serviceUi);
     }
   }
-
 </script>
 
 <Accordion.Item value={String(service.serviceId)}>

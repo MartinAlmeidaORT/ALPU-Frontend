@@ -7,9 +7,9 @@
   import { Textarea } from '$lib/components/ui/textarea/index.js';
   import type { ServiceIvr } from '$lib/graphql/schema';
   import DatePicker from './DatePicker.svelte';
-  import type { ServiceIvrUI, BaseService } from './types';
   import { validateDate } from '$lib/browser/utils';
   import { toast } from 'svelte-sonner';
+  import { ServiceIvrUI, BaseServiceUI } from './Contract.svelte';
 
   let {
     service = $bindable(),
@@ -18,58 +18,58 @@
   }: ServiceIvrData = $props();
   type ServiceIvrData = {
     service: ServiceIvr;
-    handleAddPiece: (pieceName: string, baseService: BaseService) => void;
+    handleAddPiece: (pieceName: string, baseService: BaseServiceUI) => void;
     handleAddService: (serviceUi: ServiceIvrUI) => void;
   };
 
-  let serviceUi = $state<ServiceIvrUI>({
-    id: service.serviceId,
-    pieces: [],
-    messageText: '',
-    additionalMessages: 0,
-    isInterior: false,
-    priceOverride: null,
-    updates: null,
-    date: undefined,
-    type: service.type,
-  });
+  let serviceUi = $state<ServiceIvrUI>(new ServiceIvrUI(service));
   let pieceName = $state<string>('');
 
   let isPriceSuggested = $state<boolean>(false);
   let areAdditionalMessages = $state<boolean>(false);
   let hasUpdates = $state<boolean>(false);
 
-    function confirmService() {
-      if (validateIvr()) {
-        handleAddPiece(pieceName, serviceUi);
-        handleAddService(serviceUi);
-      }
+  function confirmService() {
+    if (validateIvr()) {
+      handleAddPiece(pieceName, serviceUi);
+      handleAddService(serviceUi);
     }
+  }
 
-    function validateIvr() {
-      if (!validateDate(serviceUi.date)) {
-        return false;
-      }
-      if (isPriceSuggested && (serviceUi.priceOverride === null || serviceUi.priceOverride <= service.basePrice)) {
-        toast.error('Error al agregar un medio', {
-          description: 'Debe ingresar un precio sugerido válido y mayor al mínimo',
-        });
-        return false;
-      }
-      if (areAdditionalMessages && (serviceUi.additionalMessages === null || serviceUi.additionalMessages < 0)) {
-        toast.error('Error al agregar un medio', {
-          description: 'Debe ingresar una cantidad válida de mensajes adicionales',
-        });
-        return false;
-      }
-      if (hasUpdates && (serviceUi.updates === null || serviceUi.updates < 0)) {
-        toast.error('Error al agregar un medio', {
-          description: 'Debe ingresar una cantidad válida de actualizaciones',
-        });
-        return false;
-      }
-      return true;
+  function validateIvr() {
+    if (!validateDate(serviceUi.date)) {
+      return false;
     }
+    if (
+      isPriceSuggested &&
+      (serviceUi.priceOverride === null ||
+        serviceUi.priceOverride <= service.basePrice)
+    ) {
+      toast.error('Error al agregar un medio', {
+        description:
+          'Debe ingresar un precio sugerido válido y mayor al mínimo',
+      });
+      return false;
+    }
+    if (
+      areAdditionalMessages &&
+      (serviceUi.additionalMessages === null ||
+        serviceUi.additionalMessages < 0)
+    ) {
+      toast.error('Error al agregar un medio', {
+        description:
+          'Debe ingresar una cantidad válida de mensajes adicionales',
+      });
+      return false;
+    }
+    if (hasUpdates && (serviceUi.updates === null || serviceUi.updates < 0)) {
+      toast.error('Error al agregar un medio', {
+        description: 'Debe ingresar una cantidad válida de actualizaciones',
+      });
+      return false;
+    }
+    return true;
+  }
 </script>
 
 <Accordion.Item value={String(service.serviceId)}>

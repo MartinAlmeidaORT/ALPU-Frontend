@@ -5,8 +5,8 @@
   import Label from '$lib/components/ui/label/label.svelte';
   import { Input } from '$lib/components/ui/input/index.js';
   import type { ServicePeriod } from '$lib/graphql/schema';
-  import type { BaseService, ServicePeriodUI } from './types';
   import { toast } from 'svelte-sonner';
+  import { ServicePeriodUI, BaseServiceUI } from './Contract.svelte';
 
   let {
     service = $bindable(),
@@ -16,17 +16,10 @@
   type ServicePeriodData = {
     service: ServicePeriod;
     handleAddService: (serviceUi: ServicePeriodUI) => void;
-    handleAddPiece: (pieceName: string, baseService: BaseService) => void;
+    handleAddPiece: (pieceName: string, baseService: BaseServiceUI) => void;
   };
 
-  let serviceUi = $state<ServicePeriodUI>({
-    id: service.serviceId,
-    pieces: [],
-    period: null,
-    isInterior: false,
-    isInternalUse: false,
-    type: service.type,
-  });
+  let serviceUi = $state<ServicePeriodUI>(new ServicePeriodUI(service));
   let pieceName = $state<string>('');
 
   function shouldShowSubsiguiente(): boolean {

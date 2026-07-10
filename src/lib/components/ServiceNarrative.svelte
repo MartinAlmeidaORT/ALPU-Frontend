@@ -7,9 +7,9 @@
   import * as Select from '$lib/components/ui/select/index.js';
   import type { ServiceNarrative } from '$lib/graphql/schema';
   import DatePicker from './DatePicker.svelte';
-  import type { BaseService, ServiceNarrativeUI } from './types';
   import { validateDate } from '$lib/browser/utils';
   import { toast } from 'svelte-sonner';
+  import { ServiceNarrativeUI, BaseServiceUI } from './Contract.svelte';
 
   let {
     service = $bindable(),
@@ -18,21 +18,10 @@
   }: ServiceNarrativeData = $props();
   type ServiceNarrativeData = {
     service: ServiceNarrative;
-    handleAddPiece: (pieceName: string, baseService: BaseService) => void;
+    handleAddPiece: (pieceName: string, baseService: BaseServiceUI) => void;
     handleAddService: (serviceUi: ServiceNarrativeUI) => void;
   };
-  let serviceUi = $state<ServiceNarrativeUI>({
-    id: service.serviceId,
-    pieces: [],
-    isNonCommercialContent: false,
-    isInternetBroadcast: false,
-    narrativeMinutes: 0,
-    isPriceSuggested: 0,
-    isExtraRoles: 0,
-    isLipSync: false,
-    date: undefined,
-    type: service.type,
-  });
+  let serviceUi = $state<ServiceNarrativeUI>(new ServiceNarrativeUI(service));
   let isPriceSuggested = $state<boolean>(false);
   let isExtraRoles = $state<boolean>(false);
   let pieceName = $state<string>('');
@@ -48,19 +37,30 @@
     if (!validateDate(serviceUi.date)) {
       return false;
     }
-    if (isPriceSuggested && (serviceUi.isPriceSuggested === null || serviceUi.isPriceSuggested <= service.basePrice)) {
+    if (
+      isPriceSuggested &&
+      (serviceUi.isPriceSuggested === null ||
+        serviceUi.isPriceSuggested <= service.basePrice)
+    ) {
       toast.error('Error al agregar un medio', {
-        description: 'Debe ingresar un precio sugerido válido y mayor al mínimo',
+        description:
+          'Debe ingresar un precio sugerido válido y mayor al mínimo',
       });
       return false;
     }
-    if (serviceUi.narrativeMinutes === null || serviceUi.narrativeMinutes <= 0) {
+    if (
+      serviceUi.narrativeMinutes === null ||
+      serviceUi.narrativeMinutes <= 0
+    ) {
       toast.error('Error al agregar un medio', {
         description: 'Debe ingresar una cantidad válida de minutos',
       });
       return false;
     }
-    if (isExtraRoles && (serviceUi.isExtraRoles === null || serviceUi.isExtraRoles <= 0)) {
+    if (
+      isExtraRoles &&
+      (serviceUi.isExtraRoles === null || serviceUi.isExtraRoles <= 0)
+    ) {
       toast.error('Error al agregar un medio', {
         description: 'Debe ingresar una cantidad válida de roles adicionales',
       });
@@ -98,7 +98,10 @@
         </Label>
       </div>
       <div class="flex items-center gap-2">
-        <Checkbox id="lypSinc_{service.serviceId}" bind:checked={serviceUi.isLipSync} />
+        <Checkbox
+          id="lypSinc_{service.serviceId}"
+          bind:checked={serviceUi.isLipSync}
+        />
         <Label for="lypSinc_{service.serviceId}">Sincro labial (+20%)</Label>
       </div>
       <div class="flex items-center gap-2">

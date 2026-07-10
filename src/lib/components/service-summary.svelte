@@ -10,6 +10,7 @@
   import { GENERATE_CONTRACT_MUTATION } from '$lib/graphql/queries/contracts';
   import ServicePriceDetails from './ServicePriceDetails.svelte';
   import { page } from '$app/state';
+  import type { Contract } from './Contract.svelte';
   let contractSerial: string | null = '';
   const urqlClient = createUrqlClient(page.data.token);
 
@@ -26,24 +27,24 @@
     onRemoveService?: (index: number) => void;
     onRemoveAllServices?: () => void;
     onRemovePiece?: (serviceIndex: number, pieceIndex: number) => void;
-    contract: CampaignInput;
+    contract: Contract;
   } = $props();
   contractSerial = sessionStorage.getItem('contractSerial');
   if (contractSerial == 'undefined') {
     contractSerial = null;
   }
 
-  async function generateContract(input: CampaignInput) {
+  async function generateContract() {
     if (
-      input.countryCode === undefined ||
-      input.countryCode === '' ||
-      input.countryCode === 'Seleccionar país'
+      contract.countryCode === undefined ||
+      contract.countryCode === '' ||
+      contract.countryCode === 'Seleccionar país'
     ) {
       errorMessages = 'Por favor, selecciona un país para el contrato.';
       return;
     }
     const result = await urqlClient
-      .mutation(GENERATE_CONTRACT_MUTATION, { input })
+      .mutation(GENERATE_CONTRACT_MUTATION, { input: contract.toInput() })
       .toPromise();
     if (result.error) {
       errorMessages = 'Error al generar el contrato. Intenta nuevamente.';
@@ -116,7 +117,7 @@
           <Button
             type="button"
             bgColor="bg-[#22964F] text-white hover:bg-[#1a6d3b] hover:text-white"
-            onclick={() => generateContract(contract)}
+            onclick={() => generateContract()}
             class="mt-4 flex-1"
           >
             Generar contrato

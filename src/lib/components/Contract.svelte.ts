@@ -8,19 +8,19 @@ import type { CampaignServiceInput } from '$lib/graphql/types/graphql';
 import type { CalendarDate } from '@internationalized/date';
 
 export class Contract {
-  contractSerial: string | null;
-  clientId: number;
-  broadcasterId: number;
-  campaignName: string | null;
-  countryCode: string | null;
-  services: BaseServiceUI[];
+  contractSerial= $state<string | null>(null);
+  clientId = $state<number>(0);
+  broadcasterId = $state<number>(0);
+  campaignName= $state<string | null>(null);
+  countryCode = $state<string | undefined>(undefined);
+  services= $state<BaseServiceUI[]>([]);
 
   constructor() {
     this.contractSerial = null;
     this.clientId = 0;
     this.broadcasterId = 0;
     this.campaignName = null;
-    this.countryCode = null;
+    this.countryCode = undefined;
     this.services = [];
   }
 
@@ -57,7 +57,7 @@ export class Contract {
 
 export class BaseServiceUI {
   id: number;
-  pieces: Piece[];
+  pieces = $state<Piece[]>([]);
   type: string | null;
 
   constructor(service: Service) {
@@ -76,9 +76,9 @@ export class BaseServiceUI {
 }
 
 export class ServicePeriodUI extends BaseServiceUI {
-  period: Interval | null;
-  isInterior: boolean;
-  isInternalUse: boolean;
+  period = $state<Interval | null>(null);
+  isInterior = $state<boolean>(false);
+  isInternalUse = $state<boolean>(false);
 
   constructor(service: Service) {
     super(service);
@@ -123,13 +123,13 @@ export class ServicePeriodUI extends BaseServiceUI {
 }
 
 export class ServiceNarrativeUI extends BaseServiceUI {
-  isNonCommercialContent: boolean;
-  isInternetBroadcast: boolean;
-  narrativeMinutes: number;
-  isPriceSuggested: number | null;
-  isExtraRoles: number | null;
-  isLipSync: boolean;
-  date: CalendarDate | null;
+  isNonCommercialContent = $state<boolean>(false);
+  isInternetBroadcast = $state<boolean>(false);
+  narrativeMinutes = $state<number>(0);
+  isPriceSuggested = $state<number | null>(null);
+  isExtraRoles = $state<number>(0);
+  isLipSync = $state<boolean>(false);
+  date = $state<CalendarDate | undefined>(undefined);
 
   constructor(service: Service) {
     super(service);
@@ -137,9 +137,9 @@ export class ServiceNarrativeUI extends BaseServiceUI {
     this.isInternetBroadcast = false;
     this.narrativeMinutes = 0;
     this.isPriceSuggested = null;
-    this.isExtraRoles = null;
+    this.isExtraRoles = 0;
     this.isLipSync = false;
-    this.date = null;
+    this.date = undefined;
   }
 
   toInput(): CampaignServiceInput {
@@ -153,19 +153,19 @@ export class ServiceNarrativeUI extends BaseServiceUI {
         onInternet: this.isInternetBroadcast,
         hasLipSync: this.isLipSync,
         priceOverride: this.isPriceSuggested,
-        date: this.date,
+        date: this.date?.toString(),
       },
     };
   }
 }
 
 export class ServiceIvrUI extends BaseServiceUI {
-  messageText: string | null;
-  additionalMessages: number;
-  isInterior: boolean;
-  priceOverride: number | null;
-  updates: number | null;
-  date: CalendarDate | null;
+  messageText = $state<string | null>(null);
+  additionalMessages = $state<number>(0);
+  isInterior = $state<boolean>(false);
+  priceOverride = $state<number | null>(null);
+  updates = $state<number>(0);
+  date = $state<CalendarDate | undefined>(undefined);
 
   constructor(service: Service) {
     super(service);
@@ -173,8 +173,8 @@ export class ServiceIvrUI extends BaseServiceUI {
     this.additionalMessages = 0;
     this.isInterior = false;
     this.priceOverride = null;
-    this.updates = null;
-    this.date = null;
+    this.updates = 0;
+    this.date = undefined;
   }
 
   toInput(): CampaignServiceInput {
@@ -187,20 +187,20 @@ export class ServiceIvrUI extends BaseServiceUI {
         isInterior: this.isInterior,
         priceOverride: this.priceOverride,
         updates: this.updates,
-        date: this.date,
+        date: this.date?.toString(),
       },
     };
   }
 }
 
 export class ServiceEventUI extends BaseServiceUI {
-  forMassBroadcast: boolean;
-  date: CalendarDate | null;
+  forMassBroadcast = $state<boolean>(false);
+  date = $state<CalendarDate | undefined>(undefined);
 
   constructor(service: Service) {
     super(service);
     this.forMassBroadcast = false;
-    this.date = null;
+    this.date = undefined;
   }
 
   toInput(): CampaignServiceInput {
@@ -209,7 +209,7 @@ export class ServiceEventUI extends BaseServiceUI {
       pieces: this.pieces,
       options: {
         forMassBroadcast: this.forMassBroadcast,
-        date: this.date,
+        date: this.date?.toString(),
       },
     };
   }

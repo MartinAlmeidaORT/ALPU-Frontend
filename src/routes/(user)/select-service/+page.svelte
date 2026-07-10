@@ -8,7 +8,6 @@
   } from '$lib/graphql/queries/service';
   import { toast } from 'svelte-sonner';
   import { onDestroy, onMount } from 'svelte';
-  import type { CampaignServiceInput } from '$lib/graphql/schema';
   import type {
     ServicesQuery,
     CalculateContractQuery,
@@ -97,18 +96,6 @@
     }
     checkDurationErrors();
   }
-
-  // async function calculateService(service: CampaignServiceInput) {
-  //   contract.services = contract.services.filter(
-  //     (s) => s.serviceId !== service.serviceId,
-  //   );
-  //   contract.services.push(service);
-  //   const result = await calculateServicePrice(contract);
-  //   if (!result.error) {
-  //     contractDetails = result.data?.calculateContract ?? null;
-  //   }
-  //   checkDurationErrors();
-  // }
 
   async function addService(service: BaseServiceUI) {
     contract.addOrUpdateService(service);

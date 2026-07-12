@@ -47,19 +47,16 @@
   });
 
   function validateCampaignInput(): boolean {
-    if (contract.clientId === null || contract.clientId === undefined) {
+    if (contract.clientId === 0) {
       toast.error('Selecciona un cliente', {
-        description: 'Debes seleccionar un cliente para continuar',
+      description: 'Debes seleccionar un cliente para continuar',
       });
       return false;
     }
 
-    if (
-      contract.broadcasterId === null ||
-      contract.broadcasterId === undefined
-    ) {
+    if (contract.broadcasterId === 0) {
       toast.error('Selecciona un broadcaster', {
-        description: 'Debes seleccionar un broadcaster para continuar',
+      description: 'Debes seleccionar un broadcaster para continuar',
       });
       return false;
     }
@@ -103,7 +100,7 @@
   }
 
   async function removeAllServices() {
-    contract.services = [];
+    contract.removeAllServices();
     contractDetails = null;
     errorMessages = null;
     checkDurationErrors();
@@ -111,6 +108,10 @@
 
   async function removeService(index: number) {
     contract.removeService(index);
+    if (contract.services.length === 0) {
+      contractDetails = null;
+      errorMessages = null;
+    }
     checkDurationErrors();
     await recalculate();
   }

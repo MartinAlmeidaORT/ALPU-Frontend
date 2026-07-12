@@ -75,13 +75,11 @@
 
   <h1 class="text-2xl font-bold mb-4">Total a pagar</h1>
 
-  {#if !contractDetails}
+  {#if !contractDetails || contractDetails.services.length === 0}
     <span>No ha seleccionado ningún servicio.</span>
   {:else}
     <div class="grid grid-cols-3 gap-2 max-h-96 overflow-y-auto">
-      <div
-        class="space-y-2 border border-[#cad8e4] rounded p-2 flex flex-col text-left"
-      >
+      <div class="space-y-2 border border-[#cad8e4] rounded p-2 flex flex-col text-left">
         <span class="font-bold text-[#1e293b]">Descuentos del contrato</span>
         {#each contractDetails.adjustments as adjustment}
           <div class="flex bg-[#ffffff] rounded gap-2">
@@ -93,7 +91,6 @@
           </div>
         {/each}
       </div>
-
       <div class="col-span-2 space-y-2">
         {#each contractDetails.services as service, serviceIndex (serviceIndex)}
           <ServicePriceDetails
@@ -105,33 +102,30 @@
         {/each}
       </div>
     </div>
-
-    {#if contractDetails !== null}
-      <div class="border-t-2 pt-4 mt-4">
-        <div class="flex gap-2 justify-between">
-          <h1 class="text-2xl font-bold">
-            Total con descuentos: ${contractDetails.total}
-          </h1>
-        </div>
-        <div class="flex gap-2">
-          <Button
-            type="button"
-            bgColor="bg-[#22964F] text-white hover:bg-[#1a6d3b] hover:text-white"
-            onclick={() => generateContract()}
-            class="mt-4 flex-1"
-          >
-            Generar contrato
-          </Button>
-          <Button
-            type="button"
-            bgColor="bg-red-500 text-white hover:bg-red-600 hover:text-white"
-            onclick={() => onRemoveAllServices()}
-            class="mt-4 flex-1"
-          >
-            Borrar todo
-          </Button>
-        </div>
+    <div class="border-t-2 pt-4 mt-4">
+      <div class="flex gap-2 justify-between">
+        <h1 class="text-2xl font-bold">
+          Total con descuentos: ${contractDetails.total}
+        </h1>
       </div>
-    {/if}
+      <div class="flex gap-2">
+        <Button
+          type="button"
+          bgColor="bg-[#22964F] text-white hover:bg-[#1a6d3b] hover:text-white"
+          onclick={() => generateContract()}
+          class="mt-4 flex-1"
+        >
+          Generar contrato
+        </Button>
+        <Button
+          type="button"
+          bgColor="bg-red-500 text-white hover:bg-red-600 hover:text-white"
+          onclick={() => onRemoveAllServices()}
+          class="mt-4 flex-1"
+        >
+          Borrar todo
+        </Button>
+      </div>
+    </div>
   {/if}
 </div>

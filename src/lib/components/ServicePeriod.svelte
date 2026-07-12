@@ -44,13 +44,13 @@
   }
 
   function confirmService() {
-    handleAddPiece(pieceName, serviceUi);
     if (!serviceUi.period) {
       toast.error('Error al agregar un medio', {
         description: 'Debe seleccionar un periodo',
       });
       return;
     }
+    handleAddPiece(pieceName, serviceUi);
     handleAddService(serviceUi);
   }
 </script>

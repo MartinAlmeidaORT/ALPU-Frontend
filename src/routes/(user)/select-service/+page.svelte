@@ -24,7 +24,14 @@
     data: PageData;
   } = $props();
 
-  let contract = $state<Contract>(new Contract());
+  let contract = $derived<Contract>(
+    data.existingContract
+      ? Contract.fromContract(data.existingContract)
+      : new Contract(),
+  );
+
+  $effect(() => console.log($state.snapshot(contract)));
+
   let errorMessages = $state<string | null>(null);
   let contractDetails = $state<
     CalculateContractQuery['calculateContract'] | null
@@ -49,14 +56,14 @@
   function validateCampaignInput(): boolean {
     if (contract.clientId === 0) {
       toast.error('Selecciona un cliente', {
-      description: 'Debes seleccionar un cliente para continuar',
+        description: 'Debes seleccionar un cliente para continuar',
       });
       return false;
     }
 
     if (contract.broadcasterId === 0) {
       toast.error('Selecciona un broadcaster', {
-      description: 'Debes seleccionar un broadcaster para continuar',
+        description: 'Debes seleccionar un broadcaster para continuar',
       });
       return false;
     }

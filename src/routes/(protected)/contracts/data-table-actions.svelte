@@ -123,14 +123,10 @@
     }
   }
 
-  async function restructureContract(
-    contractId: string,
-    contractSerial: string,
-  ) {
+  async function restructureContract(contractId: string) {
     try {
       await cancelContract(contractId);
-      sessionStorage.setItem('contractSerial', contractSerial);
-      goto('/select-service');
+      goto(`select-service?contractId=${contractId}`);
     } catch (error) {
       toast.error('Error al reestructurar el contrato');
     }

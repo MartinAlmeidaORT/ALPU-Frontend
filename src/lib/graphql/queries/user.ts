@@ -34,6 +34,27 @@ const BROADCASTER_QUERY = graphql(`
       firstName
       lastName
       email
+      photo
+    }
+  }
+`);
+
+export const BROADCASTERS_QUERY = graphql(`
+  query broadcasters($first: Int, $after: String) {
+    broadcasters(first: $first, after: $after, where: { userState: { eq: ENABLED } }) {
+      userId
+      firstName
+      lastName
+      email
+      photo
+      skills {
+        skillId
+        name
+      }
+      languages {
+        languageId
+        name
+      }
     }
   }
 `);

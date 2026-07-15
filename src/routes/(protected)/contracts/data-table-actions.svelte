@@ -54,7 +54,6 @@
   const handleAction = async (
     action: string,
     contractId: string,
-    contractSerial: string,
   ) => {
     switch (action) {
       case 'cancel':
@@ -67,7 +66,7 @@
         await viewContract(contractId);
         break;
       case 'reestructurar':
-        await restructureContract(contractId, contractSerial);
+        await restructureContract(contractId);
         break;
       default:
         toast.error('Acción no reconocida');
@@ -125,7 +124,6 @@
 
   async function restructureContract(contractId: string) {
     try {
-      await cancelContract(contractId);
       goto(`select-service?contractId=${contractId}`);
     } catch (error) {
       toast.error('Error al reestructurar el contrato');
@@ -155,8 +153,7 @@
           onclick={() =>
             handleAction(
               item.action,
-              String(contract.contractId),
-              String(contract.contractSerial),
+              String(contract.contractId)
             )}
         >
           {item.label}

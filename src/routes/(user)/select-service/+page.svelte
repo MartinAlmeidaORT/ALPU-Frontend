@@ -18,6 +18,7 @@
   import SearchAgency from '$lib/components/search-agency.svelte';
   import CountryPicker from '$lib/components/CountryPicker.svelte';
   import { Contract, BaseServiceUI } from '$lib/components/Contract.svelte';
+  import { page } from '$app/state';
   let {
     data,
   }: {
@@ -30,19 +31,13 @@
       : new Contract(),
   );
 
-  $effect(() => console.log($state.snapshot(contract)));
-
   let errorMessages = $state<string | null>(null);
   let contractDetails = $state<
     CalculateContractQuery['calculateContract'] | null
   >(null);
   let fetchServicesResult = $state<OperationResult<ServicesQuery> | null>(null);
   let services = $derived(fetchServicesResult?.data?.services ?? []);
-  let contractSerial = sessionStorage.getItem('contractSerial');
 
-  onDestroy(() => {
-    sessionStorage.removeItem('contractSerial');
-  });
 
   onMount(async () => {
     fetchServicesResult = await fetchServices();
@@ -170,7 +165,7 @@
             <SearchClientBroadcaster
               rol={data.user?.role}
               bind:valorId={contract.clientId}
-              disabled={contractSerial == undefined ? false : true}
+              disabled={page.data.existingContract == undefined ? false : true}
             />
           </div>
         {:else if data.user?.role === 'Client'}
@@ -178,7 +173,7 @@
             <SearchClientBroadcaster
               rol={data.user?.role}
               bind:valorId={contract.broadcasterId}
-              disabled={contractSerial == undefined ? false : true}
+              disabled={page.data.existingContract == undefined ? false : true}
             />
           </div>
         {/if}
@@ -187,7 +182,7 @@
           <div class="flex-1">
             <SearchAgency
               bind:valorId={contract.clientId}
-              disabled={contractSerial == undefined ? false : true}
+              disabled={page.data.existingContract == undefined ? false : true}
             />
           </div>
         {/if}

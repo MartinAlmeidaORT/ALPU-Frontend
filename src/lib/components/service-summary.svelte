@@ -2,16 +2,12 @@
   import { Button } from '$lib/components/ui/button/index.js';
   import * as Alert from '$lib/components/ui/alert/index.js';
   import type { CalculateContractQuery } from '$lib/graphql/types/graphql';
-  import {
-    type CampaignInput,
-  } from '$lib/graphql/schema';
   import { createUrqlClient } from '$lib/graphql/client';
   import { goto, invalidateAll } from '$app/navigation';
   import { GENERATE_CONTRACT_MUTATION } from '$lib/graphql/queries/contracts';
   import ServicePriceDetails from './ServicePriceDetails.svelte';
   import { page } from '$app/state';
   import type { Contract } from './Contract.svelte';
-  let contractSerial: string | null = '';
   const urqlClient = createUrqlClient(page.data.token);
 
   let {
@@ -29,10 +25,7 @@
     onRemovePiece?: (serviceIndex: number, pieceIndex: number) => void;
     contract: Contract;
   } = $props();
-  contractSerial = sessionStorage.getItem('contractSerial');
-  if (contractSerial == 'undefined') {
-    contractSerial = null;
-  }
+
 
   async function generateContract() {
     if (
@@ -56,9 +49,6 @@
         'contractId',
         result.data?.generateContract?.contract?.contractId,
       );
-      if (contractSerial) {
-        sessionStorage.removeItem('contractSerial');
-      }
       goto('/contract-preview');
     }
   }

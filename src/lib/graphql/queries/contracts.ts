@@ -15,11 +15,13 @@ export const CONTRACT_QUERY = graphql(`
           userId
           firstName
           lastName
+          email
         }
         client {
           userId
           firstName
           lastName
+          email
           agency {
             name
           }
@@ -51,10 +53,12 @@ export const CONTRACTS_QUERY = graphql(`
         broadcaster {
           firstName
           lastName
+          email
         }
         client {
           firstName
           lastName
+          email
           agency {
             name
           }

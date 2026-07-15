@@ -10,6 +10,7 @@
     ClientsQuery,
   } from '$lib/graphql/types/graphql';
   import { toast } from 'svelte-sonner';
+  import { page } from '$app/state';
   let {
     rol,
     valorId = $bindable(),
@@ -20,6 +21,11 @@
     disabled?: boolean;
   } = $props();
   let email = $state('');
+  if (rol == 'Broadcaster') {
+    email = (page.data.existingContract == undefined ? '' : page.data.existingContract.client.email);
+  } else if (rol == 'Client') {
+    email = (page.data.existingContract == undefined ? '' : page.data.existingContract.broadcaster.email);
+  }
   let user:
     | (BroadcastersQuery['broadcasters'] | ClientsQuery['clients'])
     | null = $state(null);

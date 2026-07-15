@@ -9,8 +9,7 @@ import type { CampaignServiceInput } from '$lib/graphql/types/graphql';
 import type { CalendarDate } from '@internationalized/date';
 
 export class Contract {
-  contractId: number;
-  contractSerial = $state<string | null>(null);
+  contractId: number | null;
   clientId = $state<number>(0);
   broadcasterId = $state<number>(0);
   campaignName = $state<string | null>(null);
@@ -18,8 +17,7 @@ export class Contract {
   services = $state<BaseServiceUI[]>([]);
 
   constructor() {
-    this.contractId = 0;
-    this.contractSerial = null;
+    this.contractId = null;
     this.clientId = 0;
     this.broadcasterId = 0;
     this.campaignName = null;
@@ -51,8 +49,7 @@ export class Contract {
   toInput(): CampaignInput {
     return {
       campaign: this.campaignName ?? '',
-      contractId: this.contractId,
-      contractSerial: this.contractSerial,
+      contractId: this.contractId ?? null,
       clientId: this.clientId ?? 0,
       broadcasterId: this.broadcasterId ?? 0,
       countryCode: this.countryCode ?? '',
@@ -64,12 +61,10 @@ export class Contract {
     const contract = new Contract();
 
     contract.contractId = data.contractId;
-    contract.contractSerial = data.contractSerial ?? null;
     contract.broadcasterId = data.broadcaster.userId;
     contract.clientId = data.client.userId;
     contract.campaignName = data.campaigns[0].name;
     contract.countryCode = data.countryCode;
-
     return contract;
   }
 }

@@ -6,22 +6,29 @@
   import { Input } from '$lib/components/ui/input/index.js';
   import type { ServiceDate } from '$lib/graphql/schema';
   import DatePicker from './DatePicker.svelte';
-  import type { CalendarDate } from '@internationalized/date';
+  import { validateDate } from '$lib/browser/utils';
+  import { ServiceEventUI, BaseServiceUI } from './Contract.svelte';
 
   let {
     service = $bindable(),
-    broadcastInMassMedia = $bindable(),
-    nombrePieza = $bindable(),
-    selectedDate = $bindable(),
     handleAddPiece = () => {},
+    handleAddService = () => {},
   }: ServiceDateData = $props();
   type ServiceDateData = {
     service: ServiceDate;
-    broadcastInMassMedia: boolean;
-    nombrePieza: string;
-    selectedDate: CalendarDate | undefined;
-    handleAddPiece: () => void;
+    handleAddPiece: (pieceName: string, baseService: BaseServiceUI) => void;
+    handleAddService: (serviceUi: ServiceEventUI) => void;
   };
+
+  let serviceUi = $state<ServiceEventUI>(new ServiceEventUI(service));
+  let pieceName = $state<string>('');
+
+  function confirmService() {
+    if (validateDate(serviceUi.date)) {
+      handleAddPiece(pieceName, serviceUi);
+      handleAddService(serviceUi);
+    }
+  }
 </script>
 
 <Accordion.Item value={String(service.serviceId)}>
@@ -37,19 +44,19 @@
         <div class="flex items-center gap-2">
           <Checkbox
             id="broadcastInMassMedia_{service.serviceId}"
-            bind:checked={broadcastInMassMedia}
+            bind:checked={serviceUi.forMassBroadcast}
           />
           <Label for="broadcastInMassMedia_{service.serviceId}">
             Difusión en medios masivos (+30%)
           </Label>
         </div>
       {/if}
-      <DatePicker bind:selectedDate />
+      <DatePicker bind:selectedDate={serviceUi.date} />
       <div class="flex items-center gap-2">
         <Label for="nombrePieza_{service.serviceId}">Nombre</Label>
         <Input
           id="nombrePieza_{service.serviceId}"
-          bind:value={nombrePieza}
+          bind:value={pieceName}
           type="text"
           placeholder="Nombre de la pieza"
         />
@@ -59,7 +66,7 @@
         class="col-span-2"
         variant="outline"
         bgColor="bg-[#22964F] text-white hover:bg-[#1a6d3b] hover:text-white"
-        onclick={() => handleAddPiece()}
+        onclick={() => confirmService()}
       >
         Agregar
       </Button>

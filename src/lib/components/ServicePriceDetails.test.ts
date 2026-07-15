@@ -48,13 +48,19 @@ describe('ServicePriceDetails', () => {
     renderPriceDetails();
 
     expect(screen.getByText('Medio')).toBeInTheDocument();
-    expect(screen.getByText('Nombre de pieza: Spot manana')).toBeInTheDocument();
+    expect(
+      screen.getByText('Nombre de pieza: Spot manana'),
+    ).toBeInTheDocument();
     expect(screen.getByText('Precio sin descuento: $500')).toBeInTheDocument();
     expect(screen.getByText('Nombre de pieza: Spot tarde')).toBeInTheDocument();
     expect(screen.getByText('Precio sin descuento: $450')).toBeInTheDocument();
-    expect(screen.getByText('Nombre del servicio: Radio generico')).toBeInTheDocument();
+    expect(
+      screen.getByText('Nombre del servicio: Radio generico'),
+    ).toBeInTheDocument();
     expect(screen.getByText('Descuentos del medio')).toBeInTheDocument();
-    expect(screen.getByText('Descuento interior de un total de $ 150')).toBeInTheDocument();
+    expect(
+      screen.getByText('Descuento interior de un total de $ 150'),
+    ).toBeInTheDocument();
     expect(screen.getByText('Total medio $850')).toBeInTheDocument();
   });
 
@@ -74,16 +80,16 @@ describe('ServicePriceDetails', () => {
       pieces: [baseService.pieces[0]],
     });
 
-    expect(
-      screen.getAllByRole('button'),
-    ).toHaveLength(1);
+    expect(screen.getAllByRole('button')).toHaveLength(1);
   });
 
   it('calls onRemoveService from the delete service button', async () => {
     const onRemoveService = vi.fn();
     renderPriceDetails(baseService, onRemoveService);
 
-    await fireEvent.click(screen.getByRole('button', { name: 'Eliminar medio' }));
+    await fireEvent.click(
+      screen.getByRole('button', { name: 'Eliminar medio' }),
+    );
 
     expect(onRemoveService).toHaveBeenCalledOnce();
   });
@@ -104,7 +110,9 @@ describe('ServicePriceDetails', () => {
     });
 
     expect(screen.getByText('Precio sin descuento: $1200')).toBeInTheDocument();
-    expect(screen.queryByText('Precio sin descuento: $300')).not.toBeInTheDocument();
+    expect(
+      screen.queryByText('Precio sin descuento: $300'),
+    ).not.toBeInTheDocument();
     expect(screen.queryByText('Descuentos del medio')).not.toBeInTheDocument();
   });
 
@@ -124,6 +132,8 @@ describe('ServicePriceDetails', () => {
     });
 
     expect(screen.getByText('Precio sin descuento: $700')).toBeInTheDocument();
-    expect(screen.queryByText('Precio sin descuento: $100')).not.toBeInTheDocument();
+    expect(
+      screen.queryByText('Precio sin descuento: $100'),
+    ).not.toBeInTheDocument();
   });
 });

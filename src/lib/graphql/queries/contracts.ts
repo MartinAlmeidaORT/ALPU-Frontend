@@ -1,5 +1,49 @@
 import { graphql } from '../types';
 
+export const CONTRACT_QUERY = graphql(`
+  query contract($first: Int, $after: String, $id: Int) {
+    contracts(
+      first: $first
+      after: $after
+      where: { contractId: { eq: $id } }
+    ) {
+      nodes {
+        contractId
+        contractSerial
+        countryCode
+        broadcaster {
+          userId
+          firstName
+          lastName
+          email
+        }
+        client {
+          userId
+          firstName
+          lastName
+          email
+          agency {
+            name
+          }
+        }
+        campaigns {
+          name
+        }
+        state
+        date
+        dueDate
+      }
+      pageInfo {
+        hasNextPage
+        hasPreviousPage
+        startCursor
+        endCursor
+      }
+      totalCount
+    }
+  }
+`);
+
 export const CONTRACTS_QUERY = graphql(`
   query contracts($first: Int, $after: String) {
     contracts(first: $first, after: $after, order: [{ contractId: DESC }]) {
@@ -9,10 +53,12 @@ export const CONTRACTS_QUERY = graphql(`
         broadcaster {
           firstName
           lastName
+          email
         }
         client {
           firstName
           lastName
+          email
           agency {
             name
           }

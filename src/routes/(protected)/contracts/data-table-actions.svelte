@@ -3,7 +3,6 @@
   import { Button } from '$lib/components/ui/button/index.js';
   import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
   import type { TableContract } from './columns';
-  import { getContext } from 'svelte';
   import {
     CANCEL_CONTRACT_QUERY,
     APPROVE_CONTRACT_QUERY,
@@ -17,9 +16,9 @@
   import { createUrqlClient } from '$lib/graphql/client';
   import { invalidateAll } from '$app/navigation';
   import { toast } from 'svelte-sonner';
-  let token = getContext('token') as string;
   let { contract }: { contract: TableContract } = $props();
   import { goto } from '$app/navigation';
+  import { page } from '$app/state';
 
   const getMenuItems = (state: string) => {
     switch (state) {
@@ -43,7 +42,7 @@
           { label: 'Reestructurar', action: 'reestructurar' },
         ];
       case 'CANCELED':
-          return [
+        return [
           { label: 'Ver', action: 'ver' },
           { label: 'Reestructurar', action: 'reestructurar' },
         ];
@@ -52,7 +51,7 @@
     }
   };
 
-  const handleAction = async (action: string, contractId: string, contractSerial: string) => {
+  const handleAction = async (action: string, contractId: string) => {
     switch (action) {
       case 'cancel':
         await cancelContract(contractId);
@@ -64,7 +63,7 @@
         await viewContract(contractId);
         break;
       case 'reestructurar':
-        await restructureContract(contractId, contractSerial);
+        await restructureContract(contractId);
         break;
       default:
         toast.error('Acción no reconocida');
@@ -76,7 +75,7 @@
       contractId: Number(contractId),
       newState: ContractState.Canceled,
     };
-    const urqlClient: Client = createUrqlClient(token);
+    const urqlClient: Client = createUrqlClient(page.data.token);
     const result = await urqlClient
       .mutation(CANCEL_CONTRACT_QUERY, { input })
       .toPromise();
@@ -88,7 +87,7 @@
   }
 
   async function approveContract(contractId: string) {
-    const urqlClient: Client = createUrqlClient(token);
+    const urqlClient: Client = createUrqlClient(page.data.token);
     const result = await urqlClient
       .mutation(APPROVE_CONTRACT_QUERY, { contractId: Number(contractId) })
       .toPromise();
@@ -101,7 +100,7 @@
 
   async function viewContract(contractId: string) {
     try {
-      const urqlClient: Client = createUrqlClient(token);
+      const urqlClient: Client = createUrqlClient(page.data.token);
       const result = await urqlClient
         .query(GET_CONTRACT_URL_QUERY, { contractId: Number(contractId) })
         .toPromise();
@@ -120,12 +119,9 @@
     }
   }
 
-  async function restructureContract(contractId: string, contractSerial: string) {
+  async function restructureContract(contractId: string) {
     try {
-      await cancelContract(contractId);
-      sessionStorage.setItem('contractSerial', contractSerial);
-      console.log('contractSerial set to:', contractSerial);
-      goto('/select-service');
+      goto(`select-service?contractId=${contractId}`);
     } catch (error) {
       toast.error('Error al reestructurar el contrato');
     }
@@ -151,7 +147,7 @@
       <DropdownMenu.Label>Acciones</DropdownMenu.Label>
       {#each getMenuItems(contract.state) as item (item.action)}
         <DropdownMenu.Item
-          onclick={() => handleAction(item.action, String(contract.contractId), String(contract.contractSerial))}
+          onclick={() => handleAction(item.action, String(contract.contractId))}
         >
           {item.label}
         </DropdownMenu.Item>

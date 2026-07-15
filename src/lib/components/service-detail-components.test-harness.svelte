@@ -100,17 +100,23 @@
 <output aria-label="is-interior">{String(isInterior)}</output>
 <output aria-label="internal-use">{String(internalUse)}</output>
 <output aria-label="piece-name">{nombrePieza}</output>
-<output aria-label="broadcast-in-mass-media">{String(broadcastInMassMedia)}</output>
+<output aria-label="broadcast-in-mass-media"
+  >{String(broadcastInMassMedia)}</output
+>
 <output aria-label="is-price-suggested">{String(isPriceSuggested)}</output>
 <output aria-label="price-suggested">{priceSuggested ?? ''}</output>
 <output aria-label="can-ivr-update">{String(canIvrUpdate)}</output>
 <output aria-label="ivr-updates">{ivrUpdates}</output>
-<output aria-label="can-ivr-get-more-messages">{String(canIvrGetMoreMessages)}</output>
+<output aria-label="can-ivr-get-more-messages"
+  >{String(canIvrGetMoreMessages)}</output
+>
 <output aria-label="additional-ivr-message">{additionalIvrMessage}</output>
 <output aria-label="ivr-message">{ivrMessage}</output>
 <output aria-label="is-extra-roles">{String(isExtraRoles)}</output>
 <output aria-label="extra-roles">{extraRoles ?? ''}</output>
-<output aria-label="non-commercial-content">{String(nonCommercialContent)}</output>
+<output aria-label="non-commercial-content"
+  >{String(nonCommercialContent)}</output
+>
 <output aria-label="lip-sync">{String(lipSync)}</output>
 <output aria-label="internet-broadcast">{String(internetBroadcast)}</output>
 <output aria-label="narrative-minutes">{narrativeMinutes ?? ''}</output>

@@ -121,7 +121,9 @@ describe('ServiceItem', () => {
     expect(screen.getByText('Subsiguiente')).toBeInTheDocument();
     expect(screen.getByText('$50')).toBeInTheDocument();
     expect(screen.getAllByText('$100')).toHaveLength(2);
-    expect(screen.getByPlaceholderText('Nombre de la pieza')).toBeInTheDocument();
+    expect(
+      screen.getByPlaceholderText('Nombre de la pieza'),
+    ).toBeInTheDocument();
   });
 
   it('shows a toast and does not add when the piece has no name', async () => {
@@ -154,7 +156,9 @@ describe('ServiceItem', () => {
     });
     expect(toastErrorMock).not.toHaveBeenCalled();
     expect(screen.getByPlaceholderText('Nombre de la pieza')).toHaveValue('');
-    expect(screen.getByLabelText('Descuento interior (-70%)')).not.toBeChecked();
+    expect(
+      screen.getByLabelText('Descuento interior (-70%)'),
+    ).not.toBeChecked();
   });
 
   it('adds a camera service with internal use option', async () => {
@@ -167,10 +171,14 @@ describe('ServiceItem', () => {
     await fillPieceName('Camara institucional');
     await clickAdd();
 
-    expect(onAddPiece).toHaveBeenCalledWith('Camara institucional', cameraService, {
-      period: 'ONE_MONTH',
-      forInternalUse: true,
-    });
+    expect(onAddPiece).toHaveBeenCalledWith(
+      'Camara institucional',
+      cameraService,
+      {
+        period: 'ONE_MONTH',
+        forInternalUse: true,
+      },
+    );
   });
 
   it('requires a date for narrative services before adding', async () => {

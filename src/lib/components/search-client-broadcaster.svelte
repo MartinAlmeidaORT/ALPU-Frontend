@@ -10,16 +10,28 @@
     ClientsQuery,
   } from '$lib/graphql/types/graphql';
   import { toast } from 'svelte-sonner';
+  import { page } from '$app/state';
   let {
     rol,
     valorId = $bindable(),
     disabled = false,
   }: {
     rol: string | null | undefined;
-    valorId?: string | number | null | undefined;
+    valorId?: number | null | undefined;
     disabled?: boolean;
   } = $props();
   let email = $state('');
+  if (rol == 'Broadcaster') {
+    email =
+      page.data.existingContract == undefined
+        ? ''
+        : page.data.existingContract.client.email;
+  } else if (rol == 'Client') {
+    email =
+      page.data.existingContract == undefined
+        ? ''
+        : page.data.existingContract.broadcaster.email;
+  }
   let user:
     | (BroadcastersQuery['broadcasters'] | ClientsQuery['clients'])
     | null = $state(null);
@@ -40,7 +52,7 @@
       <AlertDialog.Trigger>
         <Button
           bgColor="bg-blue-500 text-white hover:bg-blue-600"
-          disabled={disabled}
+          {disabled}
           onclick={async () => {
             user = null;
             if (rol === 'Broadcaster') {

@@ -138,9 +138,7 @@ describe('/expenses-incomes page', () => {
     });
     await tick();
 
-    expect(toastErrorMock).toHaveBeenCalledWith(
-      expect.any(String),
-    );
+    expect(toastErrorMock).toHaveBeenCalledWith(expect.any(String));
     expect(update).toHaveBeenCalledWith({ reset: false });
     expect(invalidateAllMock).not.toHaveBeenCalled();
     expect(

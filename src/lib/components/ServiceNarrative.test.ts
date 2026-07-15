@@ -33,16 +33,22 @@ describe('ServiceNarrative', () => {
 
     expect(screen.getByText('NARRACION')).toBeInTheDocument();
     expect(screen.getByText('Hasta 3 minutos $300')).toBeInTheDocument();
-    expect(screen.getByLabelText('Contenido no comercial (-20%)')).toBeInTheDocument();
+    expect(
+      screen.getByLabelText('Contenido no comercial (-20%)'),
+    ).toBeInTheDocument();
     expect(screen.getByLabelText('Sincro labial (+20%)')).toBeInTheDocument();
-    expect(screen.getByRole('checkbox', { name: /internet/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole('checkbox', { name: /internet/i }),
+    ).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Agregar' })).toBeInTheDocument();
   });
 
   it('binds booleans, minutes and piece name', async () => {
     renderNarrative();
 
-    await fireEvent.click(screen.getByLabelText('Contenido no comercial (-20%)'));
+    await fireEvent.click(
+      screen.getByLabelText('Contenido no comercial (-20%)'),
+    );
     await fireEvent.click(screen.getByLabelText('Sincro labial (+20%)'));
     await fireEvent.click(screen.getByRole('checkbox', { name: /internet/i }));
     await fireEvent.input(screen.getByPlaceholderText('Nombre de la pieza'), {
@@ -52,9 +58,13 @@ describe('ServiceNarrative', () => {
       target: { value: '5' },
     });
 
-    expect(screen.getByLabelText('non-commercial-content')).toHaveTextContent('true');
+    expect(screen.getByLabelText('non-commercial-content')).toHaveTextContent(
+      'true',
+    );
     expect(screen.getByLabelText('lip-sync')).toHaveTextContent('true');
-    expect(screen.getByLabelText('internet-broadcast')).toHaveTextContent('true');
+    expect(screen.getByLabelText('internet-broadcast')).toHaveTextContent(
+      'true',
+    );
     expect(screen.getByLabelText('piece-name')).toHaveTextContent(
       'Narracion institucional',
     );
@@ -73,7 +83,9 @@ describe('ServiceNarrative', () => {
       target: { value: '2' },
     });
 
-    expect(screen.getByLabelText('is-price-suggested')).toHaveTextContent('true');
+    expect(screen.getByLabelText('is-price-suggested')).toHaveTextContent(
+      'true',
+    );
     expect(screen.getByLabelText('price-suggested')).toHaveTextContent('750');
     expect(screen.getByLabelText('is-extra-roles')).toHaveTextContent('true');
     expect(screen.getByLabelText('extra-roles')).toHaveTextContent('2');

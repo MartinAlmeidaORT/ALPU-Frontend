@@ -2,7 +2,11 @@
   import { Button } from '$lib/components/ui/button/index.js';
   import { Input } from '$lib/components/ui/input/index.js';
   import Label from './ui/label/label.svelte';
-  import { fetchClient, fetchBroadcaster, fetchAgency } from '$lib/graphql/queries/user';
+  import {
+    fetchClient,
+    fetchBroadcaster,
+    fetchAgency,
+  } from '$lib/graphql/queries/user';
   import * as AlertDialog from '$lib/components/ui/alert-dialog/index.js';
   import X from '@lucide/svelte/icons/x';
   import type {
@@ -38,14 +42,14 @@
       <AlertDialog.Trigger>
         <Button
           bgColor="bg-blue-500 text-white hover:bg-blue-600"
-          disabled={disabled}
+          {disabled}
           onclick={async () => {
             user = null;
-            const result = await fetchAgency({agency: agencyName,});
+            const result = await fetchAgency({ agency: agencyName });
             if (result.data?.clients && result.data?.clients.length > 0) {
-            user = result.data.clients;
+              user = result.data.clients;
             } else {
-            toast.error('No se encontró ninguna agencia con ese nombre');
+              toast.error('No se encontró ninguna agencia con ese nombre');
             }
           }}
         >

@@ -2,69 +2,41 @@
   import { Button } from '$lib/components/ui/button/index.js';
   import * as Alert from '$lib/components/ui/alert/index.js';
   import type { CalculateContractQuery } from '$lib/graphql/types/graphql';
-  import { onMount } from 'svelte';
-  import {
-    ServiceType,
-    UserState,
-    type CampaignInput,
-    type CampaignServiceInput,
-  } from '$lib/graphql/schema';
   import { createUrqlClient } from '$lib/graphql/client';
-  import { getContext } from 'svelte';
   import { goto, invalidateAll } from '$app/navigation';
   import { GENERATE_CONTRACT_MUTATION } from '$lib/graphql/queries/contracts';
   import ServicePriceDetails from './ServicePriceDetails.svelte';
-  let token = getContext('token') as string;
-  let userState = getContext('userState') as string;
-  let contractSerial: string | null = '';
-  const urqlClient = createUrqlClient(token);
+  import { page } from '$app/state';
+  import type { Contract } from './Contract.svelte';
+  const urqlClient = createUrqlClient(page.data.token);
 
-  // Props
   let {
-    totalContrato = null,
+    contractDetails = null,
     errorMessages = null,
     onRemoveService = () => {},
     onRemoveAllServices = () => {},
     onRemovePiece = () => {},
-    rol,
-    activeUserId,
-    valorId = $bindable(),
-    countryCode = $bindable(),
-    campaignName = $bindable('Test'),
-    services = $bindable([]),
+    contract = $bindable(),
   }: {
-    rol: string | null | undefined;
-    activeUserId?: number | null | undefined;
-    totalContrato?: CalculateContractQuery['calculateContract'] | null;
+    contractDetails?: CalculateContractQuery['calculateContract'] | null;
     errorMessages?: string | null;
     onRemoveService?: (index: number) => void;
     onRemoveAllServices?: () => void;
     onRemovePiece?: (serviceIndex: number, pieceIndex: number) => void;
-    valorId?: string | number | null | undefined;
-    campaignName?: string;
-    countryCode?: string;
-    services?: CampaignServiceInput[];
+    contract: Contract;
   } = $props();
-  contractSerial = sessionStorage.getItem('contractSerial');
-  if (contractSerial == 'undefined') {
-    contractSerial = null;
-  }
-  let input = $derived<CampaignInput>({
-    contractSerial: sessionStorage.getItem('contractSerial'),
-    broadcasterId: rol === 'Broadcaster' ? activeUserId : valorId,
-    clientId: rol === 'Client' ? activeUserId : valorId,
-    campaign: campaignName,
-    services: services,
-    countryCode: countryCode,
-  });
 
-  async function generateContract(input: CampaignInput) {
-    if (input.countryCode === undefined || input.countryCode === '' || input.countryCode === 'Seleccionr país') {
+  async function generateContract() {
+    if (
+      contract.countryCode === undefined ||
+      contract.countryCode === '' ||
+      contract.countryCode === 'Seleccionar país'
+    ) {
       errorMessages = 'Por favor, selecciona un país para el contrato.';
       return;
     }
     const result = await urqlClient
-      .mutation(GENERATE_CONTRACT_MUTATION, { input })
+      .mutation(GENERATE_CONTRACT_MUTATION, { input: contract.toInput() })
       .toPromise();
     if (result.error) {
       errorMessages = 'Error al generar el contrato. Intenta nuevamente.';
@@ -76,14 +48,9 @@
         'contractId',
         result.data?.generateContract?.contract?.contractId,
       );
-      if (contractSerial)
-      {
-        sessionStorage.removeItem('contractSerial');
-      }
       goto('/contract-preview');
     }
   }
-
 </script>
 
 <div
@@ -97,7 +64,7 @@
 
   <h1 class="text-2xl font-bold mb-4">Total a pagar</h1>
 
-  {#if !totalContrato}
+  {#if !contractDetails || contractDetails.services.length === 0}
     <span>No ha seleccionado ningún servicio.</span>
   {:else}
     <div class="grid grid-cols-3 gap-2 max-h-96 overflow-y-auto">
@@ -105,7 +72,7 @@
         class="space-y-2 border border-[#cad8e4] rounded p-2 flex flex-col text-left"
       >
         <span class="font-bold text-[#1e293b]">Descuentos del contrato</span>
-        {#each totalContrato.adjustments as adjustment}
+        {#each contractDetails.adjustments as adjustment}
           <div class="flex bg-[#ffffff] rounded gap-2">
             <span class="text-sm text-[#1e293b]"
               >{adjustment.name} de un total de $ {Math.abs(
@@ -115,46 +82,41 @@
           </div>
         {/each}
       </div>
-
       <div class="col-span-2 space-y-2">
-        {#each totalContrato.services as service, serviceIndex (serviceIndex)}
+        {#each contractDetails.services as service, serviceIndex (serviceIndex)}
           <ServicePriceDetails
-            service={service}
+            {service}
             onRemoveService={() => onRemoveService(serviceIndex)}
-            onRemovePiece={(pieceIndex) => onRemovePiece(serviceIndex, pieceIndex)}
+            onRemovePiece={(pieceIndex) =>
+              onRemovePiece(serviceIndex, pieceIndex)}
           ></ServicePriceDetails>
         {/each}
       </div>
-
     </div>
-
-    {#if totalContrato !== null}
-      <div class="border-t-2 pt-4 mt-4">
-        <div class="flex gap-2 justify-between">
-          <h1 class="text-2xl font-bold">
-            Total con descuentos: ${totalContrato.total}
-          </h1>
-        </div>
-        <div class="flex gap-2">
-          <Button
-            type="button"
-            bgColor="bg-[#22964F] text-white hover:bg-[#1a6d3b] hover:text-white"
-            onclick={() => generateContract(input)}
-            class="mt-4 flex-1"
-            disabled={userState !== UserState.Enabled}
-          >
-            Generar contrato
-          </Button>
-          <Button
-            type="button"
-            bgColor="bg-red-500 text-white hover:bg-red-600 hover:text-white"
-            onclick={() => onRemoveAllServices()}
-            class="mt-4 flex-1"
-          >
-            Borrar todo
-          </Button>
-        </div>
+    <div class="border-t-2 pt-4 mt-4">
+      <div class="flex gap-2 justify-between">
+        <h1 class="text-2xl font-bold">
+          Total con descuentos: ${contractDetails.total}
+        </h1>
       </div>
-    {/if}
+      <div class="flex gap-2">
+        <Button
+          type="button"
+          bgColor="bg-[#22964F] text-white hover:bg-[#1a6d3b] hover:text-white"
+          onclick={() => generateContract()}
+          class="mt-4 flex-1"
+        >
+          Generar contrato
+        </Button>
+        <Button
+          type="button"
+          bgColor="bg-red-500 text-white hover:bg-red-600 hover:text-white"
+          onclick={() => onRemoveAllServices()}
+          class="mt-4 flex-1"
+        >
+          Borrar todo
+        </Button>
+      </div>
+    </div>
   {/if}
 </div>

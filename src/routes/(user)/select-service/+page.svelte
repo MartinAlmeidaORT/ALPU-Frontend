@@ -7,12 +7,7 @@
     calculateServicePrice,
   } from '$lib/graphql/queries/service';
   import { toast } from 'svelte-sonner';
-  import { onMount } from 'svelte';
-  import { setContext } from 'svelte';
-  import type {
-    CampaignInput,
-    CampaignServiceInput,
-  } from '$lib/graphql/schema';
+  import { onDestroy, onMount } from 'svelte';
   import type {
     ServicesQuery,
     CalculateContractQuery,
@@ -22,219 +17,63 @@
   import SearchClientBroadcaster from '$lib/components/search-client-broadcaster.svelte';
   import SearchAgency from '$lib/components/search-agency.svelte';
   import CountryPicker from '$lib/components/CountryPicker.svelte';
+  import { Contract, BaseServiceUI } from '$lib/components/Contract.svelte';
+  import { page } from '$app/state';
   let {
     data,
   }: {
     data: PageData;
   } = $props();
-  setContext('token', data.token);
-  setContext('userState', data.userState);
-  type ServiceSelected = {
-    service: NonNullable<ServicesQuery['services']>[number];
-    selectedPrice?: number;
-    selectedDurationId?: string;
-  } | null;
 
-  let userSelectedId = $state<number | null>(null);
-  let campaignName = $state('Test');
-  let serviceSelected: ServiceSelected = $state(null);
+  let contract = $derived<Contract>(
+    data.existingContract
+      ? Contract.fromContract(data.existingContract)
+      : new Contract(),
+  );
+
   let errorMessages = $state<string | null>(null);
-  let nombrePieza = $state('');
-  let totalServices = $state<CampaignServiceInput[]>([]);
-  let totalContrato = $state<
+  let contractDetails = $state<
     CalculateContractQuery['calculateContract'] | null
   >(null);
-  let isInterior = $state(false);
-  let isPriceSuggested = $state(false);
-  let priceSuggested = $state(null);
-  let nonCommercialContent = $state(false);
-  let internetBroadcast = $state(false);
-  let lipSync = $state(false);
-  let narrativeRoles = $state('0');
-  let narrativeMinutes = $state('');
-  let ivrMessage = $state('');
-  let ivrUpdates = $state(0);
-  let additionalIvrMessage = $state(0);
-  let broadcastInMassMedia = $state(false);
   let fetchServicesResult = $state<OperationResult<ServicesQuery> | null>(null);
-  let selectedContractCountryCode = $state<string>('');
-  let contractSerial = sessionStorage.getItem('contractSerial')
+  let services = $derived(fetchServicesResult?.data?.services ?? []);
 
   onMount(async () => {
     fetchServicesResult = await fetchServices();
+    if (data.user?.role === 'Broadcaster') {
+      contract.broadcasterId = data.user?.id;
+    } else if (data.user?.role === 'Client') {
+      contract.clientId = data.user?.id;
+    }
   });
-  let services = $derived(fetchServicesResult?.data?.services ?? []);
 
   function validateCampaignInput(): boolean {
-    if (
-      data.rol === 'Broadcaster' &&
-      (userSelectedId === null || userSelectedId === undefined)
-    ) {
+    if (contract.clientId === 0) {
       toast.error('Selecciona un cliente', {
         description: 'Debes seleccionar un cliente para continuar',
       });
       return false;
     }
 
-    if (
-      data.rol === 'Client' &&
-      (userSelectedId === null || userSelectedId === undefined)
-    ) {
+    if (contract.broadcasterId === 0) {
       toast.error('Selecciona un broadcaster', {
         description: 'Debes seleccionar un broadcaster para continuar',
       });
       return false;
     }
-
     return true;
   }
 
-  async function handleAddPiece(pieceName: string, svc: any, options: any) {
-    if (isPriceSuggested && priceSuggested != null) {
-      if (svc.basePrice && svc.basePrice > priceSuggested) {
-        errorMessages = 'Precio sugerido no puede ser menor al precio base';
-        return;
-      }
-    }
-    if (svc.__typename === 'ServicePeriod') {
-      if (options.period == '') {
-        toast.error('Selecciona una duración para el servicio', {
-          description: 'Debes seleccionar una duración para continuar',
-        });
-        return;
-      }
-    }
-    if (!validateCampaignInput()) {
-      return;
-    }
-
-    // Buscar si ya existe un servicio con el mismo serviceId
-    const existingServiceIndex = totalServices.findIndex(
-      (s) => s.serviceId === svc.serviceId,
-    );
-
-    if (existingServiceIndex !== -1) {
-      // Agregar la pieza al servicio existente
-      totalServices[existingServiceIndex].pieces?.push({ name: pieceName });
-    } else {
-      // Crear un nuevo servicio con la pieza
-      totalServices.push({
-        serviceId: svc.serviceId,
-        options: options,
-        pieces: [{ name: pieceName }],
-      });
-    }
-
-    totalServices = totalServices; // Trigger reactivity
-
-    const input: CampaignInput = {
-      broadcasterId:
-        data.rol === 'Broadcaster' ? data.user?.userId : userSelectedId,
-      clientId: data.rol === 'Client' ? data.user?.userId : userSelectedId,
-      campaign: campaignName,
-      services: totalServices,
-      countryCode: selectedContractCountryCode, // Aquí podrías agregar lógica para determinar el país si es necesario
-    };
-
-    const result = await calculateServicePrice(input);
-    if (result == null) {
-      return;
-    }
-    totalContrato = result.data?.calculateContract ?? null;
-    serviceSelected = null;
-    isInterior = false;
-    isPriceSuggested = false;
-    priceSuggested = null;
-    nombrePieza = '';
-    nonCommercialContent = false;
-    internetBroadcast = false;
-    lipSync = false;
-    narrativeRoles = '0';
-    narrativeMinutes = '';
-    ivrMessage = '';
-    ivrUpdates = 0;
-    additionalIvrMessage = 0;
-    broadcastInMassMedia = false;
-    checkDurationErrors();
-  }
-
-  async function removeAllServices() {
-    totalServices = [];
-    totalContrato = null;
-    errorMessages = null;
-    checkDurationErrors();
-  }
-
-  async function removeService(index: number) {
-    totalServices = totalServices.filter((_, i) => i !== index);
-
-    if (totalServices.length === 0) {
-      totalContrato = null;
-      return;
-    }
-
-    if (!validateCampaignInput()) {
-      return;
-    }
-
-    const input: CampaignInput = {
-      broadcasterId:
-        data.rol === 'Broadcaster' ? data.user?.userId : userSelectedId,
-      clientId: data.rol === 'Client' ? data.user?.userId : userSelectedId,
-      campaign: campaignName,
-      services: totalServices,
-      countryCode: selectedContractCountryCode,
-    };
-
-    const result = await calculateServicePrice(input);
-    if (result != null) {
-      totalContrato = result.data?.calculateContract ?? null;
-    }
-    checkDurationErrors();
-  }
-
-  async function removePiece(serviceIndex: number, pieceIndex: number) {
-    if (totalServices[serviceIndex].pieces) {
-      totalServices[serviceIndex].pieces = totalServices[
-        serviceIndex
-      ].pieces!.filter((_, i) => i !== pieceIndex);
-
-      // Si el servicio no tiene piezas, eliminar el servicio completo
-      if (totalServices[serviceIndex].pieces!.length === 0) {
-        await removeService(serviceIndex);
-        return;
-      }
-
-      totalServices = totalServices; // Trigger reactivity
-
-      if (!validateCampaignInput()) {
-        return;
-      }
-
-      const input: CampaignInput = {
-        broadcasterId:
-        data.rol === 'Broadcaster' ? data.user?.userId : userSelectedId,
-        clientId: data.rol === 'Client' ? data.user?.userId : userSelectedId,
-        campaign: campaignName,
-        services: totalServices,
-        countryCode: selectedContractCountryCode,
-      };
-
-      const result = await calculateServicePrice(input);
-      if (result != null) {
-        totalContrato = result.data?.calculateContract ?? null;
-      }
-    }
-  }
-
   async function checkDurationErrors() {
-    if (totalServices.length === 0) {
+    if (contract.services.length === 0) {
       errorMessages = null;
       return;
     }
-    const firstPeriod = totalServices[0].options?.period;
-    const allSamePeriod = totalServices.every(
-      (service) => service.options?.period === firstPeriod,
+    const periodOf = (s: BaseServiceUI) =>
+      'period' in s ? s.period : undefined;
+    const firstPeriod = periodOf(contract.services[0]);
+    const allSamePeriod = contract.services.every(
+      (service) => periodOf(service) === firstPeriod,
     );
 
     if (!allSamePeriod) {
@@ -243,6 +82,53 @@
     } else {
       errorMessages = null;
     }
+  }
+
+  async function recalculate() {
+    if (!validateCampaignInput()) {
+      return;
+    }
+    const result = await calculateServicePrice(contract.toInput());
+    if (!result.error) {
+      contractDetails = result.data?.calculateContract ?? null;
+    }
+    checkDurationErrors();
+  }
+
+  async function addService(service: BaseServiceUI) {
+    contract.addOrUpdateService(service);
+    await recalculate();
+  }
+
+  async function removeAllServices() {
+    contract.removeAllServices();
+    contractDetails = null;
+    errorMessages = null;
+    checkDurationErrors();
+  }
+
+  async function removeService(index: number) {
+    contract.removeService(index);
+    if (contract.services.length === 0) {
+      contractDetails = null;
+      errorMessages = null;
+    }
+    checkDurationErrors();
+    await recalculate();
+  }
+
+  async function removePiece(serviceIndex: number, pieceIndex: number) {
+    const service = contract.services[serviceIndex];
+    if (!service) return;
+
+    contract.removePiece(serviceIndex, pieceIndex);
+
+    if (service.pieces.length === 0) {
+      await removeService(serviceIndex);
+      return;
+    }
+
+    await recalculate();
   }
 </script>
 
@@ -263,46 +149,46 @@
       </div>
       <Accordion.Root type="single" class="w-full" value="item-1">
         {#each services as service (service.serviceId)}
-          <ServiceItem
-            {service}
-            onAddPiece={(pieceName, svc, options) =>
-              handleAddPiece(pieceName, svc, options)}
-          />
+          <ServiceItem {service} onAddService={addService} />
         {/each}
       </Accordion.Root>
     </div>
 
     <div class="flex-1 min-w-[300px] w-full">
       <div class="flex w-full gap-4">
-        <div class="flex-1 ">
-          <CountryPicker bind:countryCode={selectedContractCountryCode} />
-        </div>
-
         <div class="flex-1">
-          <SearchClientBroadcaster
-            rol={data.rol}
-            bind:valorId={userSelectedId}
-            disabled={contractSerial == undefined? false : true}
-          />
+          <CountryPicker bind:countryCode={contract.countryCode} />
         </div>
-
-        {#if data.rol === 'Broadcaster'}
+        {#if data.user?.role === 'Broadcaster'}
           <div class="flex-1">
-            <SearchAgency 
-            bind:valorId={userSelectedId} 
-            disabled={contractSerial == undefined? false : true} 
+            <SearchClientBroadcaster
+              rol={data.user?.role}
+              bind:valorId={contract.clientId}
+              disabled={page.data.existingContract == undefined ? false : true}
+            />
+          </div>
+        {:else if data.user?.role === 'Client'}
+          <div class="flex-1">
+            <SearchClientBroadcaster
+              rol={data.user?.role}
+              bind:valorId={contract.broadcasterId}
+              disabled={page.data.existingContract == undefined ? false : true}
+            />
+          </div>
+        {/if}
+
+        {#if data.user?.role === 'Broadcaster'}
+          <div class="flex-1">
+            <SearchAgency
+              bind:valorId={contract.clientId}
+              disabled={page.data.existingContract == undefined ? false : true}
             />
           </div>
         {/if}
       </div>
       <ServiceSummary
-        rol={data.rol}
-        activeUserId={data.user?.userId}
-        bind:countryCode={selectedContractCountryCode}
-        bind:valorId={userSelectedId}
-        bind:campaignName
-        bind:services={totalServices}
-        {totalContrato}
+        {contract}
+        {contractDetails}
         {errorMessages}
         onRemoveService={(i) => removeService(i)}
         onRemoveAllServices={() => removeAllServices()}

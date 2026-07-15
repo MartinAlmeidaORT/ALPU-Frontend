@@ -7,11 +7,9 @@
     AlertDescription,
     AlertTitle,
   } from '$lib/components/ui/alert/index.js';
-  import { setContext } from 'svelte';
   import type { PageData } from './$types.js';
 
   let { data }: { data: PageData } = $props();
-  setContext('token', data.token);
 </script>
 
 {#if data.error}

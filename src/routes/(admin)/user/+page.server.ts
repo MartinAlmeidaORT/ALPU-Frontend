@@ -3,7 +3,7 @@ import { redirect } from '@sveltejs/kit';
 import type { TableUser } from './columns.js';
 
 export async function load({ locals, url }: { locals: App.Locals; url: URL }) {
-  if (locals.rol === 'Accountant') {
+  if (locals.user?.role === 'Accountant') {
     throw redirect(303, '/expenses-incomes');
   }
   try {

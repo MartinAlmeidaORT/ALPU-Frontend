@@ -7,36 +7,67 @@
   import * as Select from '$lib/components/ui/select/index.js';
   import type { ServiceNarrative } from '$lib/graphql/schema';
   import DatePicker from './DatePicker.svelte';
-  import type { CalendarDate } from '@internationalized/date';
+  import { validateDate } from '$lib/browser/utils';
+  import { toast } from 'svelte-sonner';
+  import { ServiceNarrativeUI, BaseServiceUI } from './Contract.svelte';
 
   let {
     service = $bindable(),
-    nombrePieza = $bindable(),
-    isPriceSuggested = $bindable(),
-    priceSuggested = $bindable(),
-    isExtraRoles = $bindable(),
-    extraRoles = $bindable(),
-    nonCommercialContent = $bindable(),
-    lipSync = $bindable(),
-    internetBroadcast = $bindable(),
-    narrativeMinutes = $bindable(),
-    selectedDate = $bindable(),
     handleAddPiece = () => {},
+    handleAddService = () => {},
   }: ServiceNarrativeData = $props();
   type ServiceNarrativeData = {
     service: ServiceNarrative;
-    nombrePieza: string;
-    isPriceSuggested: boolean;
-    priceSuggested: number | null;
-    isExtraRoles: boolean;
-    extraRoles: number | null;
-    nonCommercialContent: boolean;
-    lipSync: boolean;
-    internetBroadcast: boolean;
-    narrativeMinutes: string | undefined;
-    selectedDate: CalendarDate | undefined;
-    handleAddPiece: () => void;
+    handleAddPiece: (pieceName: string, baseService: BaseServiceUI) => void;
+    handleAddService: (serviceUi: ServiceNarrativeUI) => void;
   };
+  let serviceUi = $state<ServiceNarrativeUI>(new ServiceNarrativeUI(service));
+  let isPriceSuggested = $state<boolean>(false);
+  let isExtraRoles = $state<boolean>(false);
+  let pieceName = $state<string>('');
+
+  function confirmService() {
+    if (validateNarrative()) {
+      handleAddPiece(pieceName, serviceUi);
+      handleAddService(serviceUi);
+    }
+  }
+
+  function validateNarrative() {
+    if (!validateDate(serviceUi.date)) {
+      return false;
+    }
+    if (
+      isPriceSuggested &&
+      (serviceUi.isPriceSuggested === null ||
+        serviceUi.isPriceSuggested <= service.basePrice)
+    ) {
+      toast.error('Error al agregar un medio', {
+        description:
+          'Debe ingresar un precio sugerido válido y mayor al mínimo',
+      });
+      return false;
+    }
+    if (
+      serviceUi.narrativeMinutes === null ||
+      serviceUi.narrativeMinutes <= 0
+    ) {
+      toast.error('Error al agregar un medio', {
+        description: 'Debe ingresar una cantidad válida de minutos',
+      });
+      return false;
+    }
+    if (
+      isExtraRoles &&
+      (serviceUi.isExtraRoles === null || serviceUi.isExtraRoles <= 0)
+    ) {
+      toast.error('Error al agregar un medio', {
+        description: 'Debe ingresar una cantidad válida de roles adicionales',
+      });
+      return false;
+    }
+    return true;
+  }
 </script>
 
 <Accordion.Item value={String(service.serviceId)}>
@@ -52,7 +83,7 @@
         <Label for="nombrePieza_{service.serviceId}">Nombre</Label>
         <Input
           id="nombrePieza_{service.serviceId}"
-          bind:value={nombrePieza}
+          bind:value={pieceName}
           type="text"
           placeholder="Nombre de la pieza"
         />
@@ -60,20 +91,23 @@
       <div class="flex items-center gap-2">
         <Checkbox
           id="nonCommercialContent_{service.serviceId}"
-          bind:checked={nonCommercialContent}
+          bind:checked={serviceUi.isNonCommercialContent}
         />
         <Label for="nonCommercialContent_{service.serviceId}">
           Contenido no comercial (-20%)
         </Label>
       </div>
       <div class="flex items-center gap-2">
-        <Checkbox id="lypSinc_{service.serviceId}" bind:checked={lipSync} />
+        <Checkbox
+          id="lypSinc_{service.serviceId}"
+          bind:checked={serviceUi.isLipSync}
+        />
         <Label for="lypSinc_{service.serviceId}">Sincro labial (+20%)</Label>
       </div>
       <div class="flex items-center gap-2">
         <Checkbox
           id="internetBroadcast_{service.serviceId}"
-          bind:checked={internetBroadcast}
+          bind:checked={serviceUi.isInternetBroadcast}
         />
         <Label for="internetBroadcast_{service.serviceId}">
           Difusión en internet (+100%)
@@ -82,11 +116,11 @@
     </div>
     <div class="flex gap-3 px-2">
       <div class="flex items-center gap-2">
-        <Select.Root type="single" bind:value={narrativeMinutes}>
+        <Select.Root type="single" bind:value={serviceUi.narrativeMinutes}>
           <Label>Minutos</Label>
           <Input
             id="narrativeMinutes_{service.serviceId}"
-            bind:value={narrativeMinutes}
+            bind:value={serviceUi.narrativeMinutes}
             type="number"
             placeholder="Minutos"
           />
@@ -103,7 +137,7 @@
           <Input
             class="w-40"
             id="suggestedPrice_{service.serviceId}"
-            bind:value={priceSuggested}
+            bind:value={serviceUi.isPriceSuggested}
             type="number"
             placeholder="Precio sugerido"
           />
@@ -117,12 +151,12 @@
           <Input
             class="w-20"
             id="extraRoles_{service.serviceId}"
-            bind:value={extraRoles}
+            bind:value={serviceUi.isExtraRoles}
             type="number"
             placeholder="Roles extra"
           />
         {/if}
-        <DatePicker bind:selectedDate />
+        <DatePicker bind:selectedDate={serviceUi.date} />
       </div>
       <Button
         type="button"
@@ -130,7 +164,7 @@
         variant="outline"
         bgColor="bg-[#22964F] text-white hover:bg-[#1a6d3b] hover:text-white"
         onclick={() => {
-          handleAddPiece();
+          confirmService();
         }}
       >
         Agregar

@@ -1,4 +1,4 @@
-export function redirectToGoogle() {
+export function redirectToGoogle(): void {
   const params = new URLSearchParams({
     client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
     redirect_uri: import.meta.env.VITE_GOOGLE_REDIRECT_URI,

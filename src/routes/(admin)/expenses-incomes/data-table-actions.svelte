@@ -3,7 +3,6 @@
   import { Button } from '$lib/components/ui/button/index.js';
   import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
   import type { TableBill } from './columns';
-  import { getContext } from 'svelte';
   import { goto, invalidateAll } from '$app/navigation';
   import {
     GET_BILL_URL_QUERY,
@@ -12,8 +11,8 @@
   import type { Client } from '@urql/svelte';
   import { createUrqlClient } from '$lib/graphql/client';
   import { toast } from 'svelte-sonner';
+  import { page } from '$app/state';
 
-  let token = getContext('token') as string;
   let { bill }: { bill: TableBill } = $props();
 
   const getMenuItems = () => {
@@ -25,7 +24,7 @@
 
   const handleAction = async (action: string, billId: string) => {
     if (action === 'ver') {
-      const urqlClient: Client = createUrqlClient(token);
+      const urqlClient: Client = createUrqlClient(page.data.token);
       const result = await urqlClient
         .query(GET_BILL_URL_QUERY, { billId: Number(billId) })
         .toPromise();
@@ -48,7 +47,7 @@
       }
     }
     if (action === 'borrar') {
-      const urqlClient: Client = createUrqlClient(token);
+      const urqlClient: Client = createUrqlClient(page.data.token);
       const result = await urqlClient
         .mutation(DELETE_BILL_MUTATION, { billId: Number(billId) })
         .toPromise();

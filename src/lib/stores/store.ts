@@ -11,10 +11,10 @@ interface AuthUser {
 export const currentUser = writable<AuthUser | null>(null);
 export const isAuthenticated = derived(currentUser, ($user) => !!$user);
 
-export function setUser(user: AuthUser) {
+export function setUser(user: AuthUser): void {
   currentUser.set(user);
 }
 
-export function clearUser() {
+export function clearUser(): void {
   currentUser.set(null);
 }

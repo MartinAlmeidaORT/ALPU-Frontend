@@ -40,7 +40,9 @@ const searchAgency = async (agencyName: string) => {
   await fireEvent.input(screen.getByPlaceholderText('Ingresar agencia'), {
     target: { value: agencyName },
   });
-  await fireEvent.click(screen.getAllByRole('button', { name: 'Buscar' }).at(-1)!);
+  await fireEvent.click(
+    screen.getAllByRole('button', { name: 'Buscar' }).at(-1)!,
+  );
 };
 
 describe('SearchAgency', () => {
@@ -52,10 +54,10 @@ describe('SearchAgency', () => {
     render(SearchAgencyHarness);
 
     expect(screen.getByText('Buscar')).toBeInTheDocument();
+    expect(screen.getByPlaceholderText('Ingresar agencia')).toBeInTheDocument();
     expect(
-      screen.getByPlaceholderText('Ingresar agencia'),
-    ).toBeInTheDocument();
-    expect(screen.getAllByRole('button', { name: 'Buscar' }).length).toBeGreaterThan(0);
+      screen.getAllByRole('button', { name: 'Buscar' }).length,
+    ).toBeGreaterThan(0);
   });
 
   it('searches an agency and shows the returned clients', async () => {
@@ -69,7 +71,9 @@ describe('SearchAgency', () => {
     await searchAgency('Analytical Engines');
 
     await waitFor(() => {
-      expect(fetchAgency).toHaveBeenCalledWith({ agency: 'Analytical Engines' });
+      expect(fetchAgency).toHaveBeenCalledWith({
+        agency: 'Analytical Engines',
+      });
     });
     expect(await screen.findByText('Agencia encontrada')).toBeInTheDocument();
     expect(screen.getByText(/Ada/)).toBeInTheDocument();
@@ -88,11 +92,15 @@ describe('SearchAgency', () => {
     render(SearchAgencyHarness);
 
     await searchAgency('Analytical Engines');
-    const chooseButtons = await screen.findAllByRole('button', { name: 'Escoger' });
+    const chooseButtons = await screen.findAllByRole('button', {
+      name: 'Escoger',
+    });
     await fireEvent.click(chooseButtons[0]);
 
     expect(screen.getByLabelText('selected-agency-id')).toHaveTextContent('12');
-    expect(toastSuccessMock).toHaveBeenCalledWith('Usuario seleccionado: Ada Lovelace');
+    expect(toastSuccessMock).toHaveBeenCalledWith(
+      'Usuario seleccionado: Ada Lovelace',
+    );
     expect(screen.getByPlaceholderText('Ingresar agencia')).toHaveValue('');
   });
 

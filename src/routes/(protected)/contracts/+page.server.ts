@@ -2,14 +2,20 @@ import {
   CONTRACTS_FILTERED_QUERY,
   CONTRACTS_QUERY,
 } from '$lib/graphql/queries/contracts';
+import type { PageServerLoad } from './$types.js';
 import type { TableContract } from './columns.js';
 
-export async function load({ locals, url }: { locals: App.Locals; url: URL }) {
+export async function load({
+  locals,
+  url,
+}: {
+  locals: App.Locals;
+  url: URL;
+}): Promise<PageServerLoad> {
   try {
     const state = url.searchParams.get('state') || undefined;
     const after = url.searchParams.get('after') || null;
     let result;
-
     if (state) {
       result = await locals.urql
         .query(

@@ -38,7 +38,9 @@ describe('ServiceDate', () => {
 
     expect(screen.getByText('MAESTRO DE CEREMONIAS')).toBeInTheDocument();
     expect(screen.getByText('Precio base $500')).toBeInTheDocument();
-    expect(screen.getByPlaceholderText('Nombre de la pieza')).toBeInTheDocument();
+    expect(
+      screen.getByPlaceholderText('Nombre de la pieza'),
+    ).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Agregar' })).toBeInTheDocument();
   });
 
@@ -47,7 +49,9 @@ describe('ServiceDate', () => {
 
     await fireEvent.click(screen.getByLabelText(/medios masivos/));
 
-    expect(screen.getByLabelText('broadcast-in-mass-media')).toHaveTextContent('true');
+    expect(screen.getByLabelText('broadcast-in-mass-media')).toHaveTextContent(
+      'true',
+    );
   });
 
   it('does not show mass media option for other date services', () => {
@@ -65,7 +69,9 @@ describe('ServiceDate', () => {
     });
     await fireEvent.click(screen.getByRole('button', { name: 'Agregar' }));
 
-    expect(screen.getByLabelText('piece-name')).toHaveTextContent('Evento lanzamiento');
+    expect(screen.getByLabelText('piece-name')).toHaveTextContent(
+      'Evento lanzamiento',
+    );
     expect(handleAddPiece).toHaveBeenCalledOnce();
   });
 });

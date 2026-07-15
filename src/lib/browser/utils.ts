@@ -10,7 +10,7 @@ export function translateRole(role: string): string {
     case 'Accountant':
       return 'Contador';
     case 'Client':
-      return 'Locutor';
+      return 'Cliente';
     case 'Broadcaster':
       return 'Locutor';
     default:

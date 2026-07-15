@@ -51,10 +51,7 @@
     }
   };
 
-  const handleAction = async (
-    action: string,
-    contractId: string,
-  ) => {
+  const handleAction = async (action: string, contractId: string) => {
     switch (action) {
       case 'cancel':
         await cancelContract(contractId);
@@ -150,11 +147,7 @@
       <DropdownMenu.Label>Acciones</DropdownMenu.Label>
       {#each getMenuItems(contract.state) as item (item.action)}
         <DropdownMenu.Item
-          onclick={() =>
-            handleAction(
-              item.action,
-              String(contract.contractId)
-            )}
+          onclick={() => handleAction(item.action, String(contract.contractId))}
         >
           {item.label}
         </DropdownMenu.Item>

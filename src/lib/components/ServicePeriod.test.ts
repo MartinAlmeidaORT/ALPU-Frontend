@@ -12,8 +12,18 @@ const radioService: ServicePeriod = {
   extraPrice: 50,
   firstExtraPrice: 75,
   periods: [
-    { interval: 'ONE_WEEK', basePrice: 100, extraPrice: 50, firstExtraPrice: 75 },
-    { interval: 'ONE_MONTH', basePrice: 200, extraPrice: 100, firstExtraPrice: 150 },
+    {
+      interval: 'ONE_WEEK',
+      basePrice: 100,
+      extraPrice: 50,
+      firstExtraPrice: 75,
+    },
+    {
+      interval: 'ONE_MONTH',
+      basePrice: 200,
+      extraPrice: 100,
+      firstExtraPrice: 150,
+    },
   ],
 };
 
@@ -53,13 +63,17 @@ describe('ServicePeriod', () => {
     renderPeriod();
 
     await fireEvent.click(screen.getByRole('button', { name: '$200' }));
-    await fireEvent.click(screen.getByRole('button', { name: /RADIO SPOT GENERICO/i }));
+    await fireEvent.click(
+      screen.getByRole('button', { name: /RADIO SPOT GENERICO/i }),
+    );
     await fireEvent.click(screen.getByLabelText('Descuento interior (-70%)'));
     await fireEvent.input(screen.getByPlaceholderText('Nombre de la pieza'), {
       target: { value: 'Spot tarde' },
     });
 
-    expect(screen.getByLabelText('selected-period')).toHaveTextContent('ONE_MONTH');
+    expect(screen.getByLabelText('selected-period')).toHaveTextContent(
+      'ONE_MONTH',
+    );
     expect(screen.getByLabelText('is-interior')).toHaveTextContent('true');
     expect(screen.getByLabelText('piece-name')).toHaveTextContent('Spot tarde');
   });

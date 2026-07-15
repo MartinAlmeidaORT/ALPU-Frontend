@@ -8,21 +8,28 @@
 
   let {
     form,
-    data
+    data,
   }: {
     form: ActionData | null | undefined;
     data: PageData | null | undefined;
   } = $props();
- let hasPendingState = $derived(data?.pendingState)
+  let hasPendingState = $derived(data?.pendingState);
   $effect(() => {
     if (hasPendingState) {
-      toast.error('Cuenta creada. Espera a que un administrador confirme tu aprobación.', {
-        duration: 5000
-      });
+      toast.error(
+        'Cuenta creada. Espera a que un administrador confirme tu aprobación.',
+        {
+          duration: 5000,
+        },
+      );
 
       const newUrl = new URL(page.url.href);
       newUrl.searchParams.delete('pendingState');
-      goto(newUrl.toString(), { replaceState: true, keepFocus: true, noScroll: true });
+      goto(newUrl.toString(), {
+        replaceState: true,
+        keepFocus: true,
+        noScroll: true,
+      });
     }
   });
 </script>

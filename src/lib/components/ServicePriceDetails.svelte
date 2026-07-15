@@ -2,7 +2,7 @@
   import { Button } from '$lib/components/ui/button/index.js';
   import { ServiceType } from '$lib/graphql/schema';
 
-    let {
+  let {
     service,
     onRemoveService = () => {},
     onRemovePiece = () => {},
@@ -56,15 +56,11 @@
     class="flex flex-col text-left gap-2 bg-[#ffffff] rounded p-2 border border-[#cad8e4]"
   >
     {#if service.adjustments.length > 0}
-      <span class="font-bold text-[#1e293b]"
-        >Descuentos del medio</span
-      >
+      <span class="font-bold text-[#1e293b]">Descuentos del medio</span>
     {/if}
     {#each service.adjustments as flag}
       <span class="text-sm text-[#1e293b]"
-        >{flag.name} de un total de $ {Math.abs(
-          flag.applyDiscount,
-        )}</span
+        >{flag.name} de un total de $ {Math.abs(flag.applyDiscount)}</span
       >
     {/each}
     <div class="flex gap-3 my-2 justify-between">

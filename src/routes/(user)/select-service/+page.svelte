@@ -38,7 +38,6 @@
   let fetchServicesResult = $state<OperationResult<ServicesQuery> | null>(null);
   let services = $derived(fetchServicesResult?.data?.services ?? []);
 
-
   onMount(async () => {
     fetchServicesResult = await fetchServices();
     if (data.user?.role === 'Broadcaster') {

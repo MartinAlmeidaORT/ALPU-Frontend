@@ -1,4 +1,4 @@
-import type { CalendarDate } from "@internationalized/date";
+import type { CalendarDate } from '@internationalized/date';
 import { toast } from 'svelte-sonner';
 
 export function translateRole(role: string): string {
@@ -19,11 +19,11 @@ export function translateRole(role: string): string {
 }
 
 export function validateDate(calendarDate: CalendarDate | undefined): boolean {
-    if (!calendarDate || calendarDate.toString() === '') {
-      toast.error('Error al agregar un medio', {
-        description: 'Debe seleccionar una fecha',
-      });
-      return false;
-    }
-    return true;
+  if (!calendarDate || calendarDate.toString() === '') {
+    toast.error('Error al agregar un medio', {
+      description: 'Debe seleccionar una fecha',
+    });
+    return false;
+  }
+  return true;
 }

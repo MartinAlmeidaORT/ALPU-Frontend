@@ -1,6 +1,5 @@
 import { UserState } from '$lib/graphql/schema';
 import { fireEvent, render, screen, waitFor } from '@testing-library/svelte';
-import { tick } from 'svelte';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import Page from './+page.svelte';
 
@@ -92,12 +91,9 @@ const openServiceForm = async () => {
 };
 
 const fillPieceName = async (name: string) => {
-  await fireEvent.input(
-    screen.getByPlaceholderText('Nombre de la pieza'),
-    {
-      target: { value: name },
-    },
-  );
+  await fireEvent.input(screen.getByPlaceholderText('Nombre de la pieza'), {
+    target: { value: name },
+  });
 };
 
 const clickAddPiece = async () => {
@@ -138,12 +134,9 @@ describe('/select-service page', () => {
     await clickAddPiece();
 
     await waitFor(() => {
-      expect(toastErrorMock).toHaveBeenCalledWith(
-        'Selecciona un cliente',
-        {
-          description: 'Debes seleccionar un cliente para continuar',
-        },
-      );
+      expect(toastErrorMock).toHaveBeenCalledWith('Selecciona un cliente', {
+        description: 'Debes seleccionar un cliente para continuar',
+      });
     });
 
     expect(calculateServicePriceMock).not.toHaveBeenCalled();
@@ -181,15 +174,14 @@ describe('/select-service page', () => {
     await openServiceForm();
     await fillPieceName('Spot matutino');
 
-    await fireEvent.input(
-      screen.getByPlaceholderText('Ingresar email'),
-      { target: { value: 'grace@example.com' } },
-    );
-    
+    await fireEvent.input(screen.getByPlaceholderText('Ingresar email'), {
+      target: { value: 'grace@example.com' },
+    });
+
     const buttons = screen.getAllByRole('button', { name: /buscar/i });
 
     const buscar = buttons.find(
-      (b) => b.getAttribute('data-slot') === 'button'
+      (b) => b.getAttribute('data-slot') === 'button',
     );
 
     expect(buscar).toBeDefined();

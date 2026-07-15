@@ -107,9 +107,7 @@ describe('SearchClientBroadcaster', () => {
       }),
     );
 
-    expect(
-      await screen.findByText('Cliente encontrado'),
-    ).toBeInTheDocument();
+    expect(await screen.findByText('Cliente encontrado')).toBeInTheDocument();
 
     await fireEvent.click(
       await screen.findByRole('button', {
@@ -138,14 +136,11 @@ describe('SearchClientBroadcaster', () => {
       },
     });
 
-    await fireEvent.input(
-      screen.getByPlaceholderText('Ingresar email'),
-      {
-        target: {
-          value: 'missing@test.com',
-        },
+    await fireEvent.input(screen.getByPlaceholderText('Ingresar email'), {
+      target: {
+        value: 'missing@test.com',
       },
-    );
+    });
 
     const buscar = screen
       .getAllByRole('button', { name: 'Buscar' })
@@ -180,14 +175,11 @@ describe('SearchClientBroadcaster', () => {
       },
     });
 
-    await fireEvent.input(
-      screen.getByPlaceholderText('Ingresar email'),
-      {
-        target: {
-          value: 'missing@test.com',
-        },
+    await fireEvent.input(screen.getByPlaceholderText('Ingresar email'), {
+      target: {
+        value: 'missing@test.com',
       },
-    );
+    });
 
     const buscar = screen
       .getAllByRole('button', { name: 'Buscar' })

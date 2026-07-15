@@ -39,7 +39,9 @@ describe('ServiceIVR', () => {
     expect(screen.getByLabelText('Sugerir precio')).toBeInTheDocument();
     expect(screen.getByLabelText('Actualizar IVR')).toBeInTheDocument();
     expect(screen.getByLabelText('Mensajes adicionales')).toBeInTheDocument();
-    expect(screen.getByPlaceholderText('Ingrese su mensaje')).toBeInTheDocument();
+    expect(
+      screen.getByPlaceholderText('Ingrese su mensaje'),
+    ).toBeInTheDocument();
   });
 
   it('reveals and binds price, update and additional message inputs', async () => {
@@ -50,9 +52,12 @@ describe('ServiceIVR', () => {
       target: { value: '900' },
     });
     await fireEvent.click(screen.getByLabelText('Actualizar IVR'));
-    await fireEvent.input(document.querySelector('#Updates7') as HTMLInputElement, {
-      target: { value: '2' },
-    });
+    await fireEvent.input(
+      document.querySelector('#Updates7') as HTMLInputElement,
+      {
+        target: { value: '2' },
+      },
+    );
     await fireEvent.click(screen.getByLabelText('Mensajes adicionales'));
     await fireEvent.input(
       document.querySelector('#additionalIvrMessages7') as HTMLInputElement,
@@ -61,12 +66,18 @@ describe('ServiceIVR', () => {
       },
     );
 
-    expect(screen.getByLabelText('is-price-suggested')).toHaveTextContent('true');
+    expect(screen.getByLabelText('is-price-suggested')).toHaveTextContent(
+      'true',
+    );
     expect(screen.getByLabelText('price-suggested')).toHaveTextContent('900');
     expect(screen.getByLabelText('can-ivr-update')).toHaveTextContent('true');
     expect(screen.getByLabelText('ivr-updates')).toHaveTextContent('2');
-    expect(screen.getByLabelText('can-ivr-get-more-messages')).toHaveTextContent('true');
-    expect(screen.getByLabelText('additional-ivr-message')).toHaveTextContent('3');
+    expect(
+      screen.getByLabelText('can-ivr-get-more-messages'),
+    ).toHaveTextContent('true');
+    expect(screen.getByLabelText('additional-ivr-message')).toHaveTextContent(
+      '3',
+    );
   });
 
   it('binds piece name and message, and calls handleAddPiece', async () => {
@@ -81,8 +92,12 @@ describe('ServiceIVR', () => {
     });
     await fireEvent.click(screen.getByRole('button', { name: 'Agregar' }));
 
-    expect(screen.getByLabelText('piece-name')).toHaveTextContent('Mensaje inicial');
-    expect(screen.getByLabelText('ivr-message')).toHaveTextContent('Gracias por llamar');
+    expect(screen.getByLabelText('piece-name')).toHaveTextContent(
+      'Mensaje inicial',
+    );
+    expect(screen.getByLabelText('ivr-message')).toHaveTextContent(
+      'Gracias por llamar',
+    );
     expect(handleAddPiece).toHaveBeenCalledOnce();
   });
 });

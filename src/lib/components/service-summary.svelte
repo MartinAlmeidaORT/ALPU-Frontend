@@ -26,7 +26,6 @@
     contract: Contract;
   } = $props();
 
-
   async function generateContract() {
     if (
       contract.countryCode === undefined ||
@@ -69,7 +68,9 @@
     <span>No ha seleccionado ningún servicio.</span>
   {:else}
     <div class="grid grid-cols-3 gap-2 max-h-96 overflow-y-auto">
-      <div class="space-y-2 border border-[#cad8e4] rounded p-2 flex flex-col text-left">
+      <div
+        class="space-y-2 border border-[#cad8e4] rounded p-2 flex flex-col text-left"
+      >
         <span class="font-bold text-[#1e293b]">Descuentos del contrato</span>
         {#each contractDetails.adjustments as adjustment}
           <div class="flex bg-[#ffffff] rounded gap-2">

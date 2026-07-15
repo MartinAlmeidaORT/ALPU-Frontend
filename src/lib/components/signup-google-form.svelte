@@ -85,10 +85,10 @@
     if (!hasUserChooseAccountType) messages = null;
   }
 
-  function handleSubmit({ cancel }: { cancel: () => void })  {
+  function handleSubmit({ cancel }: { cancel: () => void }) {
     if (!selectedCountryCode) {
       messages = ['Selecciona un país de la lista.'];
-      cancel(); 
+      cancel();
       return;
     }
     if (!selectedDepartmentId) {
@@ -117,12 +117,12 @@
     messages = null;
     selectedCountryCode = undefined;
     selectedDepartmentId = undefined;
-    departmentsFetch = null; 
+    departmentsFetch = null;
 
     if (formElement) {
       formElement.reset();
     }
-}
+  }
 </script>
 
 <Card.Root {...restProps}>

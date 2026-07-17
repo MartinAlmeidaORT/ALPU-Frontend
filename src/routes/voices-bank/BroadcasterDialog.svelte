@@ -31,7 +31,7 @@
 					<Dialog.Header class="mb-4">
 						<div class="flex items-center gap-4">
 							<Avatar.Root class="size-16">
-								<Avatar.Image src={broadcaster.photoUrl} alt={fullName} class="object-cover" />
+								<Avatar.Image src={broadcaster.profilePictureUrl} alt={fullName} class="object-cover" />
 								<Avatar.Fallback>{initials}</Avatar.Fallback>
 							</Avatar.Root>
 							<div class="text-left">
@@ -45,7 +45,7 @@
 						</div>
 					</Dialog.Header>
 
-					<audio controls src={broadcaster.audioUrl} class="mb-6 h-10 w-full">
+					<audio controls src={broadcaster.demos[0]?.audioUrl} class="mb-6 h-10 w-full">
 						<track kind="captions" />
 					</audio>
 

@@ -11,11 +11,12 @@
 	import { onMount } from 'svelte';
 	import type { LanguagesQuery, SkillsQuery } from '$lib/graphql/types/graphql.js';
   	import type { BroadcasterFilters } from './broadcaster';
-  import { page } from '$app/state';
-  import { fetchBroadcasters } from '$lib/graphql/queries/user';
+	import { fetchBroadcasters } from '$lib/graphql/queries/user';
+	import type { Broadcaster } from '$lib/graphql/schema';
 
 	interface Props {
-		loading?: boolean;
+		loading: boolean;
+		broadcasters: Broadcaster[];
 	}
 
 	let filters = $state<BroadcasterFilters>({
@@ -25,11 +26,11 @@
 		languages: []
 	});
 
+	let { loading, broadcasters = $bindable() }: Props = $props();
 	let pagination = $state({
 		first: 15,
-		after: 'MG=='
+		after: 'Mg=='
 	});
-	let { loading = false }: Props = $props();
 
 	let skillOptions: SkillsQuery['skills'] = $state([]);
 	let languageOptions: LanguagesQuery['languages'] = $state([]);
@@ -51,7 +52,7 @@
 		}
 	});
 
-	function onSearch() {
+	async function onSearch() {
 		/*const queryParams = new URLSearchParams();
 		if (filters.firstName) queryParams.append('firstName', filters.firstName);
 		if (filters.lastName) queryParams.append('lastName', filters.lastName);
@@ -61,8 +62,8 @@
 		const newUrl = `/voices-bank?${queryParams.toString()}`;
 		history.pushState(null, '', newUrl);*/
 		try {
-			let broadcastersFiltered = fetchBroadcasters(pagination,filters);
-			page.data.broadcasters = broadcastersFiltered;
+			let broadcastersFiltered = await fetchBroadcasters(pagination,filters);
+			broadcasters = broadcastersFiltered.data?.broadcastersPaged ?? [];
 		} catch (error) {
 			toast.error('Ocurrió un error al aplicar los filtros de búsqueda.');
 		}
@@ -119,7 +120,7 @@
 					</Select.Trigger>
 					<Select.Content>
 						{#each skillOptions as option (option.skillId)}
-							<Select.Item value={String(option.skillId)} label={option.name}>
+							<Select.Item value={option.skillId} datatype="number" label={option.name}>
 								{option.name}
 							</Select.Item>
 						{/each}
@@ -135,7 +136,7 @@
 					</Select.Trigger>
 					<Select.Content>
 						{#each languageOptions as option (option.languageId)}
-							<Select.Item value={String(option.languageId)} label={option.name}>
+							<Select.Item value={option.languageId} datatype="number" label={option.name}>
 								{option.name}
 							</Select.Item>
 						{/each}

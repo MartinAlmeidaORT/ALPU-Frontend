@@ -12,7 +12,6 @@ export async function load({ locals, url }: { locals: App.Locals; url: URL }) {
         { requestPolicy: 'network-only' },
       )
       .toPromise();
-    console.log('Result from GraphQL query:', result);
     if (result.error) {
       return {
         token: locals.token,

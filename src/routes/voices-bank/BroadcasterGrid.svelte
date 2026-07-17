@@ -4,13 +4,13 @@
   	import type { Broadcaster } from '$lib/graphql/schema';
 	import BroadcasterCard from './BroadcasterCard.svelte';
 	import EmptyState from './EmptyState.svelte';
-  import { page } from '$app/state';
 
 	interface Props {
 		loading: boolean;
+		broadcasters: Broadcaster[];
 		onOpenDetails: (broadcaster: Broadcaster) => void;
 	}
-	let { loading, onOpenDetails }: Props = $props();
+	let { loading, onOpenDetails, broadcasters = $bindable() }: Props = $props();
 </script>
 
 {#if loading}
@@ -25,11 +25,11 @@
 			</Card.Root>
 		{/each}
 	</div>
-{:else if (page?.data?.broadcasters?.length ?? 0) === 0}
+{:else if (broadcasters?.length ?? 0) === 0}
 	<EmptyState />
 {:else}
 	<div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-		{#each page?.data?.broadcasters as broadcaster (broadcaster.userId)}
+		{#each broadcasters as broadcaster (broadcaster.userId)}
 			<BroadcasterCard {broadcaster} {onOpenDetails} />
 		{/each}
 	</div>

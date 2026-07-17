@@ -1,7 +1,7 @@
 import { createUrqlClient } from '$lib/graphql/client';
 import type { OperationResult } from '@urql/core';
 import { graphql } from '../types';
-import type { BroadcastersQuery, ClientsQuery } from '../types/graphql';
+import type { BroadcasterQuery, BroadcastersPagedQuery, ClientsQuery } from '../types/graphql';
 import type { BroadcasterFilters } from '../../../routes/voices-bank/broadcaster';
 
 const CLIENT_QUERY = graphql(`
@@ -35,7 +35,7 @@ const BROADCASTER_QUERY = graphql(`
       firstName
       lastName
       email
-      photo
+      profilePictureUrl
     }
   }
 `);
@@ -55,9 +55,9 @@ export const BROADCASTERS_PAGED_QUERY = graphql(`
         firstName
         lastName
         email
-        photo
+        profilePictureUrl
         demos {
-          fileName
+          audioUrl
         }
         skills {
           name
@@ -103,9 +103,9 @@ export const BROADCASTERS_FILTERED_PAGED_QUERY = graphql(`
         firstName
         lastName
         email
-        photo
+        profilePictureUrl
         demos {
-          fileName
+          audioUrl
         }
         skills {
           name
@@ -198,7 +198,7 @@ export async function fetchClient(input: {
 
 export async function fetchBroadcaster(input: {
   email: string;
-}): Promise<OperationResult<BroadcastersQuery>> {
+}): Promise<OperationResult<BroadcasterQuery>> {
   return await createUrqlClient()
     .query(BROADCASTER_QUERY, {
       email: input.email,
@@ -219,9 +219,9 @@ export async function fetchAgency(input: {
 export async function fetchBroadcasters(
   pagination: { first: number; after: string },
   filters: BroadcasterFilters
-): Promise<OperationResult<BroadcastersQuery>> {
+): Promise<OperationResult<BroadcastersPagedQuery>> {
   return await createUrqlClient()
-    .query(BROADCASTERS_PAGED_QUERY, {
+    .query(BROADCASTERS_FILTERED_PAGED_QUERY, {
       first: pagination.first,
       after: pagination.after,
       firstName: filters.firstName || undefined,

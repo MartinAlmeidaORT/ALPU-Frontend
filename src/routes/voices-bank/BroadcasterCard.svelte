@@ -38,8 +38,10 @@
 			{fullName}
 		</button>
 
-		<audio controls src={broadcaster.demos[0]?.fileName} class="h-10 w-full">
+		{#if broadcaster.demos}
+		<audio controls src={broadcaster.demos[0]?.audioUrl} class="h-10 w-full">
 			<track kind="captions" />
 		</audio>
+		{/if}
 	</Card.Content>
 </Card.Root>

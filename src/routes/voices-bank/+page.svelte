@@ -5,7 +5,6 @@
   	import SearchFilters from './SearchFilters.svelte';
     import type { PageData } from './$types.js';
 	let { data }: { data: PageData } = $props();
-	console.log('data', data);
 	let loading = $state(false);
 	let broadcasters: Broadcaster[] = $state(data?.broadcasters);
 	let selectedBroadcaster: Broadcaster | null = $state(null);

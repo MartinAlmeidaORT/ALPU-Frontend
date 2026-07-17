@@ -82,21 +82,12 @@ export const BROADCASTERS_FILTERED_PAGED_QUERY = graphql(`
   query broadcastersFilteredPaged(
     $first: Int
     $after: String
-    $firstName: String
-    $lastName: String
-    $skillIds: [Int!]
-    $languageIds: [Int!]
+    $where: BroadcasterFilterInput
   ) {
     broadcastersPaged(
       first: $first
       after: $after
-      where: {
-        userState: { eq: ENABLED }
-        firstName: { contains: $firstName }
-        lastName: { contains: $lastName }
-        skills: { some: { skillId: { in: $skillIds } } }
-        languages: { some: { languageId: { in: $languageIds } } }
-      }
+      where: $where
     ) {
       nodes {
         userId
@@ -224,10 +215,7 @@ export async function fetchBroadcasters(
     .query(BROADCASTERS_FILTERED_PAGED_QUERY, {
       first: pagination.first,
       after: pagination.after,
-      firstName: filters.firstName || undefined,
-      lastName: filters.lastName || undefined,
-      skillIds: filters.skills.length > 0 ? filters.skills : undefined,
-      languageIds: filters.languages.length > 0 ? filters.languages : undefined,
+      where: filters 
     })
     .toPromise();
 }

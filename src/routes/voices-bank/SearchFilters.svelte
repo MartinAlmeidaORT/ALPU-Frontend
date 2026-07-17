@@ -29,8 +29,21 @@
 	let { loading, broadcasters = $bindable() }: Props = $props();
 	let pagination = $state({
 		first: 15,
-		after: 'Mg=='
+		after: null
 	});
+
+	function buildWhere(filters: BroadcasterFilters) {
+		const where: Record<string, unknown> = {
+			userState: { eq: 'ENABLED' },
+		};
+
+		if (filters.firstName) where.firstName = { contains: filters.firstName };
+		if (filters.lastName) where.lastName = { contains: filters.lastName };
+		if (filters.skills?.length) where.skills = { some: { skillId: { in: filters.skills } } };
+		if (filters.languages?.length) where.languages = { some: { languageId: { in: filters.languages } } };
+
+		return where;
+	}
 
 	let skillOptions: SkillsQuery['skills'] = $state([]);
 	let languageOptions: LanguagesQuery['languages'] = $state([]);
@@ -62,8 +75,9 @@
 		const newUrl = `/voices-bank?${queryParams.toString()}`;
 		history.pushState(null, '', newUrl);*/
 		try {
-			let broadcastersFiltered = await fetchBroadcasters(pagination,filters);
-			broadcasters = broadcastersFiltered.data?.broadcastersPaged ?? [];
+			let where = buildWhere(filters);
+			let broadcastersFiltered = await fetchBroadcasters(pagination, where);
+			broadcasters = broadcastersFiltered.data?.broadcastersPaged?.nodes ?? [];
 		} catch (error) {
 			toast.error('Ocurrió un error al aplicar los filtros de búsqueda.');
 		}

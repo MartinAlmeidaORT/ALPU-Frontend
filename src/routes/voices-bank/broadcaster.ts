@@ -15,17 +15,16 @@ export interface Broadcaster {
 	additionalInfo?: string;
 }
 
-export const ALL_OPTIONS_VALUE = 'all';
-
 export interface BroadcasterFilters {
-	firstName: string;
-	lastName: string;
-	/** `ALL_OPTIONS_VALUE` representa "sin filtro" (Select no admite value="") */
-	skill: string;
-	language: string;
+	firstName?: string;
+	lastName?: string;
+	/** Array vacío representa "sin filtro" (ahora se permite selección múltiple) */
+	skills: string[];
+	languages: string[];
 }
 
 export interface SelectOption {
 	value: string;
 	label: string;
 }
+ 

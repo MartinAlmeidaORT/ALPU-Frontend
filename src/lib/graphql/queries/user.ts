@@ -2,6 +2,7 @@ import { createUrqlClient } from '$lib/graphql/client';
 import type { OperationResult } from '@urql/core';
 import { graphql } from '../types';
 import type { BroadcastersQuery, ClientsQuery } from '../types/graphql';
+import type { BroadcasterFilters } from '../../../routes/voices-bank/broadcaster';
 
 const CLIENT_QUERY = graphql(`
   query clients($email: String!) {
@@ -28,7 +29,7 @@ const AGENCY_QUERY = graphql(`
 `);
 
 const BROADCASTER_QUERY = graphql(`
-  query broadcasters($email: String!) {
+  query broadcaster($email: String!) {
     broadcasters(where: { email: { eq: $email }, userState: { eq: ENABLED } }) {
       userId
       firstName
@@ -39,25 +40,91 @@ const BROADCASTER_QUERY = graphql(`
   }
 `);
 
-export const BROADCASTERS_QUERY = graphql(`
-  query broadcasters($first: Int, $after: String) {
-    broadcasters(first: $first, after: $after, where: { userState: { eq: ENABLED } }) {
-      userId
-      firstName
-      lastName
-      email
-      photo
-      skills {
-        skillId
-        name
+export const BROADCASTERS_PAGED_QUERY = graphql(`
+  query broadcastersPaged(
+    $first: Int
+    $after: String
+  ) {
+    broadcastersPaged(
+      first: $first
+      after: $after
+      where: { userState: { eq: ENABLED } }
+    ) {
+      nodes {
+        userId
+        firstName
+        lastName
+        email
+        photo
+        demos {
+          fileName
+        }
+        skills {
+          name
+        }
+        languages {
+          name
+        }
       }
-      languages {
-        languageId
-        name
+      pageInfo {
+        hasNextPage
+        hasPreviousPage
+        startCursor
+        endCursor
       }
+      totalCount
     }
   }
 `);
+
+
+export const BROADCASTERS_FILTERED_PAGED_QUERY = graphql(`
+  query broadcastersFilteredPaged(
+    $first: Int
+    $after: String
+    $firstName: String
+    $lastName: String
+    $skillIds: [Int!]
+    $languageIds: [Int!]
+  ) {
+    broadcastersPaged(
+      first: $first
+      after: $after
+      where: {
+        userState: { eq: ENABLED }
+        firstName: { contains: $firstName }
+        lastName: { contains: $lastName }
+        skills: { some: { skillId: { in: $skillIds } } }
+        languages: { some: { languageId: { in: $languageIds } } }
+      }
+    ) {
+      nodes {
+        userId
+        firstName
+        lastName
+        email
+        photo
+        demos {
+          fileName
+        }
+        skills {
+          name
+        }
+        languages {
+          name
+        }
+      }
+      pageInfo {
+        hasNextPage
+        hasPreviousPage
+        startCursor
+        endCursor
+      }
+      totalCount
+    }
+  }
+`);
+
 
 export const USERS_FILTERED_QUERY = graphql(`
   query usersFiltered($first: Int, $after: String, $state: UserState!) {
@@ -145,6 +212,22 @@ export async function fetchAgency(input: {
   return await createUrqlClient()
     .query(AGENCY_QUERY, {
       agency: input.agency,
+    })
+    .toPromise();
+}
+
+export async function fetchBroadcasters(
+  pagination: { first: number; after: string },
+  filters: BroadcasterFilters
+): Promise<OperationResult<BroadcastersQuery>> {
+  return await createUrqlClient()
+    .query(BROADCASTERS_PAGED_QUERY, {
+      first: pagination.first,
+      after: pagination.after,
+      firstName: filters.firstName || undefined,
+      lastName: filters.lastName || undefined,
+      skillIds: filters.skills.length > 0 ? filters.skills : undefined,
+      languageIds: filters.languages.length > 0 ? filters.languages : undefined,
     })
     .toPromise();
 }

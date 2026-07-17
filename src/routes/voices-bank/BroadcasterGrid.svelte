@@ -1,17 +1,16 @@
 <script lang="ts">
 	import * as Card from '$lib/components/ui/card/index.js';
 	import { Skeleton } from '$lib/components/ui/skeleton/index.js';
-  import type { Broadcaster } from '$lib/graphql/schema';
+  	import type { Broadcaster } from '$lib/graphql/schema';
 	import BroadcasterCard from './BroadcasterCard.svelte';
 	import EmptyState from './EmptyState.svelte';
+  import { page } from '$app/state';
 
 	interface Props {
-		broadcasters: Broadcaster[];
 		loading: boolean;
 		onOpenDetails: (broadcaster: Broadcaster) => void;
 	}
-
-	let { broadcasters, loading, onOpenDetails }: Props = $props();
+	let { loading, onOpenDetails }: Props = $props();
 </script>
 
 {#if loading}
@@ -26,11 +25,11 @@
 			</Card.Root>
 		{/each}
 	</div>
-{:else if broadcasters.length === 0}
+{:else if (page?.data?.broadcasters?.length ?? 0) === 0}
 	<EmptyState />
 {:else}
 	<div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-		{#each broadcasters as broadcaster (broadcaster.id)}
+		{#each page?.data?.broadcasters as broadcaster (broadcaster.userId)}
 			<BroadcasterCard {broadcaster} {onOpenDetails} />
 		{/each}
 	</div>

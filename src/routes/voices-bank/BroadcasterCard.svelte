@@ -25,7 +25,7 @@
 			aria-label={`Ver detalles de ${fullName}`}
 		>
 			<Avatar.Root class="size-24">
-				<Avatar.Image src={broadcaster.photoUrl} alt={fullName} class="object-cover" />
+				<Avatar.Image src={broadcaster.photo} alt={fullName} class="object-cover" />
 				<Avatar.Fallback>{initials}</Avatar.Fallback>
 			</Avatar.Root>
 		</button>
@@ -38,7 +38,7 @@
 			{fullName}
 		</button>
 
-		<audio controls src={broadcaster.audioUrl} class="h-10 w-full">
+		<audio controls src={broadcaster.demos[0]?.fileName} class="h-10 w-full">
 			<track kind="captions" />
 		</audio>
 	</Card.Content>

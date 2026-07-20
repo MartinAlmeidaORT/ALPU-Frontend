@@ -98,14 +98,14 @@
 </script>
 
 <Card.Root class="border-none shadow-sm">
-	<Card.Content class="pt-6">
+	<p class="text-sm text-muted-foreground text-center pt-0">
+		Filtrá por nombre, apellido, aptitud e idioma para encontrar al locutor ideal.
+	</p>
+	<Card.Content class="pt-2">
 		<form
 			onsubmit={handleSubmit}
 			class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5 lg:items-end"
 		>
-			<p class="text-sm text-muted-foreground">
-				Filtrá por nombre, apellido, aptitud e idioma para encontrar al locutor ideal.
-			</p>
 			<div class="space-y-2">
 				<Label for="firstName">Nombre</Label>
 				<Input

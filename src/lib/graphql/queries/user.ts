@@ -1,8 +1,12 @@
 import { createUrqlClient } from '$lib/graphql/client';
 import type { OperationResult } from '@urql/core';
-import { graphql } from '../types';
-import type { BroadcasterQuery, BroadcastersPagedQuery, ClientsQuery } from '../types/graphql';
 import type { BroadcasterFilters } from '../../../routes/voices-bank/broadcaster';
+import { graphql } from '../types';
+import type {
+  BroadcasterQuery,
+  BroadcastersPagedQuery,
+  ClientsQuery,
+} from '../types/graphql';
 
 const CLIENT_QUERY = graphql(`
   query clients($email: String!) {
@@ -41,10 +45,7 @@ const BROADCASTER_QUERY = graphql(`
 `);
 
 export const BROADCASTERS_PAGED_QUERY = graphql(`
-  query broadcastersPaged(
-    $first: Int
-    $after: String
-  ) {
+  query broadcastersPaged($first: Int, $after: String) {
     broadcastersPaged(
       first: $first
       after: $after
@@ -90,18 +91,13 @@ export const BROADCASTERS_PAGED_QUERY = graphql(`
   }
 `);
 
-
 export const BROADCASTERS_FILTERED_PAGED_QUERY = graphql(`
   query broadcastersFilteredPaged(
     $first: Int
     $after: String
     $where: BroadcasterFilterInput
   ) {
-    broadcastersPaged(
-      first: $first
-      after: $after
-      where: $where
-    ) {
+    broadcastersPaged(first: $first, after: $after, where: $where) {
       nodes {
         userId
         firstName
@@ -141,7 +137,6 @@ export const BROADCASTERS_FILTERED_PAGED_QUERY = graphql(`
     }
   }
 `);
-
 
 export const USERS_FILTERED_QUERY = graphql(`
   query usersFiltered($first: Int, $after: String, $state: UserState!) {
@@ -235,13 +230,13 @@ export async function fetchAgency(input: {
 
 export async function fetchBroadcasters(
   pagination: { first: number; after: string },
-  filters: BroadcasterFilters
+  filters: BroadcasterFilters,
 ): Promise<OperationResult<BroadcastersPagedQuery>> {
   return await createUrqlClient()
     .query(BROADCASTERS_FILTERED_PAGED_QUERY, {
       first: pagination.first,
       after: pagination.after,
-      where: filters 
+      where: filters,
     })
     .toPromise();
 }

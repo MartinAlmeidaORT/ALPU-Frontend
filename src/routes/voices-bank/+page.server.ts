@@ -8,7 +8,7 @@ export async function load({ locals, url }: { locals: App.Locals; url: URL }) {
     result = await locals.urql
       .query(
         BROADCASTERS_PAGED_QUERY,
-        { first: 15, after} ,
+        { first: 15, after },
         { requestPolicy: 'network-only' },
       )
       .toPromise();

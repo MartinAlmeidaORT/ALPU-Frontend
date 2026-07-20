@@ -12,8 +12,6 @@ const SKILL_QUERY = graphql(`
   }
 `);
 
-export async function fetchSkills(): Promise<
-  OperationResult<SkillsQuery>
-> {
+export async function fetchSkills(): Promise<OperationResult<SkillsQuery>> {
   return await createUrqlClient().query(SKILL_QUERY, {}).toPromise();
 }

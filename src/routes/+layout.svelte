@@ -113,15 +113,18 @@
         <NavigationMenu.List class="flex-wrap items-center">
           <NavigationMenu.Item>
             {#if !isAuth}
-            <NavigationMenu.Link>
-              {#snippet child()}
-                <a href="/login" class={navigationMenuTriggerStyle()}>Login</a>
-              {/snippet}
-            </NavigationMenu.Link>
+              <NavigationMenu.Link>
+                {#snippet child()}
+                  <a href="/login" class={navigationMenuTriggerStyle()}>Login</a
+                  >
+                {/snippet}
+              </NavigationMenu.Link>
             {/if}
             <NavigationMenu.Link>
               {#snippet child()}
-                <a href="/voices-bank" class={navigationMenuTriggerStyle()}>Banco de voces</a>
+                <a href="/voices-bank" class={navigationMenuTriggerStyle()}
+                  >Banco de voces</a
+                >
               {/snippet}
             </NavigationMenu.Link>
           </NavigationMenu.Item>

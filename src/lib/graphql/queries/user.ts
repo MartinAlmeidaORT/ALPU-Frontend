@@ -1,7 +1,12 @@
 import { createUrqlClient } from '$lib/graphql/client';
 import type { OperationResult } from '@urql/core';
+import type { BroadcasterFilters } from '../../../routes/voices-bank/broadcaster';
 import { graphql } from '../types';
-import type { BroadcastersQuery, ClientsQuery } from '../types/graphql';
+import type {
+  BroadcasterQuery,
+  BroadcastersPagedQuery,
+  ClientsQuery,
+} from '../types/graphql';
 
 const CLIENT_QUERY = graphql(`
   query clients($email: String!) {
@@ -28,12 +33,107 @@ const AGENCY_QUERY = graphql(`
 `);
 
 const BROADCASTER_QUERY = graphql(`
-  query broadcasters($email: String!) {
+  query broadcaster($email: String!) {
     broadcasters(where: { email: { eq: $email }, userState: { eq: ENABLED } }) {
       userId
       firstName
       lastName
       email
+      profilePictureUrl
+    }
+  }
+`);
+
+export const BROADCASTERS_PAGED_QUERY = graphql(`
+  query broadcastersPaged($first: Int, $after: String) {
+    broadcastersPaged(
+      first: $first
+      after: $after
+      where: { userState: { eq: ENABLED } }
+    ) {
+      nodes {
+        userId
+        firstName
+        lastName
+        email
+        profilePictureUrl
+        category {
+          name
+        }
+        address {
+          city
+          country {
+            name
+          }
+          department {
+            name
+          }
+          street
+        }
+        demos {
+          audioUrl
+        }
+        skills {
+          name
+        }
+        languages {
+          name
+        }
+      }
+      pageInfo {
+        hasNextPage
+        hasPreviousPage
+        startCursor
+        endCursor
+      }
+      totalCount
+    }
+  }
+`);
+
+export const BROADCASTERS_FILTERED_PAGED_QUERY = graphql(`
+  query broadcastersFilteredPaged(
+    $first: Int
+    $after: String
+    $where: BroadcasterFilterInput
+  ) {
+    broadcastersPaged(first: $first, after: $after, where: $where) {
+      nodes {
+        userId
+        firstName
+        lastName
+        email
+        profilePictureUrl
+        category {
+          name
+        }
+        address {
+          city
+          country {
+            name
+          }
+          department {
+            name
+          }
+          street
+        }
+        demos {
+          audioUrl
+        }
+        skills {
+          name
+        }
+        languages {
+          name
+        }
+      }
+      pageInfo {
+        hasNextPage
+        hasPreviousPage
+        startCursor
+        endCursor
+      }
+      totalCount
     }
   }
 `);
@@ -110,7 +210,7 @@ export async function fetchClient(input: {
 
 export async function fetchBroadcaster(input: {
   email: string;
-}): Promise<OperationResult<BroadcastersQuery>> {
+}): Promise<OperationResult<BroadcasterQuery>> {
   return await createUrqlClient()
     .query(BROADCASTER_QUERY, {
       email: input.email,
@@ -124,6 +224,19 @@ export async function fetchAgency(input: {
   return await createUrqlClient()
     .query(AGENCY_QUERY, {
       agency: input.agency,
+    })
+    .toPromise();
+}
+
+export async function fetchBroadcasters(
+  pagination: { first: number; after: string },
+  filters: BroadcasterFilters,
+): Promise<OperationResult<BroadcastersPagedQuery>> {
+  return await createUrqlClient()
+    .query(BROADCASTERS_FILTERED_PAGED_QUERY, {
+      first: pagination.first,
+      after: pagination.after,
+      where: filters,
     })
     .toPromise();
 }

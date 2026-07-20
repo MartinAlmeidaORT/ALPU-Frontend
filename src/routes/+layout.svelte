@@ -19,6 +19,7 @@
   import { ScrollArea } from '$lib/components/ui/scroll-area/index.js';
   import { Separator } from '$lib/components/ui/separator/index.js';
   import ActiveUser from '$lib/components/custom/user/ActiveUser.svelte';
+  import { Navigation } from 'lucide-svelte';
 
   let {
     data,
@@ -110,6 +111,23 @@
     <div class="flex shrink-0 justify-center">
       <NavigationMenu.Root viewport={isMobile.current}>
         <NavigationMenu.List class="flex-wrap items-center">
+          <NavigationMenu.Item>
+            {#if !isAuth}
+              <NavigationMenu.Link>
+                {#snippet child()}
+                  <a href="/login" class={navigationMenuTriggerStyle()}>Login</a
+                  >
+                {/snippet}
+              </NavigationMenu.Link>
+            {/if}
+            <NavigationMenu.Link>
+              {#snippet child()}
+                <a href="/voices-bank" class={navigationMenuTriggerStyle()}
+                  >Banco de voces</a
+                >
+              {/snippet}
+            </NavigationMenu.Link>
+          </NavigationMenu.Item>
           {#if isAuth}
             <NavigationMenu.Item>
               {#if data.user?.role === 'Broadcaster' || data.user?.role === 'Client'}

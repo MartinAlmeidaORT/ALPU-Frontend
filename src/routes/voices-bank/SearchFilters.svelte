@@ -66,14 +66,6 @@
 	});
 
 	async function onSearch() {
-		/*const queryParams = new URLSearchParams();
-		if (filters.firstName) queryParams.append('firstName', filters.firstName);
-		if (filters.lastName) queryParams.append('lastName', filters.lastName);
-		if (filters.skills.length > 0) queryParams.append('skills', filters.skills.join(','));
-		if (filters.languages.length > 0) queryParams.append('languages', filters.languages.join(','));
-
-		const newUrl = `/voices-bank?${queryParams.toString()}`;
-		history.pushState(null, '', newUrl);*/
 		try {
 			let where = buildWhere(filters);
 			let broadcastersFiltered = await fetchBroadcasters(pagination, where);

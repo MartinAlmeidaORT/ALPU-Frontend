@@ -36,9 +36,9 @@
 							</Avatar.Root>
 							<div class="text-left">
 								<Dialog.Title class="text-xl">{fullName}</Dialog.Title>
-								{#if broadcaster.city || broadcaster.country}
+								{#if broadcaster.address?.department || broadcaster.address?.country}
 									<Dialog.Description>
-										{[broadcaster.city, broadcaster.country].filter(Boolean).join(', ')}
+										{[broadcaster.address?.department?.name, broadcaster.address?.country.name].filter(Boolean).join(', ')}
 									</Dialog.Description>
 								{/if}
 							</div>
@@ -61,18 +61,10 @@
 									<p class="text-muted-foreground">Apellido</p>
 									<p class="font-medium">{broadcaster.lastName}</p>
 								</div>
-								{#if broadcaster.age}
-									<div>
-										<p class="text-muted-foreground">Edad</p>
-										<p class="font-medium">{broadcaster.age} años</p>
-									</div>
-								{/if}
-								{#if broadcaster.gender}
-									<div>
-										<p class="text-muted-foreground">Género</p>
-										<p class="font-medium">{broadcaster.gender}</p>
-									</div>
-								{/if}
+								<div>
+									<p class="text-muted-foreground">Email</p>
+									<p class="font-medium">{broadcaster.email}</p>
+								</div>
 							</div>
 						</section>
 
@@ -86,7 +78,7 @@
 									<p class="text-xs text-muted-foreground">Aptitudes</p>
 									<div class="flex flex-wrap gap-1.5">
 										{#each broadcaster.skills as skill (skill)}
-											<Badge variant="secondary">{skill}</Badge>
+											<Badge variant="secondary">{skill.name}</Badge>
 										{/each}
 									</div>
 								</div>
@@ -97,51 +89,20 @@
 									<p class="text-xs text-muted-foreground">Idiomas</p>
 									<div class="flex flex-wrap gap-1.5">
 										{#each broadcaster.languages as language (language)}
-											<Badge variant="outline">{language}</Badge>
+											<Badge variant="outline">{language.name}</Badge>
 										{/each}
 									</div>
 								</div>
 							{/if}
 
-							{#if broadcaster.yearsOfExperience}
+							{#if broadcaster.category}
 								<div>
-									<p class="text-xs text-muted-foreground">Años de experiencia</p>
-									<p class="text-sm font-medium">{broadcaster.yearsOfExperience} años</p>
+									<p class="text-xs text-muted-foreground">Categoría</p>
+									<Badge variant="secondary">{broadcaster.category.name}</Badge>
 								</div>
 							{/if}
-
-							{#if broadcaster.description}
-								<div>
-									<p class="text-xs text-muted-foreground">Descripción</p>
-									<p class="text-sm leading-relaxed">{broadcaster.description}</p>
-								</div>
-							{/if}
+							
 						</section>
-
-						{#if broadcaster.country || broadcaster.city || broadcaster.additionalInfo}
-							<Separator />
-
-							<section class="space-y-3">
-								<h3 class="text-sm font-medium text-muted-foreground">Información adicional</h3>
-								<div class="grid grid-cols-2 gap-3 text-sm">
-									{#if broadcaster.country}
-										<div>
-											<p class="text-muted-foreground">País</p>
-											<p class="font-medium">{broadcaster.country}</p>
-										</div>
-									{/if}
-									{#if broadcaster.city}
-										<div>
-											<p class="text-muted-foreground">Ciudad</p>
-											<p class="font-medium">{broadcaster.city}</p>
-										</div>
-									{/if}
-								</div>
-								{#if broadcaster.additionalInfo}
-									<p class="text-sm leading-relaxed">{broadcaster.additionalInfo}</p>
-								{/if}
-							</section>
-						{/if}
 					</div>
 				</div>
 			</ScrollArea>

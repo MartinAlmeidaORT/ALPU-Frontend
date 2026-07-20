@@ -56,6 +56,19 @@ export const BROADCASTERS_PAGED_QUERY = graphql(`
         lastName
         email
         profilePictureUrl
+        category {
+          name
+        }
+        address {
+          city
+          country {
+            name
+          }
+          department {
+            name
+          }
+          street
+        }
         demos {
           audioUrl
         }
@@ -95,6 +108,19 @@ export const BROADCASTERS_FILTERED_PAGED_QUERY = graphql(`
         lastName
         email
         profilePictureUrl
+        category {
+          name
+        }
+        address {
+          city
+          country {
+            name
+          }
+          department {
+            name
+          }
+          street
+        }
         demos {
           audioUrl
         }

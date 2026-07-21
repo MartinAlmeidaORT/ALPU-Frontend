@@ -32,7 +32,7 @@ const AGENCY_QUERY = graphql(`
   }
 `);
 
-const BROADCASTER_QUERY = graphql(`
+export const BROADCASTER_QUERY = graphql(`
   query broadcaster($email: String!) {
     broadcasters(where: { email: { eq: $email }, userState: { eq: ENABLED } }) {
       userId
@@ -40,6 +40,33 @@ const BROADCASTER_QUERY = graphql(`
       lastName
       email
       profilePictureUrl
+      phoneNumber
+      website
+      description
+      category {
+        name
+      }
+      address {
+        city
+        country {
+          countryCode
+          name
+        }
+        department {
+          departmentId
+          name
+        }
+        street
+      }
+      demos {
+        audioUrl
+      }
+      skills {
+        name
+      }
+      languages {
+        name
+      }
     }
   }
 `);
@@ -57,6 +84,9 @@ export const BROADCASTERS_PAGED_QUERY = graphql(`
         lastName
         email
         profilePictureUrl
+        phoneNumber
+        website
+        description
         category {
           name
         }
@@ -104,6 +134,9 @@ export const BROADCASTERS_FILTERED_PAGED_QUERY = graphql(`
         lastName
         email
         profilePictureUrl
+        phoneNumber
+        website
+        description
         category {
           name
         }
@@ -194,6 +227,43 @@ export const APPROVE_USER_MUTATION = graphql(`
     approveUser(input: $input) {
       userId
       userState
+    }
+  }
+`);
+
+export const UPDATE_BROADCASTER_MUTATION = graphql(`
+  mutation updateBroadcasterProfile($input: UpdateBroadcasterProfileInput!) {
+    updateBroadcasterProfile(input: $input) {
+      userId
+      firstName
+      lastName
+      email
+      profilePictureUrl
+      phoneNumber
+      website
+      description
+      category {
+        name
+      }
+      address {
+        city
+        country {
+          name
+        }
+        department {
+          name
+        }
+        street
+      }
+      demos {
+        audioUrl
+      }
+      skills {
+        name
+      }
+      languages {
+        name
+      }
     }
   }
 `);

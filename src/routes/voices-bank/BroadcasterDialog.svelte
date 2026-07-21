@@ -80,6 +80,28 @@
                   <p class="text-muted-foreground">Email</p>
                   <p class="font-medium">{broadcaster.email}</p>
                 </div>
+                 <div>
+                    <p class="text-muted-foreground">País</p>
+                    <p class="font-medium">{broadcaster.address?.country.name}</p>
+                </div>
+                <div>
+                    <p class="text-muted-foreground">Departamento</p>
+                    <p class="font-medium">{broadcaster.address?.department.name}</p>
+                </div>
+                <div>
+                    <p class="text-muted-foreground">Ciudad</p>
+                    <p class="font-medium">{broadcaster.address?.city}</p>
+                </div>
+                <div>
+                    <p class="text-muted-foreground">Dirección</p>
+                    <p class="font-medium">{broadcaster.address?.street}</p>
+                </div>
+                {#if broadcaster.phoneNumber}
+                  <div>
+                    <p class="text-muted-foreground">Teléfono</p>
+                    <p class="font-medium">{broadcaster.phoneNumber}</p>
+                  </div>
+                {/if}
               </div>
             </section>
 
@@ -89,6 +111,20 @@
               <h3 class="text-sm font-medium text-muted-foreground">
                 Información profesional
               </h3>
+
+              {#if broadcaster.description}
+                <div>
+                  <p class="text-muted-foreground">Descripción</p>
+                  <p class="font-medium">{broadcaster.description}</p>
+                </div>
+              {/if}
+
+              {#if broadcaster.website}
+                <div>
+                  <p class="text-muted-foreground">Sitio web</p>
+                  <p class="font-medium">{broadcaster.website}</p>
+                </div>
+              {/if}
 
               {#if broadcaster.skills.length}
                 <div class="space-y-1.5">

@@ -28,7 +28,7 @@
     >
       <Avatar.Root class="size-24">
         <Avatar.Image
-          src={broadcaster.photo}
+          src={broadcaster.profilePictureUrl}
           alt={fullName}
           class="object-cover"
         />

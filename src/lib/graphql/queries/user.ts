@@ -60,12 +60,15 @@ export const BROADCASTER_QUERY = graphql(`
       }
       demos {
         audioUrl
+        fileKey
       }
       skills {
         name
+        skillId
       }
       languages {
         name
+        languageId
       }
     }
   }
@@ -268,6 +271,41 @@ export const UPDATE_BROADCASTER_MUTATION = graphql(`
   }
 `);
 
+export const REQUEST_BROADCASTER_DEMO_UPDATE_MUTATION = graphql(`
+  mutation requestDemoUploadUrl($fileName: String!) {
+    requestDemoUploadUrl( fileName: $fileName) {
+      key
+      uploadUrl
+    }
+  }
+`);
+
+export const CONFIRM_BROADCASTER_DEMO_UPDATE_MUTATION = graphql(`
+  mutation confirmDemoUpload($key: String!) {
+    confirmDemoUpload( key: $key) {
+      fileKey
+      audioUrl
+    }
+  }
+`);
+
+export const REQUEST_BROADCASTER_PROFILE_PICTURE_UPDATE_MUTATION = graphql(`
+  mutation requestProfilePictureUploadUrl($fileName: String!) {
+    requestProfilePictureUploadUrl( fileName: $fileName) {
+      key
+      uploadUrl
+    }
+  }
+`);
+
+export const CONFIRM_BROADCASTER_PROFILE_PICTURE_UPDATE_MUTATION = graphql(`
+  mutation confirmProfilePictureUpload($key: String!) {
+    confirmProfilePictureUpload( key: $key) {
+      photo
+    }
+  }
+`);
+
 export async function fetchClient(input: {
   email: string;
 }): Promise<OperationResult<ClientsQuery>> {
@@ -310,3 +348,4 @@ export async function fetchBroadcasters(
     })
     .toPromise();
 }
+

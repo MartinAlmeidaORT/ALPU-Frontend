@@ -140,6 +140,16 @@
                   {/snippet}
                 </NavigationMenu.Link>
               {/if}
+              {#if data.user?.role === 'Broadcaster'}
+                <NavigationMenu.Link>
+                  {#snippet child()}
+                    <a
+                      href="/broadcaster-profile"
+                      class={navigationMenuTriggerStyle()}>Perfil</a
+                    >
+                  {/snippet}
+                </NavigationMenu.Link>
+              {/if}
               {#if data.user?.role === 'Accountant' || data.user?.role === 'Supervisor'}
                 <NavigationMenu.Link>
                   {#snippet child()}

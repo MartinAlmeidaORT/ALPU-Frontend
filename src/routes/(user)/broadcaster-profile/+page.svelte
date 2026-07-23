@@ -22,7 +22,8 @@
   import { createUrqlClient } from '$lib/graphql/client';
   import type { Client } from '@urql/svelte';
   import type { Broadcaster } from './broadcaster.js';
-  import { UPDATE_BROADCASTER_MUTATION } from '$lib/graphql/queries/user.js';
+  import { CONFIRM_BROADCASTER_DEMO_UPDATE_MUTATION, REQUEST_BROADCASTER_DEMO_UPDATE_MUTATION, UPDATE_BROADCASTER_MUTATION } from '$lib/graphql/queries/user.js';
+  import { REQUEST_BROADCASTER_PROFILE_PICTURE_UPDATE_MUTATION, CONFIRM_BROADCASTER_PROFILE_PICTURE_UPDATE_MUTATION } from '$lib/graphql/queries/user.js';
   import { fetchCountries } from '$lib/graphql/queries/country.js';
   import type { OperationResult } from '@urql/core';
   import type {
@@ -42,9 +43,11 @@
   let newLanguages: string[] = $state([]);
   let skillsPopoverOpen = $state(false);
   let languagesPopoverOpen = $state(false);
-
+  let demos: { audioUrl: string; fileKey: string }[] = $state(broadcaster.demos ?? []);
+  let demoInput: HTMLInputElement | null = $state(null);
+  let uploadingDemo = $state(false);
   let photoInput: HTMLInputElement | null = $state(null);
-  let photoPreview: string | null = $state(null);
+  let photoPreview: string | null = $state(data.broadcaster.profilePictureUrl ?? null);
   let countriesFetch = $state<OperationResult<CountriesQuery> | null>(null);
   let departmentsFetch = $state<OperationResult<DepartmentsQuery> | null>(null);
   let broadcasterUpdated: Broadcaster = $state( {
@@ -60,8 +63,8 @@
       city: broadcaster.address.city,
       street: broadcaster.address.street,
     },
-    skillIds: [],
-    languageIds: [],
+    skillIds: broadcaster.skills?.map((skill) => skill.skillId) ?? [],
+    languageIds: broadcaster.languages?.map((language) => language.languageId) ?? [],
   });
   function labelFor(selected: string[], emptyLabel: string) {
     if (selected.length === 0) return emptyLabel;
@@ -96,52 +99,135 @@
       selectedCountryName = country ? country.name : 'Seleccionar país';
     }
   });
-       /* <div class="grid gap-3">
-        <Label for="tabs-demo-photo">Foto</Label>
-        <div class="flex items-center gap-4">
-        {#if photoPreview}
-          <img src={photoPreview} alt="Foto de perfil" class="size-16 rounded-full object-cover" />
-        {:else if broadcaster?.photoUrl}
-          <img src={broadcaster.photoUrl} alt="Foto de perfil" class="size-16 rounded-full object-cover" />
-        {:else}
-          <div class="flex size-16 items-center justify-center rounded-full bg-muted text-xs text-muted-foreground">
-          Sin foto
-          </div>
-        {/if}
-        <input
-          id="tabs-demo-photo"
-          type="file"
-          accept="image/*"
-          class="hidden"
-          bind:this={photoInput}
-          onchange={handlePhotoChange}
-        />
-        <Button type="button" variant="outline" onclick={() => photoInput?.click()}>
-          Subir foto
-        </Button>
-        </div>
-     </div>
-    
-  function handlePhotoChange() {
-  const file = photoInput?.files?.[0];
-  if (!file) return;
-  if (photoPreview) URL.revokeObjectURL(photoPreview);
-  photoPreview = URL.createObjectURL(file);
-  }*/
+
+  async function handlePhotoChange() {
+    const file = photoInput?.files?.[0];
+    if (!file) return;
+    if (photoPreview) URL.revokeObjectURL(photoPreview);
+    photoPreview = URL.createObjectURL(file);
+    try {
+      const urqlClient: Client = createUrqlClient(data.token??undefined);
+      const requestResult = await urqlClient
+        .mutation(REQUEST_BROADCASTER_PROFILE_PICTURE_UPDATE_MUTATION, { fileName: file.name })
+        .toPromise();
+      if (requestResult.error) {
+        toast.error('Error al solicitar la actualización de la foto de perfil: ' + requestResult.error.message);
+        return;
+      }
+      const requestData = requestResult.data?.requestProfilePictureUploadUrl;
+      if (!requestData) {
+        toast.error('No se recibió una URL de carga válida.');
+        return;
+      }
+
+      const uploadResponse = await fetch(requestData.uploadUrl, {
+        method: 'PUT',
+        headers: { 'Content-Type': file.type },
+        body: file,
+      });
+      if (!uploadResponse.ok) {
+        toast.error('Error al subir la imagen.');
+        return;
+      }
+      const confirmResult = await urqlClient
+        .mutation(CONFIRM_BROADCASTER_PROFILE_PICTURE_UPDATE_MUTATION, { key: requestData.key })
+        .toPromise();
+      if (confirmResult.error) {
+        toast.error('Error al confirmar la actualización de la foto de perfil: ' + confirmResult.error.message);
+        return;
+      }
+      toast.success('Foto de perfil actualizada con éxito.');
+    } catch (error) {
+      toast.error('Ocurrió un error al actualizar la foto de perfil.');
+    }
+  }
+
+  async function handleDemoUpload() {
+    const file = demoInput?.files?.[0];
+    if (!file) return;
+    uploadingDemo = true;
+    try {
+      const urqlClient: Client = createUrqlClient(data.token ?? undefined);
+      const requestResult = await urqlClient
+        .mutation(REQUEST_BROADCASTER_DEMO_UPDATE_MUTATION, { fileName: file.name })
+        .toPromise();
+      if (requestResult.error) {
+        toast.error('Error al solicitar la subida de la demo: ' + requestResult.error.message);
+        return;
+      }
+      const requestData = requestResult.data?.requestDemoUploadUrl;
+      if (!requestData) {
+        toast.error('No se recibió una URL de carga válida.');
+        return;
+      }
+
+      const uploadResponse = await fetch(requestData.uploadUrl, {
+        method: 'PUT',
+        headers: { 'Content-Type': file.type },
+        body: file,
+      });
+      if (!uploadResponse.ok) {
+        toast.error('Error al subir la demo.');
+        return;
+      }
+
+      const confirmResult = await urqlClient
+        .mutation(CONFIRM_BROADCASTER_DEMO_UPDATE_MUTATION, { key: requestData.key })
+        .toPromise();
+      if (confirmResult.error) {
+        toast.error('Error al confirmar la subida de la demo: ' + confirmResult.error.message);
+        return;
+      }
+
+      const newDemo = confirmResult.data?.confirmBroadcasterDemoUpload;
+      if (newDemo) demos = [...demos, newDemo];
+      toast.success('Demo subida con éxito.');
+    } catch (error) {
+      toast.error('Ocurrió un error al subir la demo.');
+    } finally {
+      uploadingDemo = false;
+      if (demoInput) demoInput.value = '';
+    }
+  }
+
+  async function handleDemoDelete(demoId: number) {
+    try {
+      const urqlClient: Client = createUrqlClient(data.token ?? undefined);
+      const result = await urqlClient
+        .mutation(DELETE_BROADCASTER_DEMO_MUTATION, { demoId })
+        .toPromise();
+      if (result.error) {
+        toast.error('Error al eliminar la demo: ' + result.error.message);
+        return;
+      }
+      demos = demos.filter((d) => d.fileKey !== demoId);
+      toast.success('Demo eliminada con éxito.');
+    } catch (error) {
+      toast.error('Ocurrió un error al eliminar la demo.');
+    }
+  }
 
   const skillLabel = $derived(labelFor(newSkills, 'Ninguna aptitud seleccionada'));
   const languageLabel = $derived(labelFor(newLanguages, 'Ningún idioma seleccionado'));
 
-  function toggleSkill(name: string) {
+  function toggleSkill(name: string, skillId: number) {
     newSkills = newSkills.includes(name)
       ? newSkills.filter((s) => s !== name)
       : [...newSkills, name];
+
+    broadcasterUpdated.skillIds = broadcasterUpdated.skillIds.includes(skillId)
+      ? broadcasterUpdated.skillIds.filter((id) => id !== skillId)
+      : [...broadcasterUpdated.skillIds, skillId];
   }
 
-  function toggleLanguage(name: string) {
+  function toggleLanguage(name: string, languageId: number) {
     newLanguages = newLanguages.includes(name)
       ? newLanguages.filter((l) => l !== name)
       : [...newLanguages, name];
+
+    broadcasterUpdated.languageIds = broadcasterUpdated.languageIds.includes(languageId)
+      ? broadcasterUpdated.languageIds.filter((id) => id !== languageId)
+      : [...broadcasterUpdated.languageIds, languageId];
   }
 
   onMount(async () => {
@@ -195,7 +281,7 @@
   };
 </script>
 
-<div class="mx-auto flex w-full max-w-sm flex-col gap-6 my-10">
+<div class="mx-auto flex w-full max-w-lg flex-col gap-6 my-10">
  <Tabs.Root value="account">
   <Tabs.List>
    <Tabs.Trigger value="account">Información</Tabs.Trigger>
@@ -211,18 +297,51 @@
      </Card.Description>
     </Card.Header>
     <Card.Content class="grid gap-6">
-     <div class="grid gap-3">
-      <Label for="tabs-demo-name">Nombre</Label>
-      <Input id="tabs-demo-name" bind:value={broadcasterUpdated.firstName} />
-     </div>
-     <div class="grid gap-3">
-      <Label for="tabs-demo-last-name">Apellido</Label>
-      <Input id="tabs-demo-last-name" bind:value={broadcasterUpdated.lastName} />
+     <div class="flex items-center gap-4">
+      <div class="flex flex-col items-center gap-2 shrink-0">
+       <button
+        type="button"
+        class="group relative size-20 overflow-hidden rounded-full border"
+        onclick={() => photoInput?.click()}
+       >
+        {#if photoPreview}
+         <img src={photoPreview} alt="Foto de perfil" class="size-20 rounded-full object-cover" />
+        {:else if broadcaster?.photoUrl}
+         <img src={broadcaster.photoUrl} alt="Foto de perfil" class="size-20 rounded-full object-cover" />
+        {:else}
+         <div class="flex size-20 items-center justify-center rounded-full bg-muted text-xs text-muted-foreground">
+          Sin foto
+         </div>
+        {/if}
+        <div class="absolute inset-0 flex items-center justify-center bg-black/0 text-transparent transition group-hover:bg-black/40 group-hover:text-white">
+         <span class="text-xs">Cambiar</span>
+        </div>
+       </button>
+       <input
+        id="tabs-demo-photo"
+        type="file"
+        accept="image/*"
+        class="hidden"
+        bind:this={photoInput}
+        onchange={handlePhotoChange}
+       />
+      </div>
+      <div class="flex flex-1 flex-col gap-3">
+       <div class="grid gap-3">
+        <Label for="tabs-demo-name">Nombre</Label>
+        <Input id="tabs-demo-name" bind:value={broadcasterUpdated.firstName} />
+       </div>
+       <div class="grid gap-3">
+        <Label for="tabs-demo-last-name">Apellido</Label>
+        <Input id="tabs-demo-last-name" bind:value={broadcasterUpdated.lastName} />
+       </div>
+      </div>
      </div>
       <div class="grid gap-3">
       <Label for="tabs-demo-email">email</Label>
       <Input id="tabs-demo-email" bind:value={broadcasterUpdated.email} />
      </div>
+      <div class="grid grid-cols-2 gap-4">
       <div class="grid gap-3">
       <Label for="pais">Pais</Label>
       <Select.Root
@@ -230,7 +349,7 @@
         type="single"
         bind:value={broadcasterUpdated.address.countryCode}
       >
-        <Select.Trigger id="countryCode" name="countryCode">
+        <Select.Trigger id="countryCode" name="countryCode" class="w-full">
           <span>{selectedCountryName}</span>
         </Select.Trigger>
         <Select.Content>
@@ -249,7 +368,7 @@
           type="single"
           bind:value={broadcasterUpdated.address.departmentId}
         >
-          <Select.Trigger id="departmentId" name="departmentId">
+          <Select.Trigger id="departmentId" name="departmentId" class="w-full">
             <span>{selectedDepartmentName}</span>
           </Select.Trigger>
           <Select.Content>
@@ -261,6 +380,8 @@
           </Select.Content>
         </Select.Root>
      </div>
+     </div>
+      <div class="grid grid-cols-2 gap-4">
       <div class="grid gap-3">
       <Label for="tabs-demo-city">Ciudad</Label>
       <Input id="tabs-demo-city" bind:value={broadcasterUpdated.address.city} />
@@ -268,6 +389,7 @@
       <div class="grid gap-3">
       <Label for="tabs-demo-street">Calle</Label>
       <Input id="tabs-demo-street" bind:value={broadcasterUpdated.address.street} />
+     </div>
      </div>
       <div class="grid gap-3">
       <Label for="tabs-demo-street">Teléfono</Label>
@@ -320,9 +442,9 @@
           <Command.Group class="flex flex-col gap-2">
            {#each skillOptions as skill (skill.name)}
             <Command.Item
-             value={skill.name}
-             onSelect={() => toggleSkill(skill.name)}
-             class="pr-4"
+            value={skill.name}
+            onSelect={() => toggleSkill(skill.name, skill.skillId)}
+            class="pr-4 cursor-pointer select-none"
             >
              <span class="flex items-center gap-2">
               <Check
@@ -375,9 +497,9 @@
           <Command.Group class="flex flex-col gap-2">
            {#each languageOptions as language (language.name)}
             <Command.Item
-             value={language.name}
-             onSelect={() => toggleLanguage(language.name)}
-             class="pr-4"
+            value={language.name}
+            onSelect={() => toggleLanguage(language.name, language.languageId)}
+            class="pr-4 cursor-pointer select-none"
             >
              <span class="flex items-center gap-2">
               <Check
@@ -407,8 +529,53 @@
      </div>
     </Card.Content>
     <Card.Footer class="flex justify-end">
-     <Button>Guardar cambios</Button>
+     <Button onclick={handleSubmit}>Guardar cambios</Button>
     </Card.Footer>
+   </Card.Root>
+  </Tabs.Content>
+  <Tabs.Content value="demos">
+   <Card.Root>
+    <Card.Header>
+     <Card.Title>Demos</Card.Title>
+     <Card.Description>
+      Subí tus demos de audio aquí. Podés agregar nuevas o eliminar las que ya no quieras mostrar.
+     </Card.Description>
+    </Card.Header>
+    <Card.Content class="grid gap-4">
+     {#if demos.length === 0}
+      <p class="text-sm text-muted-foreground">Todavía no subiste ninguna demo.</p>
+     {:else}
+      {#each demos as demo (demo.fileKey)}
+       <div class="flex items-center gap-3 rounded-lg border p-3">
+        <audio src={demo.audioUrl} controls class="h-10 flex-1"></audio>
+        <Button
+         type="button"
+         variant="outline"
+         size="icon"
+        >
+         ✕
+        </Button>
+       </div>
+      {/each}
+     {/if}
+
+     <input
+      id="demo-upload"
+      type="file"
+      accept="audio/*"
+      class="hidden"
+      bind:this={demoInput}
+      onchange={handleDemoUpload}
+     />
+     <Button
+      type="button"
+      variant="outline"
+      disabled={uploadingDemo}
+      onclick={() => demoInput?.click()}
+     >
+      {uploadingDemo ? 'Subiendo...' : 'Subir nueva demo'}
+     </Button>
+    </Card.Content>
    </Card.Root>
   </Tabs.Content>
  </Tabs.Root>

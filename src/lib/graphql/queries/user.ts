@@ -43,6 +43,7 @@ export const BROADCASTER_QUERY = graphql(`
       phoneNumber
       website
       description
+      gender
       category {
         name
       }
@@ -267,6 +268,8 @@ export const UPDATE_BROADCASTER_MUTATION = graphql(`
       phoneNumber
       website
       description
+      gender
+      identityCard
       category {
         name
       }

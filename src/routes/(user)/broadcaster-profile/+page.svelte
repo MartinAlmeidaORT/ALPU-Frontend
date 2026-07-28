@@ -34,6 +34,8 @@
   import { Textarea } from '$lib/components/ui/textarea/index.js';
   import * as Field from '$lib/components/ui/field/index.js';
   import { invalidate } from '$app/navigation';
+  import { Gender } from '$lib/graphql/schema.js';
+  import { translateGender } from '$lib/browser/utils.js';
   let { data }: { data: PageData } = $props();
 
   let broadcaster: any = $state(data.broadcaster);
@@ -51,6 +53,7 @@
   let photoPreview: string | null = $state(data.broadcaster.profilePictureUrl ?? null);
   let selectedLanguageId: number | undefined = $state(undefined);
   let demoTitle: string = $state('');
+  let genders = Object.values(Gender);
   let countriesFetch = $state<OperationResult<CountriesQuery> | null>(null);
   let languagesFetch = $state<OperationResult<LanguagesQuery> | null>(null);
   let departmentsFetch = $state<OperationResult<DepartmentsQuery> | null>(null);
@@ -67,6 +70,8 @@
       city: broadcaster.address.city,
       street: broadcaster.address.street,
     },
+    identityCard: broadcaster.identityCard,
+    gender: broadcaster.gender,
     skillIds: broadcaster.skills?.map((skill) => skill.skillId) ?? [],
     languageIds: broadcaster.languages?.map((language) => language.languageId) ?? [],
   });
@@ -425,13 +430,36 @@ async function handleSubmit() {
      </div>
      </div>
       <div class="grid grid-cols-2 gap-4">
+        <div class="grid gap-3">
+        <Label for="tabs-demo-city">Ciudad</Label>
+        <Input id="tabs-demo-city" bind:value={broadcasterUpdated.address.city} />
+      </div>
+        <div class="grid gap-3">
+        <Label for="tabs-demo-street">Calle</Label>
+        <Input id="tabs-demo-street" bind:value={broadcasterUpdated.address.street} />
+      </div>
       <div class="grid gap-3">
-      <Label for="tabs-demo-city">Ciudad</Label>
-      <Input id="tabs-demo-city" bind:value={broadcasterUpdated.address.city} />
+      <Label for="tabs-demo-identity-card">Cédula de Identidad</Label>
+      <Input id="tabs-demo-identity-card" bind:value={broadcasterUpdated.identityCard} />
      </div>
       <div class="grid gap-3">
-      <Label for="tabs-demo-street">Calle</Label>
-      <Input id="tabs-demo-street" bind:value={broadcasterUpdated.address.street} />
+      <Label for="gender">Sexo</Label>
+      <Select.Root
+        name="gender"
+        type="single"
+        bind:value={broadcasterUpdated.gender}
+      >
+        <Select.Trigger id="gender" name="gender" class="w-full">
+          <span>{translateGender(broadcasterUpdated.gender)}</span>
+        </Select.Trigger>
+        <Select.Content>
+          {#each genders as gender}
+            <Select.Item value={gender}>
+              {translateGender(gender)}
+            </Select.Item>
+          {/each}
+        </Select.Content>
+      </Select.Root>
      </div>
      </div>
       <div class="grid gap-3">

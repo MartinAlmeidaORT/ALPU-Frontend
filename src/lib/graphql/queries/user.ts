@@ -44,6 +44,7 @@ export const BROADCASTER_QUERY = graphql(`
       website
       description
       gender
+      identityCard
       category {
         name
       }

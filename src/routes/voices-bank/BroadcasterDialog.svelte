@@ -4,7 +4,11 @@
   import { Badge } from '$lib/components/ui/badge/index.js';
   import { Separator } from '$lib/components/ui/separator/index.js';
   import { ScrollArea } from '$lib/components/ui/scroll-area/index.js';
-  import type { Broadcaster } from '$lib/graphql/schema';
+  import type { Broadcaster, Demo } from '$lib/graphql/schema';
+  import { Button } from '$lib/components/ui/button/index.js';
+  import ChevronLeft from 'lucide-svelte/icons/chevron-left';
+  import ChevronRight from 'lucide-svelte/icons/chevron-right';
+  import * as Field from '$lib/components/ui/field/index.js';
 
   interface Props {
     broadcaster: Broadcaster | null;
@@ -21,8 +25,17 @@
       ? `${broadcaster.firstName[0] ?? ''}${broadcaster.lastName[0] ?? ''}`.toUpperCase()
       : '',
   );
-</script>
+  const demos = $derived(broadcaster?.demos ?? []);
+  let currentDemoIndex = $state(0);
+  const currentDemo = $derived(demos[currentDemoIndex]);
+  function prevDemo() {
+    currentDemoIndex = currentDemoIndex === 0 ? demos.length - 1 : currentDemoIndex - 1;
+  }
 
+  function nextDemo() {
+    currentDemoIndex = currentDemoIndex === demos.length - 1 ? 0 : currentDemoIndex + 1;
+  }
+</script>
 <Dialog.Root bind:open>
   <Dialog.Content class="max-h-[85vh] max-w-lg overflow-hidden p-0">
     {#if broadcaster}
@@ -53,15 +66,47 @@
               </div>
             </div>
           </Dialog.Header>
+          {#if demos.length > 0}
+            <div class="flex w-full items-center gap-2">
+              {#if demos.length > 1}
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  class="shrink-0"
+                  onclick={prevDemo}
+                  aria-label="Demo anterior"
+                >
+                  <ChevronLeft class="size-4" />
+                </Button>
+              {/if}
 
-          <audio
-            controls
-            src={broadcaster.demos[0]?.audioUrl}
-            class="mb-6 h-10 w-full"
-          >
-            <track kind="captions" />
-          </audio>
+              <audio controls src={currentDemo?.audioUrl} class="h-10 w-full">
+                <track kind="captions" />
+              </audio>
 
+              {#if demos.length > 1}
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  class="shrink-0"
+                  onclick={nextDemo}
+                  aria-label="Siguiente demo"
+                >
+                  <ChevronRight class="size-4" />
+                </Button>
+              {/if}
+            </div>
+
+            {#if demos.length > 1}
+            <div class="mt-2 flex w-full justify-center">
+              <Field.Label class="text-base text-muted-foreground">
+                {'Titulo: ' + currentDemo?.title}
+              </Field.Label>
+            </div>
+            {/if}
+          {/if}
           <div class="space-y-6">
             <section class="space-y-3">
               <h3 class="text-sm font-medium text-muted-foreground">
@@ -91,10 +136,6 @@
                 <div>
                     <p class="text-muted-foreground">Ciudad</p>
                     <p class="font-medium">{broadcaster.address?.city}</p>
-                </div>
-                <div>
-                    <p class="text-muted-foreground">Dirección</p>
-                    <p class="font-medium">{broadcaster.address?.street}</p>
                 </div>
                 {#if broadcaster.phoneNumber}
                   <div>

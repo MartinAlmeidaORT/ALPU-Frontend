@@ -61,6 +61,7 @@ export const BROADCASTER_QUERY = graphql(`
       demos {
         audioUrl
         fileKey
+        title
       }
       skills {
         name
@@ -105,6 +106,7 @@ export const BROADCASTERS_PAGED_QUERY = graphql(`
         }
         demos {
           audioUrl
+          title
         }
         skills {
           name
@@ -155,6 +157,7 @@ export const BROADCASTERS_FILTERED_PAGED_QUERY = graphql(`
         }
         demos {
           audioUrl
+          title
         }
         skills {
           name
@@ -225,6 +228,25 @@ export const USERS_QUERY = graphql(`
   }
 `);
 
+export const USER_QUERY = graphql(`
+  query userFiltered($userId: Int!) {
+    users(where: { userId: { eq: $userId }, userState: { eq: ENABLED } }) {
+        nodes {
+          userId
+          firstName
+          lastName
+          email
+          rut
+          userState
+          __typename
+          ... on Broadcaster {
+            profilePictureUrl
+          }
+        }
+    }
+  }
+`);
+
 export const APPROVE_USER_MUTATION = graphql(`
   mutation approveUser($input: UpdateUserStateInput!) {
     approveUser(input: $input) {
@@ -276,15 +298,20 @@ export const REQUEST_BROADCASTER_DEMO_UPDATE_MUTATION = graphql(`
     requestDemoUploadUrl( fileName: $fileName) {
       key
       uploadUrl
+      fields {
+        name
+        value
+      }
     }
   }
 `);
 
 export const CONFIRM_BROADCASTER_DEMO_UPDATE_MUTATION = graphql(`
-  mutation confirmDemoUpload($key: String!) {
-    confirmDemoUpload( key: $key) {
+  mutation confirmDemoUpload($input: UploadDemoInput!) {
+    confirmDemoUpload( input: $input) {
       fileKey
       audioUrl
+      title
     }
   }
 `);
@@ -305,6 +332,16 @@ export const CONFIRM_BROADCASTER_PROFILE_PICTURE_UPDATE_MUTATION = graphql(`
     }
   }
 `);
+
+export const DELETE_BROADCASTER_DEMO_MUTATION = graphql(`
+  mutation deleteDemo($key: String!) {
+    deleteDemo(key: $key) {
+      fileKey
+      audioUrl
+    }
+  }
+`);
+
 
 export async function fetchClient(input: {
   email: string;

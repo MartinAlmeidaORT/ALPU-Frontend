@@ -14,6 +14,11 @@
   const initials = $derived(
     `${broadcaster.firstName[0] ?? ''}${broadcaster.lastName[0] ?? ''}`.toUpperCase(),
   );
+  const demo = $derived(
+    broadcaster
+      ? broadcaster.demos.find((d) => d.title.toLowerCase() === 'demo') ?? broadcaster.demos[0]
+      : null,
+  );
 </script>
 
 <Card.Root
@@ -43,11 +48,22 @@
     >
       {fullName}
     </button>
-
-    {#if broadcaster.demos}
-      <audio controls src={broadcaster.demos[0]?.audioUrl} class="h-10 w-full">
+    {#if demo}
+      <audio
+        controls
+        src={demo?.audioUrl}
+        class="h-10 w-full"
+      >
         <track kind="captions" />
       </audio>
+      <span class="block w-full text-center text-base text-muted-foreground">
+        {'Titulo: ' + demo?.title}
+      </span>
     {/if}
+    <div>
+      <p class="text-sm text-muted-foreground">
+        {broadcaster.description}
+      </p>
+    </div>
   </Card.Content>
 </Card.Root>

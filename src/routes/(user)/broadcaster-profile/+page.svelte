@@ -22,7 +22,7 @@
   import { createUrqlClient } from '$lib/graphql/client';
   import type { Client } from '@urql/svelte';
   import type { Broadcaster } from './broadcaster.js';
-  import { CONFIRM_BROADCASTER_DEMO_UPDATE_MUTATION, REQUEST_BROADCASTER_DEMO_UPDATE_MUTATION, UPDATE_BROADCASTER_MUTATION } from '$lib/graphql/queries/user.js';
+  import { CONFIRM_BROADCASTER_DEMO_UPDATE_MUTATION, DELETE_BROADCASTER_DEMO_MUTATION, REQUEST_BROADCASTER_DEMO_UPDATE_MUTATION, UPDATE_BROADCASTER_MUTATION } from '$lib/graphql/queries/user.js';
   import { REQUEST_BROADCASTER_PROFILE_PICTURE_UPDATE_MUTATION, CONFIRM_BROADCASTER_PROFILE_PICTURE_UPDATE_MUTATION } from '$lib/graphql/queries/user.js';
   import { fetchCountries } from '$lib/graphql/queries/country.js';
   import type { OperationResult } from '@urql/core';
@@ -32,7 +32,8 @@
   } from '$lib/graphql/types/graphql';
   import { fetchDepartments } from '$lib/graphql/queries/department.js';
   import { Textarea } from '$lib/components/ui/textarea/index.js';
-
+  import * as Field from '$lib/components/ui/field/index.js';
+  import { invalidate } from '$app/navigation';
   let { data }: { data: PageData } = $props();
 
   let broadcaster: any = $state(data.broadcaster);
@@ -43,12 +44,15 @@
   let newLanguages: string[] = $state([]);
   let skillsPopoverOpen = $state(false);
   let languagesPopoverOpen = $state(false);
-  let demos: { audioUrl: string; fileKey: string }[] = $state(broadcaster.demos ?? []);
+  let demos: { audioUrl: string; fileKey: string, title: string }[] = $state(broadcaster.demos ?? []);
   let demoInput: HTMLInputElement | null = $state(null);
   let uploadingDemo = $state(false);
   let photoInput: HTMLInputElement | null = $state(null);
   let photoPreview: string | null = $state(data.broadcaster.profilePictureUrl ?? null);
+  let selectedLanguageId: number | undefined = $state(undefined);
+  let demoTitle: string = $state('');
   let countriesFetch = $state<OperationResult<CountriesQuery> | null>(null);
+  let languagesFetch = $state<OperationResult<LanguagesQuery> | null>(null);
   let departmentsFetch = $state<OperationResult<DepartmentsQuery> | null>(null);
   let broadcasterUpdated: Broadcaster = $state( {
     firstName: broadcaster.firstName,
@@ -71,7 +75,14 @@
     return `${selected.length} seleccionada${selected.length > 1 ? 's' : ''}`;
   }
 
-   $effect(() => {
+
+  let selectedLanguageName = $derived(
+    languagesFetch?.data?.languages.find(
+      (l) => l.languageId === Number(selectedLanguageId),
+    )?.name ?? 'Seleccionar idioma',
+  );
+
+  $effect(() => {
     if (broadcasterUpdated.address.countryCode) {
       fetchDepartments(broadcasterUpdated.address.countryCode).then((result) => {
         departmentsFetch = result;
@@ -111,7 +122,7 @@
         .mutation(REQUEST_BROADCASTER_PROFILE_PICTURE_UPDATE_MUTATION, { fileName: file.name })
         .toPromise();
       if (requestResult.error) {
-        toast.error('Error al solicitar la actualización de la foto de perfil: ' + requestResult.error.message);
+        toast.error('Error al solicitar la actualización de la foto de perfil: ' + requestResult.error.graphQLErrors.map((e) => e.message).join('\n'));
         return;
       }
       const requestData = requestResult.data?.requestProfilePictureUploadUrl;
@@ -133,10 +144,11 @@
         .mutation(CONFIRM_BROADCASTER_PROFILE_PICTURE_UPDATE_MUTATION, { key: requestData.key })
         .toPromise();
       if (confirmResult.error) {
-        toast.error('Error al confirmar la actualización de la foto de perfil: ' + confirmResult.error.message);
+        toast.error('Error al confirmar la actualización de la foto de perfil: ' + confirmResult.error.graphQLErrors.map((e) => e.message).join('\n'));
         return;
       }
       toast.success('Foto de perfil actualizada con éxito.');
+      await invalidate('app:me');
     } catch (error) {
       toast.error('Ocurrió un error al actualizar la foto de perfil.');
     }
@@ -152,7 +164,7 @@
         .mutation(REQUEST_BROADCASTER_DEMO_UPDATE_MUTATION, { fileName: file.name })
         .toPromise();
       if (requestResult.error) {
-        toast.error('Error al solicitar la subida de la demo: ' + requestResult.error.message);
+        toast.error('Error al solicitar la subida de la demo: ' + requestResult.error.graphQLErrors.map((e) => e.message).join('\n'));
         return;
       }
       const requestData = requestResult.data?.requestDemoUploadUrl;
@@ -160,28 +172,43 @@
         toast.error('No se recibió una URL de carga válida.');
         return;
       }
-
+      const formData = new FormData();
+      for (const field of requestData.fields) {
+        formData.append(field.name, field.value);
+      }
+      formData.append('Content-type', file.type);
+      formData.append('file', file);
       const uploadResponse = await fetch(requestData.uploadUrl, {
-        method: 'PUT',
-        headers: { 'Content-Type': file.type },
-        body: file,
+        method: 'POST',
+        body: formData,
       });
       if (!uploadResponse.ok) {
-        toast.error('Error al subir la demo.');
+        if (uploadResponse.status === 400) {
+          toast.error('El archivo es demasiado grande. El tamaño máximo permitido es de 5MB por audio.');
+        } else {
+          toast.error('Error al subir la demo.');
+        }
         return;
       }
 
       const confirmResult = await urqlClient
-        .mutation(CONFIRM_BROADCASTER_DEMO_UPDATE_MUTATION, { key: requestData.key })
+        .mutation(CONFIRM_BROADCASTER_DEMO_UPDATE_MUTATION, { input: { key: requestData.key, title: demoTitle, languageId: Number(selectedLanguageId) } })
         .toPromise();
       if (confirmResult.error) {
-        toast.error('Error al confirmar la subida de la demo: ' + confirmResult.error.message);
+        const mensaje =
+          'Error al actualizar la información del perfil:\n' +
+          confirmResult.error.graphQLErrors.map((e) => e.message).join('\n');
+
+        toast.error(mensaje, {
+          style: 'white-space: pre-line;'
+        });
         return;
       }
-
-      const newDemo = confirmResult.data?.confirmBroadcasterDemoUpload;
+      const newDemo = confirmResult.data?.confirmDemoUpload;
       if (newDemo) demos = [...demos, newDemo];
       toast.success('Demo subida con éxito.');
+      demoTitle = '';
+      selectedLanguageName = 'Seleccionar idioma';
     } catch (error) {
       toast.error('Ocurrió un error al subir la demo.');
     } finally {
@@ -190,17 +217,23 @@
     }
   }
 
-  async function handleDemoDelete(demoId: number) {
+  async function handleDemoDelete(key: string) {
     try {
       const urqlClient: Client = createUrqlClient(data.token ?? undefined);
       const result = await urqlClient
-        .mutation(DELETE_BROADCASTER_DEMO_MUTATION, { demoId })
+        .mutation(DELETE_BROADCASTER_DEMO_MUTATION, { key })
         .toPromise();
       if (result.error) {
-        toast.error('Error al eliminar la demo: ' + result.error.message);
+        const mensaje =
+          'Error al actualizar la información del perfil:\n' +
+          result.error.graphQLErrors.map((e) => e.message).join('\n');
+
+        toast.error(mensaje, {
+          style: 'white-space: pre-line;'
+        });
         return;
       }
-      demos = demos.filter((d) => d.fileKey !== demoId);
+      demos = demos.filter((d) => d.fileKey !== key);
       toast.success('Demo eliminada con éxito.');
     } catch (error) {
       toast.error('Ocurrió un error al eliminar la demo.');
@@ -231,6 +264,7 @@
   }
 
   onMount(async () => {
+    languagesFetch = await fetchLanguages();
     countriesFetch = await fetchCountries();
     error = data.error || null;
     broadcasterUpdated.address.countryCode = broadcaster.address.country?.countryCode;
@@ -262,28 +296,37 @@
       .map((language) => language.name);
   });
 
-  async function handleSubmit() {
-    try {
-      const UpdateBroadcasterInput = broadcasterUpdated;
-      const urqlClient: Client = createUrqlClient(data.token??undefined);
-      const result = await urqlClient
-        .mutation(UPDATE_BROADCASTER_MUTATION, { input: UpdateBroadcasterInput })
-        .toPromise();
-      if (result.error) {
-        toast.error('Error al actualizar la información del perfil: ' + result.error.message);
-        return;
-      }
-    } catch (error) {
-      toast.error('Ocurrió un error al actualizar la información del perfil.');
+async function handleSubmit() {
+  try {
+    const UpdateBroadcasterInput = broadcasterUpdated;
+    const urqlClient: Client = createUrqlClient(data.token ?? undefined);
+    const result = await urqlClient
+      .mutation(UPDATE_BROADCASTER_MUTATION, { input: UpdateBroadcasterInput })
+      .toPromise();
+
+    if (result.error) {
+      const mensaje =
+        'Error al actualizar la información del perfil:\n' +
+        result.error.graphQLErrors.map((e) => e.message).join('\n');
+
+      toast.error(mensaje, {
+        style: 'white-space: pre-line;'
+      });
       return;
     }
-    toast.success('Información del perfil actualizada con éxito.');
-  };
+  } catch (error) {
+    toast.error('Ocurrió un error al actualizar la información del perfil.');
+    return;
+  }
+  toast.success('Información del perfil actualizada con éxito.');
+  await invalidate('app:me');
+}
+
 </script>
 
 <div class="mx-auto flex w-full max-w-lg flex-col gap-6 my-10">
  <Tabs.Root value="account">
-  <Tabs.List>
+  <Tabs.List class="grid w-full grid-cols-3">
    <Tabs.Trigger value="account">Información</Tabs.Trigger>
    <Tabs.Trigger value="skills">Aptitudes y Lenguajes</Tabs.Trigger>
    <Tabs.Trigger value="demos">Demos</Tabs.Trigger>
@@ -338,7 +381,7 @@
       </div>
      </div>
       <div class="grid gap-3">
-      <Label for="tabs-demo-email">email</Label>
+      <Label for="tabs-demo-email">Email</Label>
       <Input id="tabs-demo-email" bind:value={broadcasterUpdated.email} />
      </div>
       <div class="grid grid-cols-2 gap-4">
@@ -538,7 +581,7 @@
     <Card.Header>
      <Card.Title>Demos</Card.Title>
      <Card.Description>
-      Subí tus demos de audio aquí. Podés agregar nuevas o eliminar las que ya no quieras mostrar.
+      Subí tus o eliminá tus demos aquí, con un límite de 5 minutos por demo y un máximo de 5 demos.
      </Card.Description>
     </Card.Header>
     <Card.Content class="grid gap-4">
@@ -547,9 +590,11 @@
      {:else}
       {#each demos as demo (demo.fileKey)}
        <div class="flex items-center gap-3 rounded-lg border p-3">
+        <span class="flex-shrink-0 font-medium">{demo.title}</span>
         <audio src={demo.audioUrl} controls class="h-10 flex-1"></audio>
         <Button
          type="button"
+         onclick={() => handleDemoDelete(demo.fileKey)}
          variant="outline"
          size="icon"
         >
@@ -558,23 +603,55 @@
        </div>
       {/each}
      {/if}
+    <div>
+      <div class="grid grid-cols-2 gap-4">
+        <div class="grid gap-3">
+          <Field.Label for="title">Título</Field.Label>
+          <Input id="title" name="title" type="text" bind:value={demoTitle} />
+        </div>
 
-     <input
-      id="demo-upload"
-      type="file"
-      accept="audio/*"
-      class="hidden"
-      bind:this={demoInput}
-      onchange={handleDemoUpload}
-     />
-     <Button
-      type="button"
-      variant="outline"
-      disabled={uploadingDemo}
-      onclick={() => demoInput?.click()}
-     >
-      {uploadingDemo ? 'Subiendo...' : 'Subir nueva demo'}
-     </Button>
+        <div class="grid gap-3">
+          <Field.Label for="languages">Lenguajes</Field.Label>
+          <Select.Root
+            name="languageId"
+            type="single"
+            bind:value={selectedLanguageId}
+          >
+            <Select.Trigger id="languageId" name="LanguageId" class="w-full">
+              <span>{selectedLanguageName}</span>
+            </Select.Trigger>
+            <Select.Content>
+              {#each languagesFetch?.data?.languages as language}
+                <Select.Item value={String(language.languageId)}>
+                  {language.name}
+                </Select.Item>
+              {/each}
+            </Select.Content>
+          </Select.Root>
+        </div>
+      </div>
+
+      <div class="flex justify-center mt-4">
+        <Button
+          type="button"
+          variant="outline"
+          disabled={uploadingDemo}
+          onclick={() => demoInput?.click()}
+          class="w-1/2"
+        >
+          {uploadingDemo ? 'Subiendo...' : 'Subir demo'}
+        </Button>
+      </div>
+
+      <input
+        id="demo-upload"
+        type="file"
+        accept="audio/*"
+        class="hidden"
+        bind:this={demoInput}
+        onchange={handleDemoUpload}
+      />
+    </div>
     </Card.Content>
    </Card.Root>
   </Tabs.Content>

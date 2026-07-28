@@ -9,6 +9,11 @@
   let broadcasters: Broadcaster[] = $state(data?.broadcasters);
   let selectedBroadcaster: Broadcaster | null = $state(null);
   let dialogOpen = $state(false);
+
+  $effect(() => {
+    broadcasters = data?.broadcasters;
+  });
+
   function handleOpenDetails(broadcaster: Broadcaster) {
     selectedBroadcaster = broadcaster;
     dialogOpen = true;
@@ -24,11 +29,7 @@
     <h1 class="text-2xl font-semibold tracking-tight">Buscar locutores</h1>
   </div>
   <SearchFilters {loading} bind:broadcasters />
-  <BroadcasterGrid
-    {loading}
-    bind:broadcasters
-    onOpenDetails={handleOpenDetails}
-  />
+  <BroadcasterGrid {loading} {broadcasters} pageInfo={data.pageInfo} onOpenDetails={handleOpenDetails} />
 </div>
 
 <BroadcasterDialog bind:open={dialogOpen} broadcaster={selectedBroadcaster} />

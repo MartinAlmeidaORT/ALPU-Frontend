@@ -1,4 +1,4 @@
-import type { Gender } from "$lib/graphql/types/graphql";
+import type { Gender } from '$lib/graphql/types/graphql';
 
 export interface Broadcaster {
   firstName: string;
@@ -10,9 +10,9 @@ export interface Broadcaster {
     city: string;
     street: string;
   };
-    phoneNumber: string;
-    website: string;
-    description: string;
-    identityCard: string;
-    gender: Gender;
+  phoneNumber: string;
+  website: string;
+  description: string;
+  identityCard: string;
+  gender: Gender;
 }

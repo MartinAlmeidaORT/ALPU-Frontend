@@ -29,7 +29,12 @@
     <h1 class="text-2xl font-semibold tracking-tight">Buscar locutores</h1>
   </div>
   <SearchFilters {loading} bind:broadcasters />
-  <BroadcasterGrid {loading} {broadcasters} pageInfo={data.pageInfo} onOpenDetails={handleOpenDetails} />
+  <BroadcasterGrid
+    {loading}
+    {broadcasters}
+    pageInfo={data.pageInfo}
+    onOpenDetails={handleOpenDetails}
+  />
 </div>
 
 <BroadcasterDialog bind:open={dialogOpen} broadcaster={selectedBroadcaster} />

@@ -16,7 +16,8 @@
   );
   const demo = $derived(
     broadcaster
-      ? broadcaster.demos.find((d) => d.title.toLowerCase() === 'demo') ?? broadcaster.demos[0]
+      ? (broadcaster.demos.find((d) => d.title.toLowerCase() === 'demo') ??
+          broadcaster.demos[0])
       : null,
   );
 </script>
@@ -49,11 +50,7 @@
       {fullName}
     </button>
     {#if demo}
-      <audio
-        controls
-        src={demo?.audioUrl}
-        class="h-10 w-full"
-      >
+      <audio controls src={demo?.audioUrl} class="h-10 w-full">
         <track kind="captions" />
       </audio>
       <span class="block w-full text-center text-base text-muted-foreground">

@@ -1,10 +1,10 @@
 <script lang="ts">
   import { translateRole } from '$lib/browser/utils';
   import type { User } from '$lib/components/types';
- 
+
   let { user }: { user: User } = $props();
 </script>
- 
+
 <div
   class="flex items-center gap-2.5 rounded-full border border-border/60 bg-muted/40 px-2.5 py-1.5"
 >

@@ -19,7 +19,12 @@
     pageInfo?: PageInfo;
     onOpenDetails: (broadcaster: Broadcaster) => void;
   }
-  let { loading, onOpenDetails, pageInfo, broadcasters = $bindable() }: Props = $props();
+  let {
+    loading,
+    onOpenDetails,
+    pageInfo,
+    broadcasters = $bindable(),
+  }: Props = $props();
 
   function nextPage() {
     if (pageInfo?.hasNextPage && pageInfo?.endCursor) {

@@ -233,18 +233,18 @@ export const USERS_QUERY = graphql(`
 export const USER_QUERY = graphql(`
   query userFiltered($userId: Int!) {
     users(where: { userId: { eq: $userId }, userState: { eq: ENABLED } }) {
-        nodes {
-          userId
-          firstName
-          lastName
-          email
-          rut
-          userState
-          __typename
-          ... on Broadcaster {
-            profilePictureUrl
-          }
+      nodes {
+        userId
+        firstName
+        lastName
+        email
+        rut
+        userState
+        __typename
+        ... on Broadcaster {
+          profilePictureUrl
         }
+      }
     }
   }
 `);
@@ -299,7 +299,7 @@ export const UPDATE_BROADCASTER_MUTATION = graphql(`
 
 export const REQUEST_BROADCASTER_DEMO_UPDATE_MUTATION = graphql(`
   mutation requestDemoUploadUrl($fileName: String!) {
-    requestDemoUploadUrl( fileName: $fileName) {
+    requestDemoUploadUrl(fileName: $fileName) {
       key
       uploadUrl
       fields {
@@ -312,7 +312,7 @@ export const REQUEST_BROADCASTER_DEMO_UPDATE_MUTATION = graphql(`
 
 export const CONFIRM_BROADCASTER_DEMO_UPDATE_MUTATION = graphql(`
   mutation confirmDemoUpload($input: UploadDemoInput!) {
-    confirmDemoUpload( input: $input) {
+    confirmDemoUpload(input: $input) {
       fileKey
       audioUrl
       title
@@ -322,7 +322,7 @@ export const CONFIRM_BROADCASTER_DEMO_UPDATE_MUTATION = graphql(`
 
 export const REQUEST_BROADCASTER_PROFILE_PICTURE_UPDATE_MUTATION = graphql(`
   mutation requestProfilePictureUploadUrl($fileName: String!) {
-    requestProfilePictureUploadUrl( fileName: $fileName) {
+    requestProfilePictureUploadUrl(fileName: $fileName) {
       key
       uploadUrl
     }
@@ -331,7 +331,7 @@ export const REQUEST_BROADCASTER_PROFILE_PICTURE_UPDATE_MUTATION = graphql(`
 
 export const CONFIRM_BROADCASTER_PROFILE_PICTURE_UPDATE_MUTATION = graphql(`
   mutation confirmProfilePictureUpload($key: String!) {
-    confirmProfilePictureUpload( key: $key) {
+    confirmProfilePictureUpload(key: $key) {
       photo
     }
   }
@@ -345,7 +345,6 @@ export const DELETE_BROADCASTER_DEMO_MUTATION = graphql(`
     }
   }
 `);
-
 
 export async function fetchClient(input: {
   email: string;
@@ -389,4 +388,3 @@ export async function fetchBroadcasters(
     })
     .toPromise();
 }
-

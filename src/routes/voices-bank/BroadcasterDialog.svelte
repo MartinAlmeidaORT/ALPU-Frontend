@@ -29,13 +29,16 @@
   let currentDemoIndex = $state(0);
   const currentDemo = $derived(demos[currentDemoIndex]);
   function prevDemo() {
-    currentDemoIndex = currentDemoIndex === 0 ? demos.length - 1 : currentDemoIndex - 1;
+    currentDemoIndex =
+      currentDemoIndex === 0 ? demos.length - 1 : currentDemoIndex - 1;
   }
 
   function nextDemo() {
-    currentDemoIndex = currentDemoIndex === demos.length - 1 ? 0 : currentDemoIndex + 1;
+    currentDemoIndex =
+      currentDemoIndex === demos.length - 1 ? 0 : currentDemoIndex + 1;
   }
 </script>
+
 <Dialog.Root bind:open>
   <Dialog.Content class="max-h-[85vh] max-w-lg overflow-hidden p-0">
     {#if broadcaster}
@@ -100,11 +103,11 @@
             </div>
 
             {#if demos.length > 1}
-            <div class="mt-2 flex w-full justify-center">
-              <Field.Label class="text-base text-muted-foreground">
-                {'Titulo: ' + currentDemo?.title}
-              </Field.Label>
-            </div>
+              <div class="mt-2 flex w-full justify-center">
+                <Field.Label class="text-base text-muted-foreground">
+                  {'Titulo: ' + currentDemo?.title}
+                </Field.Label>
+              </div>
             {/if}
           {/if}
           <div class="space-y-6">
@@ -125,17 +128,19 @@
                   <p class="text-muted-foreground">Email</p>
                   <p class="font-medium">{broadcaster.email}</p>
                 </div>
-                 <div>
-                    <p class="text-muted-foreground">País</p>
-                    <p class="font-medium">{broadcaster.address?.country.name}</p>
+                <div>
+                  <p class="text-muted-foreground">País</p>
+                  <p class="font-medium">{broadcaster.address?.country.name}</p>
                 </div>
                 <div>
-                    <p class="text-muted-foreground">Departamento</p>
-                    <p class="font-medium">{broadcaster.address?.department.name}</p>
+                  <p class="text-muted-foreground">Departamento</p>
+                  <p class="font-medium">
+                    {broadcaster.address?.department.name}
+                  </p>
                 </div>
                 <div>
-                    <p class="text-muted-foreground">Ciudad</p>
-                    <p class="font-medium">{broadcaster.address?.city}</p>
+                  <p class="text-muted-foreground">Ciudad</p>
+                  <p class="font-medium">{broadcaster.address?.city}</p>
                 </div>
                 {#if broadcaster.phoneNumber}
                   <div>

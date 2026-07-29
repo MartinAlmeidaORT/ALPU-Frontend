@@ -1,4 +1,4 @@
-import { BROADCASTER_QUERY } from "$lib/graphql/queries/user";
+import { BROADCASTER_QUERY } from '$lib/graphql/queries/user';
 
 export async function load({ locals, url }: { locals: App.Locals; url: URL }) {
   try {
@@ -28,7 +28,7 @@ export async function load({ locals, url }: { locals: App.Locals; url: URL }) {
     const broadcaster = result.data.broadcasters?.[0] || null;
     return {
       token: locals.token,
-      broadcaster: broadcaster
+      broadcaster: broadcaster,
     };
   } catch (error) {
     return {

@@ -17,6 +17,8 @@
     CountriesQuery,
     DepartmentsQuery,
   } from '$lib/graphql/types/graphql';
+  import { Gender } from '$lib/graphql/schema';
+  import { translateGender } from '$lib/browser/utils';
 
   let {
     form,
@@ -51,6 +53,8 @@
   let selectedDepartmentId: string | undefined = $state();
   let selectedCountryName: string | undefined = $state();
   let formElement: HTMLFormElement | undefined = undefined;
+  let genders = Object.values(Gender);
+  let selectedGender: Gender | String = $state('Seleccionar sexo');
 
   $effect(() => {
     if (selectedCountryCode) {
@@ -222,6 +226,20 @@
               maxlength={12}
             />
           </Field.Field>
+          {#if selectedCountryCode === 'UY '}
+            <Field.Field>
+              <Field.Label for="identityCard">Cédula de Identidad</Field.Label>
+              <Input
+                id="identityCard"
+                name="identityCard"
+                type="text"
+                placeholder="Cédula de Identidad"
+                required
+                minlength={8}
+                maxlength={8}
+              />
+            </Field.Field>
+          {/if}
           {#if accountType === 'client'}
             <Field.Field>
               <Field.Label for="agencyName">Nombre de Agencia</Field.Label>
@@ -305,6 +323,25 @@
               placeholder="Calle"
               required
             />
+          </Field.Field>
+          <Field.Field>
+            <Field.Label for="gender">Sexo</Field.Label>
+            <Select.Root
+              name="gender"
+              type="single"
+              bind:value={selectedGender}
+            >
+              <Select.Trigger id="gender" name="gender">
+                <span>{translateGender(selectedGender)}</span>
+              </Select.Trigger>
+              <Select.Content>
+                {#each genders as gender}
+                  <Select.Item value={gender}>
+                    {translateGender(gender)}
+                  </Select.Item>
+                {/each}
+              </Select.Content>
+            </Select.Root>
           </Field.Field>
         </Field.Group>
         <Field.Group class="mt-4" columns={2}>

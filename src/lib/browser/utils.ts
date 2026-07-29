@@ -18,6 +18,19 @@ export function translateRole(role: string): string {
   }
 }
 
+export function translateGender(gender: string): string {
+  switch (gender) {
+    case 'MALE':
+      return 'Masculino';
+    case 'FEMALE':
+      return 'Femenino';
+    case 'NON_SPECIFIED':
+      return 'No especificado';
+    default:
+      return gender;
+  }
+}
+
 export function validateDate(calendarDate: CalendarDate | undefined): boolean {
   if (!calendarDate || calendarDate.toString() === '') {
     toast.error('Error al agregar un medio', {

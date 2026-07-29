@@ -5,4 +5,5 @@ export interface User {
   lastName: string;
   role: string;
   state: string;
+  profilePictureUrl?: string | null;
 }

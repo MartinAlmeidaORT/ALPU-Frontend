@@ -8,11 +8,19 @@
 <div
   class="flex items-center gap-2.5 rounded-full border border-border/60 bg-muted/40 px-2.5 py-1.5"
 >
-  <div
-    class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground text-[11px] font-semibold select-none"
-  >
-    {(user.firstName?.[0] ?? 'U').toUpperCase()}
-  </div>
+  {#if user.profilePictureUrl}
+    <img
+      src={user.profilePictureUrl}
+      alt=""
+      class="h-6 w-6 shrink-0 rounded-full object-cover"
+    />
+  {:else}
+    <div
+      class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground text-[11px] font-semibold select-none"
+    >
+      {(user.firstName?.[0] ?? 'U').toUpperCase()}
+    </div>
+  {/if}
   <span class="text-sm font-medium leading-none whitespace-nowrap">
     {user.firstName || 'Usuario'}
   </span>

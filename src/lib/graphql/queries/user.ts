@@ -32,7 +32,7 @@ const AGENCY_QUERY = graphql(`
   }
 `);
 
-const BROADCASTER_QUERY = graphql(`
+export const BROADCASTER_QUERY = graphql(`
   query broadcaster($email: String!) {
     broadcasters(where: { email: { eq: $email }, userState: { eq: ENABLED } }) {
       userId
@@ -40,6 +40,39 @@ const BROADCASTER_QUERY = graphql(`
       lastName
       email
       profilePictureUrl
+      phoneNumber
+      website
+      description
+      gender
+      identityCard
+      category {
+        name
+      }
+      address {
+        city
+        country {
+          countryCode
+          name
+        }
+        department {
+          departmentId
+          name
+        }
+        street
+      }
+      demos {
+        audioUrl
+        fileKey
+        title
+      }
+      skills {
+        name
+        skillId
+      }
+      languages {
+        name
+        languageId
+      }
     }
   }
 `);
@@ -57,6 +90,9 @@ export const BROADCASTERS_PAGED_QUERY = graphql(`
         lastName
         email
         profilePictureUrl
+        phoneNumber
+        website
+        description
         category {
           name
         }
@@ -72,6 +108,7 @@ export const BROADCASTERS_PAGED_QUERY = graphql(`
         }
         demos {
           audioUrl
+          title
         }
         skills {
           name
@@ -104,6 +141,9 @@ export const BROADCASTERS_FILTERED_PAGED_QUERY = graphql(`
         lastName
         email
         profilePictureUrl
+        phoneNumber
+        website
+        description
         category {
           name
         }
@@ -119,6 +159,7 @@ export const BROADCASTERS_FILTERED_PAGED_QUERY = graphql(`
         }
         demos {
           audioUrl
+          title
         }
         skills {
           name
@@ -189,11 +230,118 @@ export const USERS_QUERY = graphql(`
   }
 `);
 
+export const USER_QUERY = graphql(`
+  query userFiltered($userId: Int!) {
+    users(where: { userId: { eq: $userId }, userState: { eq: ENABLED } }) {
+      nodes {
+        userId
+        firstName
+        lastName
+        email
+        rut
+        userState
+        __typename
+        ... on Broadcaster {
+          profilePictureUrl
+        }
+      }
+    }
+  }
+`);
+
 export const APPROVE_USER_MUTATION = graphql(`
   mutation approveUser($input: UpdateUserStateInput!) {
     approveUser(input: $input) {
       userId
       userState
+    }
+  }
+`);
+
+export const UPDATE_BROADCASTER_MUTATION = graphql(`
+  mutation updateBroadcasterProfile($input: UpdateBroadcasterProfileInput!) {
+    updateBroadcasterProfile(input: $input) {
+      userId
+      firstName
+      lastName
+      email
+      profilePictureUrl
+      phoneNumber
+      website
+      description
+      gender
+      identityCard
+      category {
+        name
+      }
+      address {
+        city
+        country {
+          name
+        }
+        department {
+          name
+        }
+        street
+      }
+      demos {
+        audioUrl
+      }
+      skills {
+        name
+      }
+      languages {
+        name
+      }
+    }
+  }
+`);
+
+export const REQUEST_BROADCASTER_DEMO_UPDATE_MUTATION = graphql(`
+  mutation requestDemoUploadUrl($fileName: String!) {
+    requestDemoUploadUrl(fileName: $fileName) {
+      key
+      uploadUrl
+      fields {
+        name
+        value
+      }
+    }
+  }
+`);
+
+export const CONFIRM_BROADCASTER_DEMO_UPDATE_MUTATION = graphql(`
+  mutation confirmDemoUpload($input: UploadDemoInput!) {
+    confirmDemoUpload(input: $input) {
+      fileKey
+      audioUrl
+      title
+    }
+  }
+`);
+
+export const REQUEST_BROADCASTER_PROFILE_PICTURE_UPDATE_MUTATION = graphql(`
+  mutation requestProfilePictureUploadUrl($fileName: String!) {
+    requestProfilePictureUploadUrl(fileName: $fileName) {
+      key
+      uploadUrl
+    }
+  }
+`);
+
+export const CONFIRM_BROADCASTER_PROFILE_PICTURE_UPDATE_MUTATION = graphql(`
+  mutation confirmProfilePictureUpload($key: String!) {
+    confirmProfilePictureUpload(key: $key) {
+      photo
+    }
+  }
+`);
+
+export const DELETE_BROADCASTER_DEMO_MUTATION = graphql(`
+  mutation deleteDemo($key: String!) {
+    deleteDemo(key: $key) {
+      fileKey
+      audioUrl
     }
   }
 `);

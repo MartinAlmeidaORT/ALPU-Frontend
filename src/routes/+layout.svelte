@@ -98,7 +98,7 @@
 
   onMount(() => {
     // Example: Retrieve token expiration timestamp (in milliseconds) from localStorage or a cookie
-    
+
     const expiresAt = data.expiresAt;
 
     if (expiresAt) {
@@ -118,13 +118,11 @@
       }
     }
     window.addEventListener('storage', (event) => {
-    if (event.key === 'token' && !event.newValue) {
-      goto('/logout');
-    }
+      if (event.key === 'token' && !event.newValue) {
+        goto('/logout');
+      }
     });
   });
-
-  
 </script>
 
 <nav

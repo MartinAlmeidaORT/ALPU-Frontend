@@ -44,7 +44,7 @@
     <Input
       id="email"
       type="email"
-      placeholder="Ingresar email"
+      placeholder="Ingresar email del usuario"
       class="flex-1"
       bind:value={email}
     />

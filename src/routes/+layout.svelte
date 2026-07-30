@@ -98,10 +98,11 @@
 
   onMount(() => {
     // Example: Retrieve token expiration timestamp (in milliseconds) from localStorage or a cookie
+    
     const expiresAt = data.expiresAt;
 
     if (expiresAt) {
-      const timeout = Number(expiresAt) - Date.now();
+      const timeout = Number(expiresAt) * 1000 - Date.now();
 
       if (timeout <= 0) {
         // Token is already expired

@@ -34,7 +34,7 @@
     <Input
       id="agency_name"
       type="text"
-      placeholder="Ingresar agencia"
+      placeholder="Ingresar nombre de agencia"
       class="flex-1"
       bind:value={agencyName}
     />

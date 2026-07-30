@@ -8,7 +8,7 @@
   import type { LayoutData } from './$types';
   import Button from '$lib/components/ui/button/button.svelte';
   import * as AlertDialog from '$lib/components/ui/alert-dialog/index.js';
-  import { onDestroy } from 'svelte';
+  import { onDestroy, onMount } from 'svelte';
   import { createUrqlClient } from '$lib/graphql/client';
   import {
     NOTIFICATIONS_QUERY,
@@ -19,7 +19,7 @@
   import { ScrollArea } from '$lib/components/ui/scroll-area/index.js';
   import { Separator } from '$lib/components/ui/separator/index.js';
   import ActiveUser from '$lib/components/custom/user/ActiveUser.svelte';
-  import { Navigation } from 'lucide-svelte';
+  import { goto } from '$app/navigation';
 
   let {
     data,
@@ -95,6 +95,34 @@
   function handleLogout() {
     logoutFormRef?.submit();
   }
+
+  onMount(() => {
+    // Example: Retrieve token expiration timestamp (in milliseconds) from localStorage or a cookie
+
+    const expiresAt = data.expiresAt;
+
+    if (expiresAt) {
+      const timeout = Number(expiresAt) * 1000 - Date.now();
+
+      if (timeout <= 0) {
+        // Token is already expired
+        handleLogout();
+      } else {
+        // Set a timer to logout right when the token expires
+        const timer = setTimeout(() => {
+          handleLogout();
+        }, timeout);
+
+        // Cleanup timer on component unmount
+        return () => clearTimeout(timer);
+      }
+    }
+    window.addEventListener('storage', (event) => {
+      if (event.key === 'token' && !event.newValue) {
+        goto('/logout');
+      }
+    });
+  });
 </script>
 
 <nav

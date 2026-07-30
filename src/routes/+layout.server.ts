@@ -3,7 +3,6 @@ import type { LayoutServerLoad } from './$types';
 
 export const load: LayoutServerLoad = async ({ cookies, locals, depends }) => {
   depends('app:me');
-
   const sessionId = cookies.get('session_id');
   let user = null;
   if (locals.token) {
@@ -23,5 +22,6 @@ export const load: LayoutServerLoad = async ({ cookies, locals, depends }) => {
     session: sessionId,
     token: locals.token,
     user: user,
+    expiresAt: locals.expiresAt,
   };
 };

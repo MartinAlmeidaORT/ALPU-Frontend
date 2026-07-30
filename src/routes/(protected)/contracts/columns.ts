@@ -42,7 +42,7 @@ export const columns: ColumnDef<TableContract>[] = [
     accessorKey: 'broadcaster',
     header: () => {
       const broadcasterHeaderSnippet = createRawSnippet(() => ({
-        render: () => `<div class="text-start">Broadcaster</div>`,
+        render: () => `<div class="text-start">Locutor</div>`,
       }));
       return renderSnippet(broadcasterHeaderSnippet);
     },

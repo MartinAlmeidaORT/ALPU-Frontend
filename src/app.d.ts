@@ -8,6 +8,7 @@ declare global {
       urql: Client;
       user: User | null | undefined;
       token: string | null | undefined;
+      expiresAt: number | null | undefined;
     }
     // interface Error {}
     // interface PageData {}

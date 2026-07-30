@@ -30,6 +30,7 @@ export function decodeToken(token: string, locals: App.Locals): void {
         role: decodedUser.account_role,
       };
       locals.token = token;
+      locals.expiresAt = decodedUser.exp;
       locals.urql = createUrqlClient(token);
     } catch (error) {
       clearLocals(locals);

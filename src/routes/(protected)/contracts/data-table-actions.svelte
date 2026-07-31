@@ -19,33 +19,38 @@
   let { contract }: { contract: TableContract } = $props();
   import { goto } from '$app/navigation';
   import { page } from '$app/state';
-
   const getMenuItems = (state: string) => {
+    const options = [];
     switch (state) {
       case 'PENDING':
-        return [
-          { label: 'Aprobar', action: 'approve' },
-          { label: 'Cancelar', action: 'cancel' },
-          { label: 'Ver', action: 'ver' },
-          { label: 'Reestructurar', action: 'reestructurar' },
-        ];
+        options.push({ label: 'Aprobar', action: 'approve' });
+        options.push({ label: 'Cancelar', action: 'cancel' });
+        options.push({ label: 'Ver', action: 'ver' });
+        if (page.data.user.__typename === 'Broadcaster' || page.data.role === 'Client') {
+          options.push({ label: 'Reestructurar', action: 'reestructurar' });
+        }
+        return options;
       case 'ACTIVE':
-        return [
-          { label: 'Cancelar', action: 'cancel' },
-          { label: 'Ver', action: 'ver' },
-          { label: 'Reestructurar', action: 'reestructurar' },
-        ];
+        options.push({ label: 'Cancelar', action: 'cancel' });
+        options.push({ label: 'Ver', action: 'ver' });
+        if (page.data.user.__typename === 'Broadcaster' || page.data.role === 'Client') {
+          options.push({ label: 'Reestructurar', action: 'reestructurar' });
+        }
+        return options;
+
       case 'PAID':
-        return [
-          { label: 'Cancelar', action: 'cancel' },
-          { label: 'Ver', action: 'ver' },
-          { label: 'Reestructurar', action: 'reestructurar' },
-        ];
+        options.push({ label: 'Cancelar', action: 'cancel' });
+        options.push({ label: 'Ver', action: 'ver' });
+        if (page.data.user.__typename === 'Broadcaster' || page.data.role === 'Client') {
+          options.push({ label: 'Reestructurar', action: 'reestructurar' });
+        }
+        return options;
       case 'CANCELED':
-        return [
-          { label: 'Ver', action: 'ver' },
-          { label: 'Reestructurar', action: 'reestructurar' },
-        ];
+        options.push({ label: 'Ver', action: 'ver' });
+        if (page.data.user.__typename === 'Broadcaster' || page.data.role === 'Client') {
+          options.push({ label: 'Reestructurar', action: 'reestructurar' });
+        }
+        return options;
       default:
         return [];
     }

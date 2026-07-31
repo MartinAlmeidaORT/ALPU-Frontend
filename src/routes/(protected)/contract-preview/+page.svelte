@@ -15,7 +15,7 @@
 
   let pdfAmazonS3Url = $state<string | null>(null);
   let contractId = $state<string | null>(null);
-  let { data }: { data: { token: string } } = $props();
+  let { data }: { data: { token: string, user: { __typename: string } } } = $props();
 
   onMount(() => {
     const storedData = sessionStorage.getItem('contractPreview');
@@ -65,6 +65,7 @@
         frameborder="0"
       ></iframe>
     </div>
+    {#if data.user.__typename === 'Broadcaster' || data.user.__typename === 'Client' || data.user.__typename === 'Administrator' || data.user.__typename === 'Supervisor'}
     <div class="flex w-full gap-3 max-w-6xl px-4">
       <button
         type="button"
@@ -113,6 +114,7 @@
         </Dialog.Content>
       </Dialog.Root>
     </div>
+    {/if}
   {:else}
     <div class="flex flex-col items-center gap-3 mt-20">
       <div

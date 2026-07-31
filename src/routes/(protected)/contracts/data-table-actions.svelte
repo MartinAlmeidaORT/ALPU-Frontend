@@ -23,24 +23,30 @@
     const options = [];
     switch (state) {
       case 'PENDING':
-        options.push({ label: 'Aprobar', action: 'approve' });
-        options.push({ label: 'Cancelar', action: 'cancel' });
         options.push({ label: 'Ver', action: 'ver' });
+        if (page.data.user.__typename === 'Broadcaster' || page.data.user.__typename === 'Client' || page.data.user.__typename === 'Administrator' || page.data.user.__typename === 'Supervisor') {
+          options.push({ label: 'Aprobar', action: 'approve' });
+          options.push({ label: 'Cancelar', action: 'cancel' });
+        }
         if (page.data.user.__typename === 'Broadcaster' || page.data.role === 'Client') {
           options.push({ label: 'Reestructurar', action: 'reestructurar' });
         }
         return options;
       case 'ACTIVE':
-        options.push({ label: 'Cancelar', action: 'cancel' });
         options.push({ label: 'Ver', action: 'ver' });
+        if (page.data.user.__typename === 'Broadcaster' || page.data.user.__typename === 'Client' || page.data.user.__typename === 'Administrator' || page.data.user.__typename === 'Supervisor') {
+          options.push({ label: 'Cancelar', action: 'cancel' });
+        }
         if (page.data.user.__typename === 'Broadcaster' || page.data.role === 'Client') {
           options.push({ label: 'Reestructurar', action: 'reestructurar' });
         }
         return options;
 
       case 'PAID':
-        options.push({ label: 'Cancelar', action: 'cancel' });
         options.push({ label: 'Ver', action: 'ver' });
+        if (page.data.user.__typename === 'Broadcaster' || page.data.user.__typename === 'Client' || page.data.user.__typename === 'Administrator' || page.data.user.__typename === 'Supervisor') {
+          options.push({ label: 'Cancelar', action: 'cancel' });
+        }
         if (page.data.user.__typename === 'Broadcaster' || page.data.role === 'Client') {
           options.push({ label: 'Reestructurar', action: 'reestructurar' });
         }

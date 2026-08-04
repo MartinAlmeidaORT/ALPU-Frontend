@@ -146,10 +146,10 @@
               ? 'opacity-100'
               : 'opacity-50 pointer-events-none'}"
           >
-            <Label for="contract-id">ID del Contrato</Label>
+            <Label for="contractSerial">Número de Serie del Contrato</Label>
             <Input
-              id="contract-id"
-              name="contractId"
+              id="contractSerial"
+              name="contractSerial"
               placeholder="Ingresar ID del contrato..."
               disabled={!isContract}
             />

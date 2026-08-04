@@ -62,8 +62,8 @@ export const actions = {
         type: (formData.get('type') as string).toUpperCase(),
         date: new Date().toISOString().split('T')[0],
         fileName: file ? file.name : '',
-        contractId: formData.get('contractId')
-          ? parseInt(formData.get('contractId') as string)
+        contractSerial: formData.get('contractSerial')
+          ? formData.get('contractSerial') as string
           : null,
       };
       const result = await createUrqlClient(locals.token)

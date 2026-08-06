@@ -2,13 +2,11 @@
   import { onMount } from 'svelte';
   import * as Tabs from '$lib/components/ui/tabs/index.js';
   import * as Card from '$lib/components/ui/card/index.js';
-  import * as Popover from '$lib/components/ui/popover/index.js';
   import { Button } from '$lib/components/ui/button/index.js';
   import { Input } from '$lib/components/ui/input/index.js';
   import { Label } from '$lib/components/ui/label/index.js';
   import { cn } from '$lib/utils.js';
   import Check from 'lucide-svelte/icons/check';
-  import ChevronsUpDown from 'lucide-svelte/icons/chevrons-up-down';
   import type {
     LanguagesQuery,
     SkillsQuery,
@@ -16,7 +14,6 @@
   import { fetchSkills } from '$lib/graphql/queries/skills';
   import { fetchLanguages } from '$lib/graphql/queries/languages';
   import { toast } from 'svelte-sonner';
-  import { Command } from 'bits-ui';
   import * as Select from '$lib/components/ui/select/index.js';
   import type { PageData } from './$types.js';
   import { createUrqlClient } from '$lib/graphql/client';
@@ -52,8 +49,6 @@
   let languageOptions: LanguagesQuery['languages'] = $state([]);
   let newSkills: string[] = $state([]);
   let newLanguages: string[] = $state([]);
-  let skillsPopoverOpen = $state(false);
-  let languagesPopoverOpen = $state(false);
   let demos: { audioUrl: string; fileKey: string; title: string }[] = $state(
     broadcaster.demos ?? [],
   );
@@ -112,13 +107,13 @@
   let selectedCountryName = $derived(
     countriesFetch?.data?.countries.find(
       (c) => c.countryCode === broadcasterUpdated.address.countryCode,
-    )?.name ?? 'Seleccionar país',
+    )?.name ?? 'País',
   );
 
   let selectedDepartmentName: string | undefined = $derived(
     departmentsFetch?.data?.departments.find(
       (d) => d.departmentId === Number(broadcasterUpdated.address.departmentId),
-    )?.name ?? 'Seleccionar departamento',
+    )?.name ?? 'Departamento',
   );
 
   $effect(() => {
@@ -126,7 +121,7 @@
       const country = countriesFetch.data.countries.find(
         (c) => c.countryCode === broadcasterUpdated.address.countryCode,
       );
-      selectedCountryName = country ? country.name : 'Seleccionar país';
+      selectedCountryName = country ? country.name : 'País';
     }
   });
 
@@ -289,30 +284,21 @@
     labelFor(newLanguages, 'Ningún idioma seleccionado'),
   );
 
-  function toggleSkill(name: string, skillId: number) {
-    newSkills = newSkills.includes(name)
-      ? newSkills.filter((s) => s !== name)
-      : [...newSkills, name];
+  $effect(() => {
+    if (skillOptions.length === 0) return;
+    broadcasterUpdated.skillIds = skillOptions
+      .filter((skill) => newSkills.includes(skill.name))
+      .map((skill) => skill.skillId);
+  });
 
-    broadcasterUpdated.skillIds = broadcasterUpdated.skillIds.includes(skillId)
-      ? broadcasterUpdated.skillIds.filter((id) => id !== skillId)
-      : [...broadcasterUpdated.skillIds, skillId];
-  }
-
-  function toggleLanguage(name: string, languageId: number) {
-    newLanguages = newLanguages.includes(name)
-      ? newLanguages.filter((l) => l !== name)
-      : [...newLanguages, name];
-
-    broadcasterUpdated.languageIds = broadcasterUpdated.languageIds.includes(
-      languageId,
-    )
-      ? broadcasterUpdated.languageIds.filter((id) => id !== languageId)
-      : [...broadcasterUpdated.languageIds, languageId];
-  }
+  $effect(() => {
+    if (languageOptions.length === 0) return;
+    broadcasterUpdated.languageIds = languageOptions
+      .filter((language) => newLanguages.includes(language.name))
+      .map((language) => language.languageId);
+  });
 
   onMount(async () => {
-    languagesFetch = await fetchLanguages();
     countriesFetch = await fetchCountries();
     error = data.error || null;
     broadcasterUpdated.address.countryCode =
@@ -320,13 +306,14 @@
     broadcasterUpdated.address.departmentId =
       broadcaster.address.department?.departmentId;
     try {
-      const [skillsFetch, languagesFetch] = await Promise.all([
+      const [skillsFetch, languagesResult] = await Promise.all([
         fetchSkills(),
         fetchLanguages(),
       ]);
-      if (!skillsFetch.error && !languagesFetch.error) {
+      languagesFetch = languagesResult;
+      if (!skillsFetch.error && !languagesResult.error) {
         skillOptions = skillsFetch.data?.skills ?? [];
-        languageOptions = languagesFetch.data?.languages ?? [];
+        languageOptions = languagesResult.data?.languages ?? [];
       } else {
         toast.error('Ocurrió un error al cargar las opciones de búsqueda.');
       }
@@ -334,9 +321,7 @@
       toast.error('Ocurrió un error al cargar las opciones de búsqueda.');
     }
     newSkills = skillOptions
-      .filter((skill) =>
-        broadcaster?.skills?.some((s) => s.name === skill.name),
-      )
+      .filter((skill) => broadcaster?.skills?.some((s) => s.name === skill.name))
       .map((skill) => skill.name);
 
     newLanguages = languageOptions
@@ -469,7 +454,7 @@
                 >
                   <span>{selectedCountryName}</span>
                 </Select.Trigger>
-                <Select.Content>
+                <Select.Content class="max-h-60 overflow-y-auto">
                   {#each countriesFetch?.data?.countries as country}
                     <Select.Item value={country.countryCode}>
                       {country.name}
@@ -492,7 +477,7 @@
                 >
                   <span>{selectedDepartmentName}</span>
                 </Select.Trigger>
-                <Select.Content>
+                <Select.Content class="max-h-60 overflow-y-auto">
                   {#each departmentsFetch?.data?.departments as department}
                     <Select.Item value={String(department.departmentId)}>
                       {department.name}
@@ -583,50 +568,31 @@
         <Card.Content class="grid gap-6">
           <div class="grid gap-3">
             <Label for="skills-trigger">Aptitudes</Label>
-            <Popover.Root bind:open={skillsPopoverOpen}>
-              <Popover.Trigger id="skills-trigger">
-                {#snippet child({ props })}
-                  <Button
-                    variant="outline"
-                    role="combobox"
-                    aria-expanded={skillsPopoverOpen}
-                    class="w-full justify-between font-normal"
-                    {...props}
-                  >
-                    {skillLabel}
-                    <ChevronsUpDown class="ml-2 size-4 shrink-0 opacity-50" />
-                  </Button>
-                {/snippet}
-              </Popover.Trigger>
-              <Popover.Content class="w-[--bits-popover-anchor-width] p-0">
-                <Command.Root>
-                  <Command.List>
-                    <Command.Empty>No se encontraron aptitudes.</Command.Empty>
-                    <Command.Group class="flex flex-col gap-2">
-                      {#each skillOptions as skill (skill.name)}
-                        <Command.Item
-                          value={skill.name}
-                          onSelect={() =>
-                            toggleSkill(skill.name, skill.skillId)}
-                          class="pr-4 cursor-pointer select-none"
-                        >
-                          <span class="flex items-center gap-2">
-                            <Check
-                              class={cn(
-                                'size-4 shrink-0',
-                                !newSkills.includes(skill.name) &&
-                                  'text-transparent',
-                              )}
-                            />
-                            {skill.name}
-                          </span>
-                        </Command.Item>
-                      {/each}
-                    </Command.Group>
-                  </Command.List>
-                </Command.Root>
-              </Popover.Content>
-            </Popover.Root>
+            <Select.Root type="multiple" bind:value={newSkills} name="skills">
+              <Select.Trigger
+                id="skills-trigger"
+                class="w-full justify-between font-normal"
+              >
+                <span>{skillLabel}</span>
+              </Select.Trigger>
+              <Select.Content class="max-h-60 overflow-y-auto">
+                {#each skillOptions as skill (skill.name)}
+                  <Select.Item value={skill.name} label={skill.name}>
+                    {#snippet children({ selected })}
+                      <span class="flex items-center gap-2">
+                        <Check
+                          class={cn(
+                            'size-4 shrink-0',
+                            !selected && 'text-transparent',
+                          )}
+                        />
+                        {skill.name}
+                      </span>
+                    {/snippet}
+                  </Select.Item>
+                {/each}
+              </Select.Content>
+            </Select.Root>
             {#if newSkills.length > 0}
               <div class="flex flex-wrap gap-2">
                 {#each newSkills as skill (skill)}
@@ -642,50 +608,35 @@
 
           <div class="grid gap-3">
             <Label for="languages-trigger">Lenguajes</Label>
-            <Popover.Root bind:open={languagesPopoverOpen}>
-              <Popover.Trigger id="languages-trigger">
-                {#snippet child({ props })}
-                  <Button
-                    variant="outline"
-                    role="combobox"
-                    aria-expanded={languagesPopoverOpen}
-                    class="w-full justify-between font-normal"
-                    {...props}
-                  >
-                    {languageLabel}
-                    <ChevronsUpDown class="ml-2 size-4 shrink-0 opacity-50" />
-                  </Button>
-                {/snippet}
-              </Popover.Trigger>
-              <Popover.Content class="w-[--bits-popover-anchor-width] p-0">
-                <Command.Root>
-                  <Command.List>
-                    <Command.Empty>No se encontraron idiomas.</Command.Empty>
-                    <Command.Group class="flex flex-col gap-2">
-                      {#each languageOptions as language (language.name)}
-                        <Command.Item
-                          value={language.name}
-                          onSelect={() =>
-                            toggleLanguage(language.name, language.languageId)}
-                          class="pr-4 cursor-pointer select-none"
-                        >
-                          <span class="flex items-center gap-2">
-                            <Check
-                              class={cn(
-                                'size-4 shrink-0',
-                                !newLanguages.includes(language.name) &&
-                                  'text-transparent',
-                              )}
-                            />
-                            {language.name}
-                          </span>
-                        </Command.Item>
-                      {/each}
-                    </Command.Group>
-                  </Command.List>
-                </Command.Root>
-              </Popover.Content>
-            </Popover.Root>
+            <Select.Root
+              type="multiple"
+              bind:value={newLanguages}
+              name="languages"
+            >
+              <Select.Trigger
+                id="languages-trigger"
+                class="w-full justify-between font-normal"
+              >
+                <span>{languageLabel}</span>
+              </Select.Trigger>
+              <Select.Content class="max-h-60 overflow-y-auto">
+                {#each languageOptions as language (language.name)}
+                  <Select.Item value={language.name} label={language.name}>
+                    {#snippet children({ selected })}
+                      <span class="flex items-center gap-2">
+                        <Check
+                          class={cn(
+                            'size-4 shrink-0',
+                            !selected && 'text-transparent',
+                          )}
+                        />
+                        {language.name}
+                      </span>
+                    {/snippet}
+                  </Select.Item>
+                {/each}
+              </Select.Content>
+            </Select.Root>
             {#if newLanguages.length > 0}
               <div class="flex flex-wrap gap-2">
                 {#each newLanguages as language (language)}

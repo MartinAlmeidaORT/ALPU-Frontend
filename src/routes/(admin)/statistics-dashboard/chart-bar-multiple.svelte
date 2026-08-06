@@ -36,7 +36,7 @@
 
 <Card.Root class="flex flex-col w-full h-full">
   <Card.Header class="items-center">
-    <Card.Title>Gráfico de Barras - Top 10 Clientes</Card.Title>
+    <Card.Title>Top 10 Clientes con contratos pagados</Card.Title>
     <Card.Description>Ordenados por cantidad de contratos</Card.Description>
   </Card.Header>
 

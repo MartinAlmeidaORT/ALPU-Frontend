@@ -47,7 +47,7 @@
             id="email"
             name="email"
             type="email"
-            placeholder="m@example.com"
+            placeholder="Ejemplo@gmail.com"
             required
           />
         </Field.Field>

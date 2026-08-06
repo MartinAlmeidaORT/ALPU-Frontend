@@ -30,7 +30,7 @@
     if (
       contract.countryCode === undefined ||
       contract.countryCode === '' ||
-      contract.countryCode === 'Seleccionar país'
+      contract.countryCode === 'País'
     ) {
       errorMessages = 'Por favor, selecciona un país para el contrato.';
       return;
@@ -47,6 +47,10 @@
       sessionStorage.setItem(
         'contractId',
         result.data?.generateContract?.contract?.contractId,
+      );
+      sessionStorage.setItem(
+        'contractState',
+        result.data?.generateContract?.contract?.state,
       );
       goto('/contract-preview');
     }

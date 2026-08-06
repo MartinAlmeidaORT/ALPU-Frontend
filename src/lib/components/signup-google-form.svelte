@@ -69,14 +69,14 @@
       const country = countriesFetch.data.countries.find(
         (c) => c.countryCode === selectedCountryCode,
       );
-      selectedCountryName = country ? country.name : 'Seleccionar país';
+      selectedCountryName = country ? country.name : 'País';
     }
   });
 
   let selectedDepartmentName: string | undefined = $derived(
     departmentsFetch?.data?.departments?.find(
       (d) => d.departmentId === Number(selectedDepartmentId),
-    )?.name ?? 'Seleccionar departamento',
+    )?.name ?? 'Departamento',
   );
 
   onMount(async () => {
@@ -263,7 +263,7 @@
               <Select.Trigger id="countryCode" name="countryCode">
                 <span>{selectedCountryName}</span>
               </Select.Trigger>
-              <Select.Content>
+              <Select.Content class="max-h-60 overflow-y-auto">
                 {#each countriesFetch?.data?.countries as country}
                   <Select.Item value={country.countryCode} role="option">
                     {country.name}
@@ -283,7 +283,7 @@
               <Select.Trigger id="departmentId" name="departmentId">
                 <span>{selectedDepartmentName}</span>
               </Select.Trigger>
-              <Select.Content>
+              <Select.Content class="max-h-60 overflow-y-auto">
                 {#each departmentsFetch?.data?.departments as department}
                   <Select.Item value={String(department.departmentId)}>
                     {department.name}

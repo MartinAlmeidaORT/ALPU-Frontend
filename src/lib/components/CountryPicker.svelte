@@ -15,7 +15,7 @@
 
   let selectedContractCountryName = $derived(
     countriesFetch?.data?.countries.find((c) => c.countryCode === countryCode)
-      ?.name ?? 'Seleccionar país',
+      ?.name ?? 'Escoger',
   );
 
   $effect(() => {
@@ -23,7 +23,7 @@
       const country = countriesFetch.data.countries.find(
         (c) => c.countryCode === countryCode,
       );
-      selectedContractCountryName = country ? country.name : 'Seleccionar país';
+      selectedContractCountryName = country ? country.name : 'Escoger';
     }
   });
   onMount(async () => {
@@ -31,22 +31,20 @@
   });
 </script>
 
-<div class="bg-white rounded-lg p-4 text-center border-2 border-[#cad8e4]">
+<div class="bg-white rounded-lg p-4 text-center border-2 border-[#cad8e4] w-full h-full">
+  <h3 class="text-center font-semibold mb-4">País del contrato</h3>
   <Field.Field>
-    <div class="flex items-center justify-center gap-3">
-      <Field.Label
-        for="countryCode"
-        class="mb-0 whitespace-nowrap font-semibold"
-      >
-        País del contrato
-      </Field.Label>
-
+    <div class="flex items-center justify-center">
       <Select.Root name="countryCode" type="single" bind:value={countryCode}>
-        <Select.Trigger id="countryCode" name="countryCode">
+        <Select.Trigger
+          id="countryCode"
+          name="countryCode"
+          class="h-11 px-4 text-base min-w-[160px]"
+        >
           <span>{selectedContractCountryName}</span>
         </Select.Trigger>
 
-        <Select.Content>
+        <Select.Content class="max-h-60 overflow-y-auto">
           {#each countriesFetch?.data?.countries as country}
             <Select.Item value={country.countryCode}>
               {country.name}

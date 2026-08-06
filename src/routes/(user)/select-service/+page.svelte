@@ -85,9 +85,6 @@
   }
 
   async function recalculate() {
-    if (!validateCampaignInput()) {
-      return;
-    }
     const result = await calculateServicePrice(contract.toInput());
     if (!result.error) {
       contractDetails = result.data?.calculateContract ?? null;
@@ -149,13 +146,13 @@
       </div>
       <Accordion.Root type="single" class="w-full" value="item-1">
         {#each services as service (service.serviceId)}
-          <ServiceItem {service} onAddService={addService} />
+          <ServiceItem {service} onAddService={addService} validateCampaignInput={validateCampaignInput} />
         {/each}
       </Accordion.Root>
     </div>
 
     <div class="flex-1 min-w-[300px] w-full">
-      <div class="flex w-full gap-4">
+      <div class="flex w-full gap-4 mb-3">
         <div class="flex-1">
           <CountryPicker bind:countryCode={contract.countryCode} />
         </div>

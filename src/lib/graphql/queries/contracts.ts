@@ -146,6 +146,9 @@ export const GET_CONTRACT_URL_QUERY = graphql(`
   query ContractPdfDownloadUrl($contractId: Int!) {
     contractPdfDownloadUrl(contractId: $contractId) {
       pdfAmazonS3Url
+      contract {
+        state
+      }
     }
   }
 `);
@@ -160,6 +163,7 @@ export const GENERATE_CONTRACT_MUTATION = graphql(`
         }
         contractId
         contractSerial
+        state
       }
       pdfAmazonS3Url
     }

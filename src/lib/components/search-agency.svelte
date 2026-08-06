@@ -29,12 +29,13 @@
 </script>
 
 <div class="bg-white rounded-lg p-4 text-center border-2 border-[#cad8e4]">
+  <h3 class="text-center font-semibold mb-4">Buscar agencia por nombre</h3>
   <div class="flex gap-2">
     <Label for="agency_name" class="sr-only">Nombre de Agencia</Label>
     <Input
       id="agency_name"
       type="text"
-      placeholder="Ingresar nombre de agencia"
+      placeholder="Ingresar nombre"
       class="flex-1"
       bind:value={agencyName}
     />

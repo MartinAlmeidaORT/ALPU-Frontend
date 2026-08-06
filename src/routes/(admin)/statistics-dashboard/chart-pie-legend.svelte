@@ -34,7 +34,7 @@
 
 <Card.Root class="flex flex-col w-full h-full">
   <Card.Header class="items-center">
-    <Card.Title>Gráfico de Torta - Top 5 Locutores</Card.Title>
+    <Card.Title>Top 5 Locutores con más cantidad de contratos</Card.Title>
     <Card.Description>Ordenados por cantidad de contratos</Card.Description>
   </Card.Header>
 

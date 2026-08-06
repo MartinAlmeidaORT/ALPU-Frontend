@@ -334,6 +334,7 @@
   async function handleSubmit() {
     try {
       const UpdateBroadcasterInput = broadcasterUpdated;
+      UpdateBroadcasterInput.address.departmentId = Number(UpdateBroadcasterInput.address.departmentId);
       const urqlClient: Client = createUrqlClient(data.token ?? undefined);
       const result = await urqlClient
         .mutation(UPDATE_BROADCASTER_MUTATION, {

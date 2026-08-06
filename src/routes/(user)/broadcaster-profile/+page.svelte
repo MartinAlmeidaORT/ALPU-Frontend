@@ -502,13 +502,15 @@
                 bind:value={broadcasterUpdated.address.street}
               />
             </div>
-            <div class="grid gap-3">
-              <Label for="tabs-demo-identity-card">Cédula de Identidad</Label>
-              <Input
-                id="tabs-demo-identity-card"
-                bind:value={broadcasterUpdated.identityCard}
-              />
-            </div>
+            {#if selectedCountryName === 'Uruguay'}
+              <div class="grid gap-3">
+                <Label for="tabs-demo-identity-card">Cédula de Identidad</Label>
+                <Input
+                  id="tabs-demo-identity-card"
+                  bind:value={broadcasterUpdated.identityCard}
+                />
+              </div>
+            {/if}
             <div class="grid gap-3">
               <Label for="gender">Sexo</Label>
               <Select.Root

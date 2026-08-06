@@ -90,8 +90,8 @@
     class="flex items-center gap-2 space-y-0 border-b py-5 sm:flex-row"
   >
     <div class="grid flex-1 gap-1 text-center sm:text-start">
-      <Card.Title>Contratos puntuales vs morosos</Card.Title>
-      <Card.Description>Comparativa mensual de cumplimiento</Card.Description>
+      <Card.Title>Puntualidad de los contratos</Card.Title>
+      <Card.Description>Comparativa del cumplimiento</Card.Description>
     </div>
     <Select.Root type="single" bind:value={timeRange}>
       <Select.Trigger

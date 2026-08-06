@@ -15,6 +15,7 @@
 
   let pdfAmazonS3Url = $state<string | null>(null);
   let contractId = $state<string | null>(null);
+  let contractState = $state<string | null>(null);
   let { data }: { data: { token: string, user: { __typename: string } } } = $props();
 
   onMount(() => {
@@ -23,8 +24,10 @@
       goto('/');
     } else {
       const parsed = JSON.parse(storedData);
+      contractState = sessionStorage.getItem('contractState');
       contractId = sessionStorage.getItem('contractId');
       sessionStorage.removeItem('contractPreview');
+      sessionStorage.removeItem('contractState');
       pdfAmazonS3Url = parsed.pdfUrl;
     }
   });
@@ -34,6 +37,7 @@
     await urqlClient
       .mutation(APPROVE_CONTRACT_QUERY, { contractId: Number(contractId) })
       .toPromise();
+    sessionStorage.removeItem('contractId');
     goto('/select-service');
   };
 
@@ -44,6 +48,7 @@
     };
     const urqlClient: Client = createUrqlClient(data.token);
     await urqlClient.mutation(CANCEL_CONTRACT_QUERY, { input }).toPromise();
+    sessionStorage.removeItem('contractId');
     goto('/select-service');
   };
 
@@ -66,54 +71,58 @@
       ></iframe>
     </div>
     {#if data.user.__typename === 'Broadcaster' || data.user.__typename === 'Client' || data.user.__typename === 'Administrator' || data.user.__typename === 'Supervisor'}
-    <div class="flex w-full gap-3 max-w-6xl px-4">
-      <button
-        type="button"
-        class="{btn} bg-red-600 text-white hover:bg-red-700"
-        onclick={cancelContract}
-      >
-        Cancelar contrato
-      </button>
-      <button
-        type="button"
-        class="{btn} border border-border bg-background text-muted-foreground hover:bg-muted"
-        onclick={() => goto('/select-service')}
-      >
-        Volver
-      </button>
-      <Dialog.Root>
-        <Dialog.Trigger
-          class="{btn} bg-[#22964F] text-white hover:bg-[#1a6d3b]"
-        >
-          Aceptar contrato
-        </Dialog.Trigger>
-        <Dialog.Content class="sm:max-w-md">
-          <Dialog.Header>
-            <Dialog.Title>Confirmar aceptación</Dialog.Title>
-            <Dialog.Description>
-              ¿Estás seguro de que deseas aceptar este contrato? Esta acción
-              confirmará tu acuerdo con los términos establecidos.
-            </Dialog.Description>
-          </Dialog.Header>
-          <Dialog.Footer
-            class="flex-col-reverse sm:flex-row gap-2 sm:gap-2 mt-2"
+      <div class="flex w-full gap-3 max-w-6xl px-4">
+        {#if contractState !== 'CANCELED'}
+          <button
+            type="button"
+            class="{btn} bg-red-600 text-white hover:bg-red-700"
+            onclick={cancelContract}
           >
-            <Dialog.Close
-              class="{btn} border border-border bg-background text-muted-foreground hover:bg-muted"
+            Cancelar contrato
+          </button>
+        {/if}
+        <button
+          type="button"
+          class="{btn} border border-border bg-background text-muted-foreground hover:bg-muted"
+          onclick={() => goto('/select-service')}
+        >
+          Volver
+        </button>
+        {#if contractState === 'PENDING'}
+        <Dialog.Root>
+          <Dialog.Trigger
+            class="{btn} bg-[#22964F] text-white hover:bg-[#1a6d3b]"
+          >
+            Aceptar contrato
+          </Dialog.Trigger>
+          <Dialog.Content class="sm:max-w-md">
+            <Dialog.Header>
+              <Dialog.Title>Confirmar aceptación</Dialog.Title>
+              <Dialog.Description>
+                ¿Estás seguro de que deseas aceptar este contrato? Esta acción
+                confirmará tu acuerdo con los términos establecidos.
+              </Dialog.Description>
+            </Dialog.Header>
+            <Dialog.Footer
+              class="flex-col-reverse sm:flex-row gap-2 sm:gap-2 mt-2"
             >
-              Cancelar
-            </Dialog.Close>
-            <button
-              type="button"
-              class="{btn} bg-[#22964F] text-white hover:bg-[#1a6d3b]"
-              onclick={approveContract}
-            >
-              Sí, aceptar
-            </button>
-          </Dialog.Footer>
-        </Dialog.Content>
-      </Dialog.Root>
-    </div>
+              <Dialog.Close
+                class="{btn} border border-border bg-background text-muted-foreground hover:bg-muted"
+              >
+                Cancelar
+              </Dialog.Close>
+              <button
+                type="button"
+                class="{btn} bg-[#22964F] text-white hover:bg-[#1a6d3b]"
+                onclick={approveContract}
+              >
+                Sí, aceptar
+              </button>
+            </Dialog.Footer>
+          </Dialog.Content>
+        </Dialog.Root>
+        {/if}
+      </div>
     {/if}
   {:else}
     <div class="flex flex-col items-center gap-3 mt-20">

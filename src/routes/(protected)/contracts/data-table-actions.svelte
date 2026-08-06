@@ -28,7 +28,7 @@
           options.push({ label: 'Aprobar', action: 'approve' });
           options.push({ label: 'Cancelar', action: 'cancel' });
         }
-        if (page.data.user.__typename === 'Broadcaster' || page.data.role === 'Client') {
+        if (page.data.user.__typename === 'Broadcaster' || page.data.user.__typename === 'Client') {
           options.push({ label: 'Reestructurar', action: 'reestructurar' });
         }
         return options;
@@ -118,6 +118,9 @@
       if (result.error) {
         throw new Error();
       }
+      console.log('result', result.data);
+      sessionStorage.setItem('contractState', result.data.contractPdfDownloadUrl.contract.state);
+      sessionStorage.setItem('contractId', contractId);
       sessionStorage.setItem(
         'contractPreview',
         JSON.stringify({

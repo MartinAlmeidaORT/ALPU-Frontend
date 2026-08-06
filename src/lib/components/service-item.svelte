@@ -15,9 +15,11 @@
   let {
     service,
     onAddService = () => {},
+    validateCampaignInput = () => true,
   }: {
     service: Service;
     onAddService: (service: BaseServiceUI) => void;
+    validateCampaignInput: () => boolean;
   } = $props();
 
   function handleAddPiece(pieceName: string, BaseService: BaseServiceUI) {
@@ -25,6 +27,9 @@
       toast.error('Error al agregar un medio', {
         description: 'La pieza debe tener un nombre',
       });
+      return;
+    }
+    if (!validateCampaignInput()) {
       return;
     }
     BaseService.pieces.push({ name: pieceName });

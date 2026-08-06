@@ -39,12 +39,13 @@
 </script>
 
 <div class="bg-white rounded-lg p-4 text-center border-2 border-[#cad8e4]">
+  <h3 class="text-center font-semibold mb-4">Buscar usuario por email</h3>
   <div class="flex gap-2">
     <Label for="email" class="sr-only">Email</Label>
     <Input
       id="email"
       type="email"
-      placeholder="Ingresar email del usuario"
+      placeholder="Ingresar email"
       class="flex-1"
       bind:value={email}
     />

@@ -143,7 +143,7 @@
             {#if !isAuth}
               <NavigationMenu.Link>
                 {#snippet child()}
-                  <a href="/login" class={navigationMenuTriggerStyle()}>Login</a
+                  <a href="/login" class={navigationMenuTriggerStyle()}>Iniciar Sesión</a
                   >
                 {/snippet}
               </NavigationMenu.Link>
